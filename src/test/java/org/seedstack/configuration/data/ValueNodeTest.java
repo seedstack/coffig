@@ -7,9 +7,9 @@
  */
 package org.seedstack.configuration.data;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.configuration.data.TreeNode;
-import org.seedstack.configuration.data.ValueNode;
+import org.seedstack.configuration.PropertyNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,5 +45,16 @@ public class ValueNodeTest {
 
         TreeNode newValueNode = val1.merge(val2);
         assertThat(newValueNode).isSameAs(val2);
+    }
+
+    @Test
+    public void testSearch() throws Exception {
+        ValueNode val1 = new ValueNode("val1");
+        try {
+            val1.search("foo");
+            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
+        } catch (PropertyNotFoundException e) {
+            Assertions.assertThat(e.getPropertyName()).isEqualTo("foo");
+        }
     }
 }

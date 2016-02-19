@@ -7,13 +7,26 @@
  */
 package org.seedstack.configuration;
 
+import java.util.function.Function;
+
 public class PropertyNotFoundException extends ConfigurationException {
 
     private String name;
+    private static Function<String, String> messager = name -> String.format("Property \"%s\" was not found", name);
 
     public PropertyNotFoundException(String name) {
-        super(String.format("Property \"%s\" was not found", name));
+        super(messager.apply(name));
         this.name = name;
+    }
+
+    public PropertyNotFoundException(Throwable cause, String name) {
+        super(cause);
+        this.name = name;
+    }
+
+    @Override
+    public String getMessage() {
+        return messager.apply(name);
     }
 
     public String getPropertyName() {

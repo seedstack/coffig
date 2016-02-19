@@ -78,7 +78,7 @@ public class MapNodeTest {
             mapNode1.merge(mapNode2);
             Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
         } catch (ConfigurationException e) {
-            Assertions.assertThat(e).hasMessage(ConfigurationException.INCORRECT_MERGE.apply(PairNode.class, MapNode.class));
+            assertThat(e).hasMessage(ConfigurationException.INCORRECT_MERGE.apply(PairNode.class, MapNode.class));
         }
     }
 
@@ -88,5 +88,20 @@ public class MapNodeTest {
         assertThat(new MapNode(new PairNode("id", "foo"))).isNotEqualTo(new MapNode(new PairNode("id", "foo2")));
         assertThat(new MapNode(new PairNode("id", "foo"))).isNotEqualTo(new MapNode(new PairNode("id", "foo"), new PairNode("name", "foo app")));
         assertThat(new MapNode(new PairNode("id", "foo"), new PairNode("name", "foo app"))).isNotEqualTo(new MapNode(new PairNode("id", "foo")));
+    }
+
+    @Test
+    public void testSearch() throws Exception {
+        MapNode mapNode = new MapNode(new PairNode("id", "foo"), new PairNode("name", "The foo app"));
+        assertThat(mapNode.search("id")).isNotNull();
+        assertThat(mapNode.search("id").value()).isEqualTo("foo");
+        assertThat(mapNode.search("name").value()).isEqualTo("The foo app");
+
+        try {
+            mapNode.search("foo");
+            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
+        } catch (PropertyNotFoundException e) {
+            Assertions.assertThat(e.getPropertyName()).isEqualTo("foo");
+        }
     }
 }

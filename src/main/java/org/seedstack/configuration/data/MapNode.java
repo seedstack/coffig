@@ -36,6 +36,11 @@ public class MapNode extends TreeNode {
     }
 
     @Override
+    protected TreeNode doSearch(String name) {
+        return value(name);
+    }
+
+    @Override
     public TreeNode value(String name) {
         if (childNodes.containsKey(name))
             return childNodes.get(name).get();

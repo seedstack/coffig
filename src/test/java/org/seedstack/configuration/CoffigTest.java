@@ -64,4 +64,16 @@ public class CoffigTest {
         Assertions.assertThat(app.users[0]).isEqualTo("u123456");
         Assertions.assertThat(app.users[1]).isEqualTo("u456789");
     }
+
+    @Test
+    public void testGetWithPrefix() throws Exception {
+        Coffig coffig = new Coffig();
+        coffig.addProvider(() -> new MapNode(
+                new PairNode("app",
+                        new MapNode(new PairNode("server",
+                                new MapNode(new PairNode("port", "8080")))))));
+        coffig.compute();
+        Integer appServerPort = coffig.get("app.server.port", Integer.class);
+        Assertions.assertThat(appServerPort).isEqualTo(8080);
+    }
 }

@@ -8,6 +8,7 @@
 package org.seedstack.configuration;
 
 import org.seedstack.configuration.data.MapNode;
+import org.seedstack.configuration.data.TreeNode;
 import org.seedstack.configuration.mapper.MapperFactory;
 
 import java.util.List;
@@ -51,8 +52,12 @@ public class Coffig {
     }
 
     public <T> T get(Class<T> configurationClass) {
-        //noinspection unchecked
-        return (T) MapperFactory.getInstance().map(configurationTree, configurationClass);
+        return doGet(configurationTree, configurationClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T doGet(TreeNode treeNode, Class<T> configurationClass) {
+        return (T) MapperFactory.getInstance().map(treeNode, configurationClass);
     }
 
     public void shutdown() {
@@ -66,5 +71,9 @@ public class Coffig {
                 executorService = null;
             }
         }
+    }
+
+    public <T> T get(String prefix, Class<T> configurationClass) {
+        return doGet(configurationTree.search(prefix), configurationClass);
     }
 }

@@ -7,6 +7,8 @@
  */
 package org.seedstack.configuration.data;
 
+import org.seedstack.configuration.PropertyNotFoundException;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +24,18 @@ public class ArrayNode extends TreeNode {
     public ArrayNode(String... childNodes) {
         List<ValueNode> valueNodes = Arrays.stream(childNodes).map(ValueNode::new).collect(toList());
         this.childNodes = valueNodes.toArray(new TreeNode[valueNodes.size()]);
+    }
+
+    @Override
+    public TreeNode doSearch(String name) {
+        try {
+            Integer integer = Integer.valueOf(name);
+            return childNodes[integer];
+        } catch (NumberFormatException e) {
+            throw new PropertyNotFoundException("Configuration array node is expected a number as index, but found: " + name);
+        } catch (ArrayIndexOutOfBoundsException e2) {
+            throw new PropertyNotFoundException(e2, name);
+        }
     }
 
     @Override

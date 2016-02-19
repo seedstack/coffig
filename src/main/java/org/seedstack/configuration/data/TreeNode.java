@@ -7,7 +7,30 @@
  */
 package org.seedstack.configuration.data;
 
+import org.seedstack.configuration.PropertyNotFoundException;
+
 public abstract class TreeNode {
+
+    public TreeNode search(String prefix) {
+        String[] split = prefix.split("\\.", 2);
+        try {
+            TreeNode treeNode = doSearch(split[0]);
+            if (split.length == 2) {
+                treeNode = treeNode.search(split[1]);
+            }
+            return treeNode;
+        } catch (PropertyNotFoundException e) {
+            if (e.getCause() == null) {
+                throw new PropertyNotFoundException(prefix);
+            } else {
+                throw new PropertyNotFoundException(e.getCause(), prefix);
+            }
+        }
+    }
+
+    protected TreeNode doSearch(String name) {
+        throw new PropertyNotFoundException(name);
+    }
 
     public TreeNode value(String name) {
         throw new UnsupportedOperationException();

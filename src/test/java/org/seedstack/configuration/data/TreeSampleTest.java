@@ -9,6 +9,7 @@ package org.seedstack.configuration.data;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.seedstack.configuration.PropertyNotFoundException;
 
 public class TreeSampleTest {
 
@@ -82,5 +83,28 @@ public class TreeSampleTest {
     @Test
     public void testMerge() {
         Assertions.assertThat(root.merge(root2)).isEqualTo(mergedRoot);
+    }
+
+    @Test
+    public void testSearch() throws Exception {
+        Assertions.assertThat(mergedRoot.search("users.0").value()).isEqualTo("u123456");
+        Assertions.assertThat(mergedRoot.search("server.scheme.0").value()).isEqualTo("http");
+    }
+
+    @Test
+    public void testSearchMissingProps() throws Exception {
+        try {
+            mergedRoot.search("server.scheme.0.foo.bar");
+            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
+        } catch (PropertyNotFoundException e) {
+            Assertions.assertThat(e.getPropertyName()).isEqualTo("server.scheme.0.foo.bar");
+        }
+
+        try {
+            mergedRoot.search("server.scheme.44");
+            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
+        } catch (PropertyNotFoundException e) {
+            Assertions.assertThat(e.getCause()).isNotNull();
+        }
     }
 }

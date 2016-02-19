@@ -7,10 +7,10 @@
  */
 package org.seedstack.configuration.data;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.configuration.data.ArrayNode;
-import org.seedstack.configuration.data.TreeNode;
-import org.seedstack.configuration.data.ValueNode;
+import org.seedstack.configuration.ConfigurationException;
+import org.seedstack.configuration.PropertyNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,5 +50,36 @@ public class ArrayNodeTest {
         assertThat(new ArrayNode("foo", "bar", "fuu")).isNotEqualTo(new ArrayNode("foo", "bar"));
         assertThat(new ArrayNode("foo", "bar")).isNotEqualTo(new ArrayNode("foo", "bar", "fuu"));
         assertThat(new ArrayNode("foo", "bar")).isNotEqualTo(new ArrayNode("foo", "fuu"));
+    }
+
+    @Test
+    public void testSearch() throws Exception {
+        ArrayNode arrayNode = new ArrayNode("foo", "bar");
+
+        Assertions.assertThat(arrayNode.search("0")).isNotNull();
+        Assertions.assertThat(arrayNode.search("0").value()).isEqualTo("foo");
+        Assertions.assertThat(arrayNode.search("1").value()).isEqualTo("bar");
+    }
+
+    @Test
+    public void testSearchNotIndex() throws Exception {
+        ArrayNode arrayNode = new ArrayNode("foo", "bar");
+        try {
+            arrayNode.search("x");
+            Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
+        } catch (PropertyNotFoundException e) {
+            Assertions.assertThat(e).hasMessage("Property \"x\" was not found");
+        }
+    }
+
+    @Test
+    public void testSearchOutOfBound() throws Exception {
+        ArrayNode arrayNode = new ArrayNode("foo", "bar");
+        try {
+            arrayNode.search("100");
+            Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
+        } catch (PropertyNotFoundException e) {
+            Assertions.assertThat(e).hasMessage("Property \"100\" was not found");
+        }
     }
 }
