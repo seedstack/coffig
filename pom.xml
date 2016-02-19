@@ -22,10 +22,30 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
+        <java.source.version>1.8</java.source.version>
+        <java.target.version>1.8</java.target.version>
         <compatibility.skip>true</compatibility.skip>
 
         <bintray.package>coffig</bintray.package>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.21</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+        </dependency>
+    </dependencies>
 
     <scm>
         <url>https://github.com/seedstack/coffig</url>
@@ -44,6 +64,35 @@
             <url>http://dl.bintray.com/jfrog/jfrog-jars</url>
         </pluginRepository>
     </pluginRepositories>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <configuration>
+                        <includedLicenses>
+                            <includedLicense>The MIT License</includedLicense>
+                            <includedLicense>Apache License, Version 2.0</includedLicense>
+                            <includedLicense>New BSD License</includedLicense>
+                            <includedLicense>Common Public License Version 1.0</includedLicense>
+                        </includedLicenses>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>check-java-1.6-compatibility</id>
+                            <phase>none</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
     <profiles>
         <profile>
