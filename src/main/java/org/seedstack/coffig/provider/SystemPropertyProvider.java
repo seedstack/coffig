@@ -15,8 +15,8 @@ public class SystemPropertyProvider implements ConfigurationProvider {
 
     @Override
     public MapNode provide() {
-        return new MapNode(System.getProperties().entrySet().stream()
+        return new MapNode(new PairNode("system", new MapNode(System.getProperties().entrySet().stream()
                 .map(e -> new PairNode((String) e.getKey(), (String) e.getValue()))
-                .toArray(PairNode[]::new));
+                .toArray(PairNode[]::new))));
     }
 }

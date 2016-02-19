@@ -36,7 +36,7 @@ public class EnvironmentVariableProviderTest {
 
         MapNode conf = underTest.provide();
 
-        Assertions.assertThat(conf.value("PROFILE").value()).isEqualTo("DEV");
+        Assertions.assertThat(conf.search("env.PROFILE").value()).isEqualTo("DEV");
     }
 
     @Test
