@@ -15,8 +15,8 @@ public class EnvironmentVariableProvider implements ConfigurationProvider {
 
     @Override
     public MapNode provide() {
-        return new MapNode(System.getenv().entrySet().stream()
+        return new MapNode(new PairNode("env", new MapNode(System.getenv().entrySet().stream()
                 .map(e -> new PairNode(e.getKey(), e.getValue()))
-                .toArray(PairNode[]::new));
+                .toArray(PairNode[]::new))));
     }
 }
