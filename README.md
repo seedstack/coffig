@@ -1,0 +1,2 @@
+# coffig
+Java configuration library.
