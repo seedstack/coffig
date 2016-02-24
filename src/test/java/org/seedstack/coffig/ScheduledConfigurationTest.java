@@ -7,58 +7,81 @@
  */
 package org.seedstack.coffig;
 
-import org.assertj.core.api.Assertions;
-import org.junit.After;
+import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.PairNode;
 
-import java.security.SecureRandom;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class ScheduledConfigurationTest {
 
     private Coffig underTest = new Coffig();
-    private final Random random = new SecureRandom("seed".getBytes());
-    private CountDownLatch countDownLatch = new CountDownLatch(1);
-    private CountDownLatch countDownLatch2 = new CountDownLatch(2);
 
     int initialDelay = 0;
     int delay = 5;
 
-    public static class Counter {
-        long count;
+    @Mocked
+    private ScheduledExecutorService executorService;
+
+    @Before
+    public void setUp() throws Exception {
+        new MockUp<Executors>() {
+            @Mock
+            ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+                return executorService;
+            }
+        };
     }
 
     @Test
     public void testSchedule() throws InterruptedException {
-        underTest.addProvider(() -> {
-            countDownLatch.countDown();
-            countDownLatch2.countDown();
-            return new MapNode(new PairNode("count", String.valueOf(random.nextInt())));
-        });
+        new Expectations() {{
+            executorService.scheduleWithFixedDelay(withAny((Runnable) () -> {}), initialDelay, delay, TimeUnit.MILLISECONDS);
+        }};
+        underTest.addProvider(MapNode::new);
         underTest.schedule(initialDelay, delay);
-        countDownLatch.await();
-        TimeUnit.MILLISECONDS.sleep(20);
-        Counter counter = underTest.get(Counter.class);
-        countDownLatch2.await();
-        TimeUnit.MILLISECONDS.sleep(20);
-        Counter counter2 = underTest.get(Counter.class);
-
-        Assertions.assertThat(counter).isNotNull();
-        Assertions.assertThat(counter.count).isNotEqualTo(counter2.count);
     }
 
     @Test
     public void testReSchedule() throws InterruptedException {
+        new Expectations() {{
+            executorService.scheduleWithFixedDelay(withAny((Runnable) () -> {}), initialDelay, delay, TimeUnit.MILLISECONDS);
+            times = 2;
+        }};
         underTest.schedule(initialDelay, delay);
         underTest.schedule(initialDelay, delay);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @Test
+    public void shutdown() throws Exception {
+        underTest.schedule(initialDelay, delay);
+        new Expectations() {{
+            executorService.isTerminated(); result = true;
+        }};
+        underTest.shutdown();
+    }
+
+    @Test
+    public void shutdownNotTerminated() throws Exception {
+        underTest.schedule(initialDelay, delay);
+        new Expectations() {{
+            executorService.isTerminated(); result = false;
+            executorService.shutdownNow(); times = 1;
+        }};
+        underTest.shutdown();
+    }
+
+    @Test
+    public void shutdownWithoutSchedule() throws Exception {
+        new Expectations() {{
+            executorService.isTerminated(); times = 0;
+        }};
         underTest.shutdown();
     }
 }
