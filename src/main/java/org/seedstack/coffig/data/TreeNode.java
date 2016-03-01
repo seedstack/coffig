@@ -1,50 +1,21 @@
 /**
  * Copyright (c) 2013-2016, The SeedStack authors <http://seedstack.org>
- *
+ * <p>
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package org.seedstack.coffig.data;
 
-import org.seedstack.coffig.PropertyNotFoundException;
+public interface TreeNode {
 
-public abstract class TreeNode {
+    TreeNode search(String prefix);
 
-    public TreeNode search(String prefix) {
-        String[] split = prefix.split("\\.", 2);
-        try {
-            TreeNode treeNode = doSearch(split[0]);
-            if (split.length == 2) {
-                treeNode = treeNode.search(split[1]);
-            }
-            return treeNode;
-        } catch (PropertyNotFoundException e) {
-            if (e.getCause() == null) {
-                throw new PropertyNotFoundException(prefix);
-            } else {
-                throw new PropertyNotFoundException(e.getCause(), prefix);
-            }
-        }
-    }
+    TreeNode value(String name);
 
-    protected TreeNode doSearch(String name) {
-        throw new PropertyNotFoundException(name);
-    }
+    String value();
 
-    public TreeNode value(String name) {
-        throw new UnsupportedOperationException();
-    }
+    TreeNode[] values();
 
-    public String value() {
-        throw new UnsupportedOperationException();
-    }
-
-    public TreeNode[] values() {
-        throw new UnsupportedOperationException();
-    }
-
-    public TreeNode merge(TreeNode otherNode) {
-        return otherNode;
-    }
+    TreeNode merge(TreeNode otherNode);
 }
