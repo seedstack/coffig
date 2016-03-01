@@ -1,17 +1,25 @@
+/**
+ * Copyright (c) 2013-2016, The SeedStack authors <http://seedstack.org>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package org.seedstack.coffig.data.mutable;
-
-import org.seedstack.coffig.data.TreeNode;
 
 public interface MutableTreeNode {
 
-    default MutableTreeNode set(String prefix, String value) {
-        String[] split = prefix.split("\\.", 2);
-        MutableTreeNode treeNode = doSet(split[0], value);
-        if (treeNode != null && split.length == 2) {
-            treeNode.set(split[1], value);
+    default boolean isArrayNode(String index) {
+        try {
+            if (Integer.valueOf(index) >= 0) {
+                return true;
+            } else {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+        } catch (NumberFormatException e) {
+            return false;
         }
-        return treeNode;
     }
 
-    MutableTreeNode doSet(String name, String value);
+    void set(String prefix, String value);
 }

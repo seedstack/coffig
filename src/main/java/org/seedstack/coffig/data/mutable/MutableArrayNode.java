@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2013-2016, The SeedStack authors <http://seedstack.org>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package org.seedstack.coffig.data.mutable;
 
 import org.seedstack.coffig.data.ArrayNode;
@@ -7,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MutableArrayNode extends ArrayNode {
+public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
     public MutableArrayNode(TreeNode... childNodes) {
         super(childNodes);
     }
@@ -42,5 +49,35 @@ public class MutableArrayNode extends ArrayNode {
 
     public void clear() {
         childNodes.clear();
+    }
+
+    @Override
+    public void set(String name, String value) {
+        String[] split = name.split("\\.", 2);
+        String head = split[0];
+        int index = Integer.valueOf(head);
+        MutableTreeNode treeNode;
+        if (split.length == 2) {
+            String tail = split[1];
+
+            if (childNodes.size() > index) {
+                treeNode = (MutableTreeNode) childNodes.get(index);
+            } else {
+                String newHead = tail.split("\\.", 2)[0];
+                if (isArrayNode(newHead)) {
+                    treeNode = new MutableArrayNode();
+                } else {
+                    treeNode = new MutableMapNode();
+                }
+            }
+            treeNode.set(tail, value);
+        } else {
+            treeNode = new MutableValueNode(value);
+        }
+        if (index == childNodes.size()) {
+            childNodes.add((TreeNode) treeNode);
+        } else {
+            childNodes.set(index, (TreeNode) treeNode);
+        }
     }
 }

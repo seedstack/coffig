@@ -1,5 +1,13 @@
+/**
+ * Copyright (c) 2013-2016, The SeedStack authors <http://seedstack.org>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package org.seedstack.coffig.data.mutable;
 
+import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.data.MapNode;
 import org.seedstack.coffig.data.PairNode;
 
@@ -28,7 +36,7 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
         childNodes.putAll(m);
     }
 
-    public PairNode remove(Object key) {
+    public PairNode remove(String key) {
         return childNodes.remove(key);
     }
 
@@ -37,12 +45,26 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
     }
 
     @Override
-    public MutableTreeNode doSet(String name, String value) {
-        if (childNodes.containsKey(name)) {
+    public void set(String name, String value) {
+        String[] split = name.split("\\.", 2);
+        String head = split[0];
 
+        if (split.length == 2) {
+            MutablePairNode mutablePairNode;
+            if (childNodes.containsKey(head)) {
+                PairNode pairNode = childNodes.get(head);
+                if (pairNode instanceof MutablePairNode) {
+                    mutablePairNode = (MutablePairNode) pairNode;
+                } else {
+                    throw new ConfigurationException("Try to update an immutable TreeNode: " + childNodes.get(head).getClass());
+                }
+            } else {
+                mutablePairNode = new MutablePairNode();
+            }
+            mutablePairNode.set(name, value);
+            childNodes.put(head, mutablePairNode);
         } else {
-            childNodes.put(name, )
+            childNodes.put(head, new MutablePairNode(head, value));
         }
-        return null;
     }
 }

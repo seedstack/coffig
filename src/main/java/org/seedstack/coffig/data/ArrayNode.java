@@ -37,7 +37,7 @@ public class ArrayNode extends TreeNode {
             return childNodes.get(integer);
         } catch (NumberFormatException e) {
             throw new PropertyNotFoundException("Configuration array node is expected a number as index, but found: " + name);
-        } catch (ArrayIndexOutOfBoundsException e2) {
+        } catch (IndexOutOfBoundsException e2) {
             throw new PropertyNotFoundException(e2, name);
         }
     }
