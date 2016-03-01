@@ -12,10 +12,12 @@ import org.seedstack.coffig.PropertyNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class ArrayNode extends TreeNode {
+public class ArrayNode implements TreeNode {
     protected final List<TreeNode> childNodes;
 
     public ArrayNode(TreeNode... childNodes) {
@@ -62,5 +64,14 @@ public class ArrayNode extends TreeNode {
     @Override
     public int hashCode() {
         return childNodes.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        if (childNodes.size() > 0 && childNodes.get(0) instanceof ValueNode) {
+            return childNodes.stream().map(item -> "- " + item.toString()).collect(joining("\n"));
+        } else {
+            return childNodes.stream().map(item -> "-\n" + indent(item.toString())).collect(joining("\n"));
+        }
     }
 }

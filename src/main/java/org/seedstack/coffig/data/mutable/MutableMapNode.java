@@ -10,6 +10,7 @@ package org.seedstack.coffig.data.mutable;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.data.MapNode;
 import org.seedstack.coffig.data.PairNode;
+import org.seedstack.coffig.data.TreeNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
     }
 
     @Override
-    public void set(String name, String value) {
+    public void set(String name, TreeNode value) {
         String[] split = name.split("\\.", 2);
         String head = split[0];
 
@@ -53,11 +54,8 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
             MutablePairNode mutablePairNode;
             if (childNodes.containsKey(head)) {
                 PairNode pairNode = childNodes.get(head);
-                if (pairNode instanceof MutablePairNode) {
-                    mutablePairNode = (MutablePairNode) pairNode;
-                } else {
-                    throw new ConfigurationException("Try to update an immutable TreeNode: " + childNodes.get(head).getClass());
-                }
+                assertMutable(pairNode);
+                mutablePairNode = (MutablePairNode) pairNode;
             } else {
                 mutablePairNode = new MutablePairNode();
             }

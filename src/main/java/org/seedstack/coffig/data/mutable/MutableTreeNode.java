@@ -7,7 +7,10 @@
  */
 package org.seedstack.coffig.data.mutable;
 
-public interface MutableTreeNode {
+import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.data.TreeNode;
+
+public interface MutableTreeNode extends TreeNode {
 
     default boolean isArrayNode(String index) {
         try {
@@ -21,5 +24,11 @@ public interface MutableTreeNode {
         }
     }
 
-    void set(String prefix, String value);
+    default void assertMutable(TreeNode treeNode) {
+        if (!MutableTreeNode.class.isAssignableFrom(treeNode.getClass())) {
+            throw new ConfigurationException(ConfigurationException.ILLEGAL_MUTATION.apply(treeNode));
+        }
+    }
+
+    void set(String prefix, TreeNode value);
 }

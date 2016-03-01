@@ -14,10 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
-public class MapNode extends TreeNode {
+public class MapNode implements TreeNode {
     protected final Map<String, PairNode> childNodes;
 
     public MapNode(PairNode... childNodes) {
@@ -36,7 +37,7 @@ public class MapNode extends TreeNode {
     }
 
     @Override
-    protected TreeNode doSearch(String name) {
+    public TreeNode doSearch(String name) {
         return value(name);
     }
 
@@ -82,5 +83,10 @@ public class MapNode extends TreeNode {
     @Override
     public int hashCode() {
         return Objects.hash(childNodes);
+    }
+
+    @Override
+    public String toString() {
+        return childNodes.values().stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 }

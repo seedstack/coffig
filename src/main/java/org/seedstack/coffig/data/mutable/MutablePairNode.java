@@ -36,7 +36,7 @@ public class MutablePairNode extends PairNode implements MutableTreeNode {
     }
 
     @Override
-    public void set(String name, String value) {
+    public void set(String name, TreeNode value) {
         String[] split = name.split("\\.", 2);
         String head = split[0];
         setName(head);
@@ -46,7 +46,7 @@ public class MutablePairNode extends PairNode implements MutableTreeNode {
         String[] splitTail = tail.split("\\.", 2);
         String newHead = splitTail[0];
 
-            MutableTreeNode treeNode;
+            TreeNode treeNode;
 
             if (this.value == null) {
                 if (isArrayNode(newHead)) {
@@ -55,13 +55,13 @@ public class MutablePairNode extends PairNode implements MutableTreeNode {
                     treeNode = new MutableMapNode();
                 }
             } else {
-                // TODO handle exception
-                treeNode = (MutableTreeNode) this.value;
+                treeNode = this.value;
             }
-            treeNode.set(tail, value);
-            this.value = (TreeNode) treeNode;
+            assertMutable(treeNode);
+            ((MutableTreeNode) treeNode).set(tail, value);
+            this.value = treeNode;
         } else {
-            this.value = new MutableValueNode(value);
+            this.value = value;
         }
     }
 

@@ -9,7 +9,7 @@ package org.seedstack.coffig.data;
 
 import java.util.Objects;
 
-public class ValueNode extends TreeNode {
+public class ValueNode implements TreeNode {
     protected String value;
 
     public ValueNode(String value) {
@@ -32,5 +32,10 @@ public class ValueNode extends TreeNode {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    @Override
+    public String toString() {
+        return value;
     }
 }

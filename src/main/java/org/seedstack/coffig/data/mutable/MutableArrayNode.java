@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.data.mutable;
 
+import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.data.ArrayNode;
 import org.seedstack.coffig.data.TreeNode;
 
@@ -52,16 +53,16 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
     }
 
     @Override
-    public void set(String name, String value) {
+    public void set(String name, TreeNode value) {
         String[] split = name.split("\\.", 2);
         String head = split[0];
         int index = Integer.valueOf(head);
-        MutableTreeNode treeNode;
+        TreeNode treeNode;
         if (split.length == 2) {
             String tail = split[1];
 
             if (childNodes.size() > index) {
-                treeNode = (MutableTreeNode) childNodes.get(index);
+                treeNode = childNodes.get(index);
             } else {
                 String newHead = tail.split("\\.", 2)[0];
                 if (isArrayNode(newHead)) {
@@ -70,14 +71,15 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
                     treeNode = new MutableMapNode();
                 }
             }
-            treeNode.set(tail, value);
+            assertMutable(treeNode);
+            ((MutableTreeNode) treeNode).set(tail, value);
         } else {
-            treeNode = new MutableValueNode(value);
+            treeNode = value;
         }
         if (index == childNodes.size()) {
-            childNodes.add((TreeNode) treeNode);
+            childNodes.add(treeNode);
         } else {
-            childNodes.set(index, (TreeNode) treeNode);
+            childNodes.set(index, treeNode);
         }
     }
 }
