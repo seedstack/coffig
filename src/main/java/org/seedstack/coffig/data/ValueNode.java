@@ -10,7 +10,7 @@ package org.seedstack.coffig.data;
 import java.util.Objects;
 
 public class ValueNode extends TreeNode {
-    private String value;
+    protected String value;
 
     public ValueNode(String value) {
         this.value = value;

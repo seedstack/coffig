@@ -9,28 +9,32 @@ package org.seedstack.coffig.data;
 
 import org.seedstack.coffig.PropertyNotFoundException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
 public class ArrayNode extends TreeNode {
-    private final TreeNode[] childNodes;
+    protected final List<TreeNode> childNodes;
 
     public ArrayNode(TreeNode... childNodes) {
-        this.childNodes = childNodes;
+        this.childNodes = new ArrayList<>(Arrays.asList(childNodes));
     }
 
     public ArrayNode(String... childNodes) {
-        List<ValueNode> valueNodes = Arrays.stream(childNodes).map(ValueNode::new).collect(toList());
-        this.childNodes = valueNodes.toArray(new TreeNode[valueNodes.size()]);
+        this.childNodes = Arrays.stream(childNodes).map(ValueNode::new).collect(toList());
+    }
+
+    public ArrayNode(List<TreeNode> childNodes) {
+        this.childNodes = new ArrayList<>(childNodes);
     }
 
     @Override
     public TreeNode doSearch(String name) {
         try {
             Integer integer = Integer.valueOf(name);
-            return childNodes[integer];
+            return childNodes.get(integer);
         } catch (NumberFormatException e) {
             throw new PropertyNotFoundException("Configuration array node is expected a number as index, but found: " + name);
         } catch (ArrayIndexOutOfBoundsException e2) {
@@ -40,7 +44,11 @@ public class ArrayNode extends TreeNode {
 
     @Override
     public TreeNode[] values() {
-        return childNodes;
+        return childNodes.toArray(new TreeNode[childNodes.size()]);
+    }
+
+    public TreeNode value(int index) {
+        return childNodes.get(index);
     }
 
     @Override
@@ -48,11 +56,11 @@ public class ArrayNode extends TreeNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ArrayNode arrayNode = (ArrayNode) o;
-        return Arrays.equals(childNodes, arrayNode.childNodes);
+        return childNodes.equals(arrayNode.childNodes);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(childNodes);
+        return childNodes.hashCode();
     }
 }

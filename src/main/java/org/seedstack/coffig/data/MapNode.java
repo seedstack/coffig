@@ -18,7 +18,7 @@ import java.util.Set;
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
 public class MapNode extends TreeNode {
-    private final Map<String, PairNode> childNodes;
+    protected final Map<String, PairNode> childNodes;
 
     public MapNode(PairNode... childNodes) {
         this.childNodes = new HashMap<>();

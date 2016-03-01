@@ -14,8 +14,8 @@ import java.util.Objects;
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
 public class PairNode extends TreeNode {
-    private String name;
-    private TreeNode value;
+    protected String name;
+    protected TreeNode value;
 
     public PairNode(String name, TreeNode value) {
         this.name = name;
