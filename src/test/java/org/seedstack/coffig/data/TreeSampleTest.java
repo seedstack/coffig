@@ -107,4 +107,22 @@ public class TreeSampleTest {
             Assertions.assertThat(e.getCause()).isNotNull();
         }
     }
+
+    @Test
+    public void testToString() throws Exception {
+        Assertions.assertThat(root.toString()).isEqualTo(
+                "server:\n" +
+                "  port: 80\n" +
+                "  host: localhost\n" +
+                "datasources:\n" +
+                "  -\n" +
+                "    driver: org.hsqldb.jdbcDriver\n" +
+                "    name: ds1\n" +
+                "    url: jdbc:hsqldb:hsql://localhost:9001/ds1\n" +
+                "name: The Foo app\n" +
+                "id: foo\n" +
+                "users:\n" +
+                "  - u123456\n" +
+                "  - u456789");
+    }
 }

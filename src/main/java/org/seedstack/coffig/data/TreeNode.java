@@ -9,9 +9,12 @@ package org.seedstack.coffig.data;
 
 import org.seedstack.coffig.PropertyNotFoundException;
 
-public abstract class TreeNode {
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
-    public TreeNode search(String prefix) {
+public interface TreeNode {
+
+    default TreeNode search(String prefix) {
         String[] split = prefix.split("\\.", 2);
         try {
             TreeNode treeNode = doSearch(split[0]);
@@ -28,23 +31,27 @@ public abstract class TreeNode {
         }
     }
 
-    protected TreeNode doSearch(String name) {
+    default String indent(String s) {
+        return Arrays.stream(s.split("\n")).map(line -> "  " + line).collect(Collectors.joining("\n"));
+    }
+
+    default TreeNode doSearch(String name) {
         throw new PropertyNotFoundException(name);
     }
 
-    public TreeNode value(String name) {
+    default TreeNode value(String name) {
         throw new UnsupportedOperationException();
     }
 
-    public String value() {
+    default String value() {
         throw new UnsupportedOperationException();
     }
 
-    public TreeNode[] values() {
+    default TreeNode[] values() {
         throw new UnsupportedOperationException();
     }
 
-    public TreeNode merge(TreeNode otherNode) {
+    default TreeNode merge(TreeNode otherNode) {
         return otherNode;
     }
 }

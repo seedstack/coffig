@@ -9,13 +9,15 @@ package org.seedstack.coffig.data;
 
 import org.seedstack.coffig.ConfigurationException;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
-public class PairNode extends TreeNode {
-    private String name;
-    private TreeNode value;
+public class PairNode implements TreeNode {
+    protected String name;
+    protected TreeNode value;
 
     public PairNode(String name, TreeNode value) {
         this.name = name;
@@ -59,5 +61,14 @@ public class PairNode extends TreeNode {
     @Override
     public int hashCode() {
         return Objects.hash(name, value);
+    }
+
+    @Override
+    public String toString() {
+        if (value instanceof ValueNode) {
+            return name + ": " + value.toString();
+        } else {
+            return name + ":\n" + indent(value.toString());
+        }
     }
 }
