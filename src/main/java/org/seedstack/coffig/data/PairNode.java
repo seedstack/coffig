@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
-public class PairNode implements TreeNode {
+public class PairNode extends AbstractTreeNode {
     protected String name;
     protected TreeNode value;
 

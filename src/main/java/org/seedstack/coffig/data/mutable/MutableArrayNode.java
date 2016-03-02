@@ -7,7 +7,6 @@
  */
 package org.seedstack.coffig.data.mutable;
 
-import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.data.ArrayNode;
 import org.seedstack.coffig.data.TreeNode;
 

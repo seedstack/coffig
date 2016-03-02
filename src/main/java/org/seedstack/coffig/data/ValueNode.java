@@ -9,7 +9,7 @@ package org.seedstack.coffig.data;
 
 import java.util.Objects;
 
-public class ValueNode implements TreeNode {
+public class ValueNode extends AbstractTreeNode {
     protected String value;
 
     public ValueNode(String value) {

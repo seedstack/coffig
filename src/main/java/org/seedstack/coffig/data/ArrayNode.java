@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class ArrayNode implements TreeNode {
+public class ArrayNode extends AbstractTreeNode {
     protected final List<TreeNode> childNodes;
 
     public ArrayNode(TreeNode... childNodes) {

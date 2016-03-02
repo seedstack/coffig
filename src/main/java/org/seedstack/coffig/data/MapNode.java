@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
-public class MapNode implements TreeNode {
+public class MapNode extends AbstractTreeNode {
     protected final Map<String, PairNode> childNodes;
 
     public MapNode(PairNode... childNodes) {
