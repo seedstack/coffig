@@ -53,32 +53,68 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
 
     @Override
     public void set(String name, TreeNode value) {
-        String[] split = name.split("\\.", 2);
-        String head = split[0];
-        int index = Integer.valueOf(head);
+        Prefix prefix = new Prefix(name);
         TreeNode treeNode;
-        if (split.length == 2) {
-            String tail = split[1];
-
-            if (childNodes.size() > index) {
-                treeNode = childNodes.get(index);
-            } else {
-                String newHead = tail.split("\\.", 2)[0];
-                if (isArrayNode(newHead)) {
-                    treeNode = new MutableArrayNode();
-                } else {
-                    treeNode = new MutableMapNode();
-                }
-            }
-            assertMutable(treeNode);
-            ((MutableTreeNode) treeNode).set(tail, value);
+        if (prefix.tail.isPresent()) {
+            treeNode = getOrCreateTreeNode(prefix);
+            ((MutableTreeNode) treeNode).set(prefix.tail.get(), value);
         } else {
             treeNode = value;
         }
-        if (index == childNodes.size()) {
+
+        if (prefix.index == childNodes.size()) {
             childNodes.add(treeNode);
         } else {
-            childNodes.set(index, treeNode);
+            childNodes.set(prefix.index, treeNode);
         }
+    }
+
+    private TreeNode getOrCreateTreeNode(Prefix prefix) {
+        TreeNode treeNode;
+        if (!isIndexPresent(prefix)) {
+            treeNode = createTreeNode(prefix);
+        } else {
+            treeNode = childNodes.get(prefix.index);
+            assertMutable(treeNode);
+        }
+        return treeNode;
+    }
+
+    private TreeNode createTreeNode(Prefix prefix) {
+        TreeNode treeNode;
+        if (new Prefix(prefix.tail.get()).isArray) {
+            treeNode = new MutableArrayNode();
+        } else {
+            treeNode = new MutableMapNode();
+        }
+        return treeNode;
+    }
+
+    @Override
+    public void remove(String name) {
+        Prefix prefix = new Prefix(name);
+        if (prefix.tail.isPresent()) {
+            if (isIndexPresent(prefix)) {
+                TreeNode treeNode = childNodes.get(prefix.index);
+                assertMutable(treeNode);
+
+                MutableTreeNode mutableTreeNode = (MutableTreeNode) treeNode;
+                mutableTreeNode.remove(prefix.tail.get());
+                if (mutableTreeNode.isEmpty()) {
+                    childNodes.remove(prefix.index);
+                }
+            }
+        } else {
+            childNodes.remove(prefix.index);
+        }
+    }
+
+    private boolean isIndexPresent(Prefix prefix) {
+        return childNodes.size() > prefix.index;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return childNodes.isEmpty();
     }
 }

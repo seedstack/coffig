@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.seedstack.coffig.PropertyNotFoundException;
 
-public class TreeSampleTest {
+public class MutableTreeNodeTest {
 
     MapNode root = new MapNode(
             new PairNode("id", "foo"),

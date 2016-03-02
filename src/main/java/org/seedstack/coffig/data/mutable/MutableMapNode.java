@@ -1,13 +1,12 @@
 /**
  * Copyright (c) 2013-2016, The SeedStack authors <http://seedstack.org>
- *
+ * <p>
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package org.seedstack.coffig.data.mutable;
 
-import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.data.MapNode;
 import org.seedstack.coffig.data.PairNode;
 import org.seedstack.coffig.data.TreeNode;
@@ -37,32 +36,49 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
         childNodes.putAll(m);
     }
 
-    public PairNode remove(String key) {
-        return childNodes.remove(key);
-    }
-
     public void clear() {
         childNodes.clear();
     }
 
     @Override
     public void set(String name, TreeNode value) {
-        String[] split = name.split("\\.", 2);
-        String head = split[0];
-
-        if (split.length == 2) {
+        Prefix prefix = new Prefix(name);
+        if (prefix.tail.isPresent()) {
             MutablePairNode mutablePairNode;
-            if (childNodes.containsKey(head)) {
-                PairNode pairNode = childNodes.get(head);
+            if (childNodes.containsKey(prefix.head)) {
+                PairNode pairNode = childNodes.get(prefix.head);
                 assertMutable(pairNode);
                 mutablePairNode = (MutablePairNode) pairNode;
             } else {
                 mutablePairNode = new MutablePairNode();
             }
             mutablePairNode.set(name, value);
-            childNodes.put(head, mutablePairNode);
+            childNodes.put(prefix.head, mutablePairNode);
         } else {
-            childNodes.put(head, new MutablePairNode(head, value));
+            childNodes.put(prefix.head, new MutablePairNode(prefix.head, value));
         }
+    }
+
+    @Override
+    public void remove(String name) {
+        Prefix prefix = new Prefix(name);
+        if (prefix.tail.isPresent()) {
+            if (childNodes.containsKey(prefix.head)) {
+                TreeNode treeNode = childNodes.get(prefix.head);
+                assertMutable(treeNode);
+                MutableTreeNode mutableTreeNode = (MutableTreeNode) treeNode;
+                mutableTreeNode.remove(prefix.tail.get());
+                if (mutableTreeNode.isEmpty()) {
+                    childNodes.remove(prefix.head);
+                }
+            }
+        } else {
+            childNodes.remove(prefix.head);
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return childNodes.isEmpty();
     }
 }

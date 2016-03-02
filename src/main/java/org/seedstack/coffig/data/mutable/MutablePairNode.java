@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2013-2016, The SeedStack authors <http://seedstack.org>
- *
+ * <p>
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -9,6 +9,8 @@ package org.seedstack.coffig.data.mutable;
 
 import org.seedstack.coffig.data.PairNode;
 import org.seedstack.coffig.data.TreeNode;
+
+import java.util.Optional;
 
 public class MutablePairNode extends PairNode implements MutableTreeNode {
     public MutablePairNode(String name, TreeNode value) {
@@ -37,32 +39,46 @@ public class MutablePairNode extends PairNode implements MutableTreeNode {
 
     @Override
     public void set(String name, TreeNode value) {
-        String[] split = name.split("\\.", 2);
-        String head = split[0];
-        setName(head);
+        Prefix prefix = new Prefix(name);
+        setName(prefix.head);
 
-        if (split.length == 2) {
-        String tail = split[1];
-        String[] splitTail = tail.split("\\.", 2);
-        String newHead = splitTail[0];
-
-            TreeNode treeNode;
-
-            if (this.value == null) {
-                if (isArrayNode(newHead)) {
-                    treeNode = new MutableArrayNode();
-                } else {
-                    treeNode = new MutableMapNode();
-                }
-            } else {
-                treeNode = this.value;
-            }
-            assertMutable(treeNode);
-            ((MutableTreeNode) treeNode).set(tail, value);
+        if (prefix.tail.isPresent()) {
+            TreeNode treeNode = getOrCreateTreeNode(prefix);
+            ((MutableTreeNode) treeNode).set(prefix.tail.get(), value);
             this.value = treeNode;
         } else {
             this.value = value;
         }
     }
 
+    private TreeNode getOrCreateTreeNode(Prefix prefix) {
+        TreeNode treeNode;
+        if (this.value == null) {
+            treeNode = createTreeNode(prefix);
+        } else {
+            treeNode = this.value;
+            assertMutable(treeNode);
+        }
+        return treeNode;
+    }
+
+    private TreeNode createTreeNode(Prefix prefix) {
+        TreeNode treeNode;
+        if (new Prefix(prefix.tail.get()).isArray) {
+            treeNode = new MutableArrayNode();
+        } else {
+            treeNode = new MutableMapNode();
+        }
+        return treeNode;
+    }
+
+    @Override
+    public void remove(String prefix) {
+        ((MutableTreeNode) this.value).remove(prefix);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return ((MutableTreeNode) this.value).isEmpty();
+    }
 }
