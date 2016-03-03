@@ -7,20 +7,20 @@
  */
 package org.seedstack.coffig.data.mutable;
 
-import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.data.TreeNode;
 
 public interface MutableTreeNode extends TreeNode {
 
-    default void assertMutable(TreeNode treeNode) {
-        if (!MutableTreeNode.class.isAssignableFrom(treeNode.getClass())) {
-            throw new ConfigurationException(ConfigurationException.ILLEGAL_MUTATION.apply(treeNode));
-        }
+    default MutableTreeNode move(String source, String destination) {
+        this.set(destination, this.remove(source));
+        return this;
     }
 
-    void set(String prefix, TreeNode value);
+    MutableTreeNode set(String prefix, TreeNode value);
 
-    void remove(String prefix);
+    MutableTreeNode remove(String prefix);
 
     boolean isEmpty();
+
+    TreeNode freeze();
 }

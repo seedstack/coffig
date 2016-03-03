@@ -87,7 +87,7 @@ public class MutableNodesTest {
         MutableMapNode mapNode = new MutableMapNode();
         mapNode.set("custom.key", new ValueNode("val"));
 
-        mapNode.remove("custom.key");
+        MutableTreeNode removedNode = mapNode.remove("custom.key");
 
         assertRemovedKey(mapNode, "custom");
     }
@@ -107,11 +107,13 @@ public class MutableNodesTest {
         mapNode.set("custom.property.key1", new ValueNode("val"));
         mapNode.set("custom.key2", new ValueNode("val"));
 
-        mapNode.remove("custom.property.key1");
+        MutableTreeNode removedNode = mapNode.remove("custom.property.key1");
 
         assertRemovedKey(mapNode, "custom.property.key1");
         assertRemovedKey(mapNode, "custom.property");
         assertThat(mapNode.search("custom.key2").value()).isEqualTo("val");
+
+        assertThat(removedNode.search("key1").value()).isEqualTo("val");
     }
 
     @Test

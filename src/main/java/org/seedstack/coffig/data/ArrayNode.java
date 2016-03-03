@@ -8,6 +8,8 @@
 package org.seedstack.coffig.data;
 
 import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.data.mutable.MutableArrayNode;
+import org.seedstack.coffig.data.mutable.MutableTreeNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +53,11 @@ public class ArrayNode extends AbstractTreeNode {
 
     public TreeNode value(int index) {
         return childNodes.get(index);
+    }
+
+    @Override
+    public MutableTreeNode unfreeze() {
+        return new MutableArrayNode(childNodes.stream().map(TreeNode::unfreeze).collect(toList()));
     }
 
     @Override

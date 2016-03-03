@@ -9,6 +9,8 @@ package org.seedstack.coffig.data;
 
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.data.mutable.MutableMapNode;
+import org.seedstack.coffig.data.mutable.MutableTreeNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,18 +60,20 @@ public class MapNode extends AbstractTreeNode {
     }
 
     private TreeNode mergeMapNode(MapNode otherNode) {
-        Map<String, TreeNode> newChildNodes = childNodes;
-        for (Map.Entry<String, TreeNode> entry : otherNode.childNodes.entrySet()) {
-            String nodeName = entry.getKey();
-            TreeNode node;
-            if (childNodes.containsKey(nodeName)) {
-                node = childNodes.get(nodeName).merge(entry.getValue());
-            } else {
-                node = entry.getValue();
-            }
+        Map<String, TreeNode> newChildNodes = this.childNodes;
+
+        otherNode.childNodes.forEach((nodeName, treeNode) -> {
+            TreeNode node = this.childNodes.containsKey(nodeName) ? this.childNodes.get(nodeName).merge(treeNode) : treeNode;
             newChildNodes.put(nodeName, node);
-        }
+        });
         return new MapNode(newChildNodes);
+    }
+
+    @Override
+    public MutableTreeNode unfreeze() {
+        Map<String, TreeNode> nodes = new HashMap<>();
+        childNodes.forEach((key, val) -> nodes.put(key, val.unfreeze()));
+        return new MutableMapNode(nodes);
     }
 
     @Override

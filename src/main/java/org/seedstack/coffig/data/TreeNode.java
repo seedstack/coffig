@@ -7,6 +7,8 @@
  */
 package org.seedstack.coffig.data;
 
+import org.seedstack.coffig.data.mutable.MutableTreeNode;
+
 public interface TreeNode {
 
     TreeNode search(String prefix);
@@ -18,4 +20,6 @@ public interface TreeNode {
     TreeNode[] values();
 
     TreeNode merge(TreeNode otherNode);
+
+    MutableTreeNode unfreeze();
 }
