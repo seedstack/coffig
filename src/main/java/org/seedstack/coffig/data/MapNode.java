@@ -19,16 +19,16 @@ import java.util.stream.Collectors;
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
 public class MapNode extends AbstractTreeNode {
-    protected final Map<String, PairNode> childNodes;
+    protected final Map<String, TreeNode> childNodes;
 
-    public MapNode(PairNode... childNodes) {
+    public MapNode(NamedNode... childNodes) {
         this.childNodes = new HashMap<>();
-        for (PairNode childNode : childNodes) {
-            this.childNodes.put(childNode.name(), childNode);
+        for (NamedNode childNode : childNodes) {
+            this.childNodes.put(childNode.name(), childNode.get());
         }
     }
 
-    public MapNode(Map<String, PairNode> newChildNodes) {
+    public MapNode(Map<String, TreeNode> newChildNodes) {
         this.childNodes = newChildNodes;
     }
 
@@ -44,7 +44,7 @@ public class MapNode extends AbstractTreeNode {
     @Override
     public TreeNode value(String name) {
         if (childNodes.containsKey(name))
-            return childNodes.get(name).get();
+            return childNodes.get(name);
         else
             throw new PropertyNotFoundException(name);
     }
@@ -58,12 +58,12 @@ public class MapNode extends AbstractTreeNode {
     }
 
     private TreeNode mergeMapNode(MapNode otherNode) {
-        Map<String, PairNode> newChildNodes = childNodes;
-        for (Map.Entry<String, PairNode> entry : otherNode.childNodes.entrySet()) {
+        Map<String, TreeNode> newChildNodes = childNodes;
+        for (Map.Entry<String, TreeNode> entry : otherNode.childNodes.entrySet()) {
             String nodeName = entry.getKey();
-            PairNode node;
+            TreeNode node;
             if (childNodes.containsKey(nodeName)) {
-                node = (PairNode) childNodes.get(nodeName).merge(entry.getValue());
+                node = childNodes.get(nodeName).merge(entry.getValue());
             } else {
                 node = entry.getValue();
             }
@@ -87,6 +87,12 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
-        return childNodes.values().stream().map(Object::toString).collect(Collectors.joining("\n"));
+        return childNodes.entrySet().stream().map(entry -> {
+            if (entry.getValue() instanceof ValueNode) {
+                return entry.getKey() + ": " + entry.getValue().toString();
+            } else {
+                return entry.getKey() + ":\n" + indent(entry.getValue().toString());
+            }
+        }).collect(Collectors.joining("\n"));
     }
 }

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.seedstack.coffig.data.mutable.MutableTreeNodeFactory.createFromPrefix;
+
 public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
     public MutableArrayNode(TreeNode... childNodes) {
         super(childNodes);
@@ -72,20 +74,10 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
     private TreeNode getOrCreateTreeNode(Prefix prefix) {
         TreeNode treeNode;
         if (!isIndexPresent(prefix)) {
-            treeNode = createTreeNode(prefix);
+            treeNode = createFromPrefix(prefix.tail.get());
         } else {
             treeNode = childNodes.get(prefix.index);
             assertMutable(treeNode);
-        }
-        return treeNode;
-    }
-
-    private TreeNode createTreeNode(Prefix prefix) {
-        TreeNode treeNode;
-        if (new Prefix(prefix.tail.get()).isArray) {
-            treeNode = new MutableArrayNode();
-        } else {
-            treeNode = new MutableMapNode();
         }
         return treeNode;
     }

@@ -8,19 +8,21 @@
 package org.seedstack.coffig.data.mutable;
 
 import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.PairNode;
+import org.seedstack.coffig.data.NamedNode;
 import org.seedstack.coffig.data.TreeNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.seedstack.coffig.data.mutable.MutableTreeNodeFactory.createFromPrefix;
+
 public class MutableMapNode extends MapNode implements MutableTreeNode {
 
-    public MutableMapNode(PairNode... childNodes) {
+    public MutableMapNode(NamedNode... childNodes) {
         super(childNodes);
     }
 
-    public MutableMapNode(Map<String, PairNode> newChildNodes) {
+    public MutableMapNode(Map<String, TreeNode> newChildNodes) {
         super(newChildNodes);
     }
 
@@ -28,11 +30,11 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
         super(new HashMap<>());
     }
 
-    public PairNode put(String key, PairNode value) {
+    public TreeNode put(String key, TreeNode value) {
         return childNodes.put(key, value);
     }
 
-    public void putAll(Map<? extends String, ? extends PairNode> m) {
+    public void putAll(Map<? extends String, ? extends TreeNode> m) {
         childNodes.putAll(m);
     }
 
@@ -44,19 +46,24 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
     public void set(String name, TreeNode value) {
         Prefix prefix = new Prefix(name);
         if (prefix.tail.isPresent()) {
-            MutablePairNode mutablePairNode;
-            if (childNodes.containsKey(prefix.head)) {
-                PairNode pairNode = childNodes.get(prefix.head);
-                assertMutable(pairNode);
-                mutablePairNode = (MutablePairNode) pairNode;
-            } else {
-                mutablePairNode = new MutablePairNode();
-            }
-            mutablePairNode.set(name, value);
-            childNodes.put(prefix.head, mutablePairNode);
+            MutableTreeNode nexNode = getOrCreateNode(prefix);
+            nexNode.set(prefix.tail.get(), value);
+            childNodes.put(prefix.head, nexNode);
         } else {
-            childNodes.put(prefix.head, new MutablePairNode(prefix.head, value));
+            childNodes.put(prefix.head, value);
         }
+    }
+
+    private MutableTreeNode getOrCreateNode(Prefix prefix) {
+        MutableTreeNode mutableTreeNode;
+        if (childNodes.containsKey(prefix.head)) {
+            TreeNode treeNode = childNodes.get(prefix.head);
+            assertMutable(treeNode);
+            mutableTreeNode = (MutableTreeNode) treeNode;
+        } else {
+            mutableTreeNode = createFromPrefix(prefix.tail.get());
+        }
+        return mutableTreeNode;
     }
 
     @Override

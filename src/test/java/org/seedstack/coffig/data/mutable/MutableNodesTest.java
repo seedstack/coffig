@@ -10,7 +10,7 @@ package org.seedstack.coffig.data.mutable;
 import org.junit.Test;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.PairNode;
+import org.seedstack.coffig.data.NamedNode;
 import org.seedstack.coffig.data.TreeNode;
 import org.seedstack.coffig.data.ValueNode;
 
@@ -26,10 +26,7 @@ public class MutableNodesTest {
         arrayNode.add(new ValueNode("foo"));
         arrayNode.add(new ValueNode("bar"));
         arrayNode.add(0, new ValueNode("foo"));
-        MutablePairNode pairNode = new MutablePairNode();
-        pairNode.setName("custom");
-        pairNode.setValue(arrayNode);
-        mapNode.put("custom", pairNode);
+        mapNode.put("custom", arrayNode);
 
         assertThat(mapNode.search("custom.0").value()).isEqualTo("foo");
         assertThat(mapNode.search("custom.1").value()).isEqualTo("foo");
@@ -79,7 +76,7 @@ public class MutableNodesTest {
     @Test
     public void testSetTreeNode() {
         MutableMapNode mapNode = new MutableMapNode();
-        mapNode.set("arr.0.custom", new MapNode(new PairNode("key", new ValueNode("val"))));
+        mapNode.set("arr.0.custom", new MapNode(new NamedNode("key", new ValueNode("val"))));
         assertThat(mapNode.search("arr.0.custom.key").value()).isEqualTo("val");
     }
 

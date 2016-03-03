@@ -11,18 +11,18 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.seedstack.coffig.data.ArrayNode;
 import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.PairNode;
+import org.seedstack.coffig.data.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class CoffigTest {
 
     public final ConfigurationProvider appConfigProvider = () -> new MapNode(
-                    new PairNode("id", "foo"),
-                    new PairNode("name", "The Foo app"));
+                    new NamedNode("id", "foo"),
+                    new NamedNode("name", "The Foo app"));
 
     public final ConfigurationProvider usersConfigProvider = () -> new MapNode(
-            new PairNode("id", "bar"),
-            new PairNode("users", new ArrayNode("u123456", "u456789")));
+            new NamedNode("id", "bar"),
+            new NamedNode("users", new ArrayNode("u123456", "u456789")));
 
     public static class App {
         String id;
@@ -70,9 +70,9 @@ public class CoffigTest {
     public void testGetWithPrefix() throws Exception {
         Coffig coffig = new Coffig();
         coffig.addProvider(() -> new MapNode(
-                new PairNode("app",
-                        new MapNode(new PairNode("server",
-                                new MapNode(new PairNode("port", "8080")))))));
+                new NamedNode("app",
+                        new MapNode(new NamedNode("server",
+                                new MapNode(new NamedNode("port", "8080")))))));
         coffig.compute();
         Integer appServerPort = coffig.get("app.server.port", Integer.class);
         Assertions.assertThat(appServerPort).isEqualTo(8080);

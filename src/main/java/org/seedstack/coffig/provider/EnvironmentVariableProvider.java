@@ -9,14 +9,14 @@ package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.PairNode;
+import org.seedstack.coffig.data.NamedNode;
 
 public class EnvironmentVariableProvider implements ConfigurationProvider {
 
     @Override
     public MapNode provide() {
-        return new MapNode(new PairNode("env", new MapNode(System.getenv().entrySet().stream()
-                .map(e -> new PairNode(e.getKey(), e.getValue()))
-                .toArray(PairNode[]::new))));
+        return new MapNode(new NamedNode("env", new MapNode(System.getenv().entrySet().stream()
+                .map(e -> new NamedNode(e.getKey(), e.getValue()))
+                .toArray(NamedNode[]::new))));
     }
 }
