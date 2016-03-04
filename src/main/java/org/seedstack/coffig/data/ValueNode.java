@@ -7,9 +7,6 @@
  */
 package org.seedstack.coffig.data;
 
-import org.seedstack.coffig.data.mutable.MutableTreeNode;
-import org.seedstack.coffig.data.mutable.MutableValueNode;
-
 import java.util.Objects;
 
 public class ValueNode extends AbstractTreeNode {
@@ -40,6 +37,11 @@ public class ValueNode extends AbstractTreeNode {
     @Override
     public String toString() {
         return value;
+    }
+
+    @Override
+    public TreeNode freeze() {
+        return this;
     }
 
     @Override

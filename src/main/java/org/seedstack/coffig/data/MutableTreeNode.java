@@ -7,19 +7,16 @@
  */
 package org.seedstack.coffig.data;
 
-public interface TreeNode {
+public interface MutableTreeNode extends TreeNode {
 
-    TreeNode search(String prefix);
+    default MutableTreeNode move(String source, String destination) {
+        this.set(destination, this.remove(source));
+        return this;
+    }
 
-    TreeNode value(String name);
+    MutableTreeNode set(String prefix, TreeNode value);
 
-    String value();
+    MutableTreeNode remove(String prefix);
 
-    TreeNode[] values();
-
-    TreeNode merge(TreeNode otherNode);
-
-    TreeNode freeze();
-
-    MutableTreeNode unfreeze();
+    boolean isEmpty();
 }

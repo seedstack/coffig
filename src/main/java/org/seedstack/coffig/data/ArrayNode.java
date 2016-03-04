@@ -8,30 +8,32 @@
 package org.seedstack.coffig.data;
 
 import org.seedstack.coffig.PropertyNotFoundException;
-import org.seedstack.coffig.data.mutable.MutableArrayNode;
-import org.seedstack.coffig.data.mutable.MutableTreeNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public class ArrayNode extends AbstractTreeNode {
     protected final List<TreeNode> childNodes;
 
+    /**
+     * Used by mutable subclass to avoid auto-freezing nodes.
+     */
+    protected ArrayNode() {
+        childNodes = new ArrayList<>();
+    }
+
     public ArrayNode(TreeNode... childNodes) {
-        this.childNodes = new ArrayList<>(Arrays.asList(childNodes));
+        this.childNodes = new ArrayList<>(Freezer.freeze(childNodes));
     }
 
     public ArrayNode(String... childNodes) {
-        this.childNodes = Arrays.stream(childNodes).map(ValueNode::new).collect(toList());
+        this.childNodes = Freezer.freeze(childNodes);
     }
 
     public ArrayNode(List<TreeNode> childNodes) {
-        this.childNodes = new ArrayList<>(childNodes);
+        this.childNodes = new ArrayList<>(Freezer.freeze(childNodes));
     }
 
     @Override
@@ -56,8 +58,13 @@ public class ArrayNode extends AbstractTreeNode {
     }
 
     @Override
+    public TreeNode freeze() {
+        return this;
+    }
+
+    @Override
     public MutableTreeNode unfreeze() {
-        return new MutableArrayNode(childNodes.stream().map(TreeNode::unfreeze).collect(toList()));
+        return new MutableArrayNode(childNodes);
     }
 
     @Override

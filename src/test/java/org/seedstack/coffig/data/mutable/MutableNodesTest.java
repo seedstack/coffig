@@ -10,6 +10,8 @@ package org.seedstack.coffig.data.mutable;
 import org.junit.Test;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.data.MapNode;
+import org.seedstack.coffig.data.MutableArrayNode;
+import org.seedstack.coffig.data.MutableMapNode;
 import org.seedstack.coffig.data.NamedNode;
 import org.seedstack.coffig.data.TreeNode;
 import org.seedstack.coffig.data.ValueNode;
@@ -87,7 +89,7 @@ public class MutableNodesTest {
         MutableMapNode mapNode = new MutableMapNode();
         mapNode.set("custom.key", new ValueNode("val"));
 
-        MutableTreeNode removedNode = mapNode.remove("custom.key");
+        mapNode.remove("custom.key");
 
         assertRemovedKey(mapNode, "custom");
     }
@@ -107,13 +109,11 @@ public class MutableNodesTest {
         mapNode.set("custom.property.key1", new ValueNode("val"));
         mapNode.set("custom.key2", new ValueNode("val"));
 
-        MutableTreeNode removedNode = mapNode.remove("custom.property.key1");
+        mapNode.remove("custom.property.key1");
 
         assertRemovedKey(mapNode, "custom.property.key1");
         assertRemovedKey(mapNode, "custom.property");
         assertThat(mapNode.search("custom.key2").value()).isEqualTo("val");
-
-        assertThat(removedNode.search("key1").value()).isEqualTo("val");
     }
 
     @Test

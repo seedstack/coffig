@@ -9,8 +9,6 @@ package org.seedstack.coffig.data;
 
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.PropertyNotFoundException;
-import org.seedstack.coffig.data.mutable.MutableMapNode;
-import org.seedstack.coffig.data.mutable.MutableTreeNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,15 +21,19 @@ import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 public class MapNode extends AbstractTreeNode {
     protected final Map<String, TreeNode> childNodes;
 
-    public MapNode(NamedNode... childNodes) {
+    /**
+     * Used by mutable subclass to avoid auto-freezing nodes.
+     */
+    protected MapNode() {
         this.childNodes = new HashMap<>();
-        for (NamedNode childNode : childNodes) {
-            this.childNodes.put(childNode.name(), childNode.get());
-        }
+    }
+
+    public MapNode(NamedNode... childNodes) {
+        this.childNodes = Freezer.freeze(childNodes);
     }
 
     public MapNode(Map<String, TreeNode> newChildNodes) {
-        this.childNodes = newChildNodes;
+        this.childNodes = Freezer.freeze(newChildNodes);
     }
 
     public Set<String> keys() {
@@ -70,10 +72,13 @@ public class MapNode extends AbstractTreeNode {
     }
 
     @Override
+    public TreeNode freeze() {
+        return this;
+    }
+
+    @Override
     public MutableTreeNode unfreeze() {
-        Map<String, TreeNode> nodes = new HashMap<>();
-        childNodes.forEach((key, val) -> nodes.put(key, val.unfreeze()));
-        return new MutableMapNode(nodes);
+        return new MutableMapNode(childNodes);
     }
 
     @Override

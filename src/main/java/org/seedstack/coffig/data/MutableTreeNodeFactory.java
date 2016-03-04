@@ -7,19 +7,15 @@
  */
 package org.seedstack.coffig.data;
 
-public interface TreeNode {
+class MutableTreeNodeFactory {
 
-    TreeNode search(String prefix);
-
-    TreeNode value(String name);
-
-    String value();
-
-    TreeNode[] values();
-
-    TreeNode merge(TreeNode otherNode);
-
-    TreeNode freeze();
-
-    MutableTreeNode unfreeze();
+    static MutableTreeNode createFromPrefix(String prefix) {
+        MutableTreeNode treeNode;
+        if (new Prefix(prefix).isArray) {
+            treeNode = new MutableArrayNode();
+        } else {
+            treeNode = new MutableMapNode();
+        }
+        return treeNode;
+    }
 }

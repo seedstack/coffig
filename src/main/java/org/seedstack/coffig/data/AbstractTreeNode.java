@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * @author Pierre THIROUIN (pierre.thirouin@ext.inetpsa.com)
  */
-public abstract class AbstractTreeNode implements TreeNode {
+abstract class AbstractTreeNode implements TreeNode {
 
     public TreeNode search(String prefix) {
         String[] split = prefix.split("\\.", 2);
@@ -32,10 +32,6 @@ public abstract class AbstractTreeNode implements TreeNode {
                 throw new PropertyNotFoundException(e.getCause(), prefix);
             }
         }
-    }
-
-    protected String indent(String s) {
-        return Arrays.stream(s.split("\n")).map(line -> "  " + line).collect(Collectors.joining("\n"));
     }
 
     protected TreeNode doSearch(String name) {
@@ -56,5 +52,9 @@ public abstract class AbstractTreeNode implements TreeNode {
 
     public TreeNode merge(TreeNode otherNode) {
         return otherNode;
+    }
+
+    protected String indent(String s) {
+        return Arrays.stream(s.split("\n")).map(line -> "  " + line).collect(Collectors.joining("\n"));
     }
 }

@@ -5,10 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data.mutable;
-
-import org.seedstack.coffig.data.TreeNode;
-import org.seedstack.coffig.data.ValueNode;
+package org.seedstack.coffig.data;
 
 public class MutableValueNode extends ValueNode implements MutableTreeNode {
     public MutableValueNode(String value) {
@@ -39,12 +36,12 @@ public class MutableValueNode extends ValueNode implements MutableTreeNode {
     }
 
     @Override
-    public MutableTreeNode unfreeze() {
-        return this;
+    public TreeNode freeze() {
+        return new ValueNode(value);
     }
 
     @Override
-    public TreeNode freeze() {
-        return new ValueNode(value);
+    public MutableTreeNode unfreeze() {
+        return this;
     }
 }
