@@ -7,7 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.data.TreeNode;
+import org.seedstack.coffig.TreeNode;
 
 import java.lang.reflect.Type;
 

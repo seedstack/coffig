@@ -8,9 +8,9 @@
 package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
-import org.seedstack.coffig.data.ArrayNode;
-import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.NamedNode;
+import org.seedstack.coffig.ArrayNode;
+import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.fixture.AccessorFixture;
 import org.seedstack.coffig.fixture.MultiTypesFixture;
 

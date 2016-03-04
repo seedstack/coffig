@@ -7,8 +7,6 @@
  */
 package org.seedstack.coffig;
 
-import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.TreeNode;
 import org.seedstack.coffig.mapper.MapperFactory;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
@@ -75,6 +73,6 @@ public class Coffig {
     }
 
     public <T> T get(String prefix, Class<T> configurationClass) {
-        return doGet(configurationTree.search(prefix), configurationClass);
+        return doGet(configurationTree.get(prefix), configurationClass);
     }
 }

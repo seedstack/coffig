@@ -5,11 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
+package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,13 +50,13 @@ public class ValueNodeTest {
     }
 
     @Test
-    public void testSearch() throws Exception {
+    public void testGet() throws Exception {
         ValueNode val1 = new ValueNode("val1");
         try {
-            val1.search("foo");
+            val1.get("foo");
             Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e.getPropertyName()).isEqualTo("foo");
+            Assertions.assertThat(e.getPropertyName()).isEqualTo("[foo]");
         }
     }
 }

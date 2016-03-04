@@ -7,8 +7,8 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.data.TreeNode;
-import org.seedstack.coffig.data.ValueNode;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.ValueNode;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;

@@ -5,11 +5,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
+package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.*;
 
 public class MutableTreeNodeTest {
 
@@ -87,24 +87,17 @@ public class MutableTreeNodeTest {
 
     @Test
     public void testSearch() throws Exception {
-        Assertions.assertThat(mergedRoot.search("users.0").value()).isEqualTo("u123456");
-        Assertions.assertThat(mergedRoot.search("server.scheme.0").value()).isEqualTo("http");
+        Assertions.assertThat(mergedRoot.get("users.0").value()).isEqualTo("u123456");
+        Assertions.assertThat(mergedRoot.get("server.scheme.0").value()).isEqualTo("http");
     }
 
     @Test
     public void testSearchMissingProps() throws Exception {
         try {
-            mergedRoot.search("server.scheme.0.foo.bar");
+            mergedRoot.get("server.scheme.0.foo.bar");
             Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e.getPropertyName()).isEqualTo("server.scheme.0.foo.bar");
-        }
-
-        try {
-            mergedRoot.search("server.scheme.44");
-            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
-        } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e.getCause()).isNotNull();
+            Assertions.assertThat(e.getPropertyName()).isEqualTo("server.scheme.0.[foo.bar]");
         }
     }
 

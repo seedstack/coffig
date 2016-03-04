@@ -9,9 +9,6 @@ package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.data.ArrayNode;
-import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class CoffigTest {

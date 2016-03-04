@@ -9,7 +9,7 @@ package org.seedstack.coffig.mapper;
 
 
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.data.TreeNode;
+import org.seedstack.coffig.TreeNode;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;

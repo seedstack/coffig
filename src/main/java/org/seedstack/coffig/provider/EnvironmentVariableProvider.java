@@ -8,8 +8,8 @@
 package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.spi.ConfigurationProvider;
-import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.NamedNode;
+import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.NamedNode;
 
 public class EnvironmentVariableProvider implements ConfigurationProvider {
 

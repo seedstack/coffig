@@ -13,7 +13,7 @@ import mockit.integration.junit4.JMockit;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.seedstack.coffig.data.MapNode;
+import org.seedstack.coffig.MapNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class EnvironmentVariableProviderTest {
 
         MapNode conf = underTest.provide();
 
-        Assertions.assertThat(conf.search("env.PROFILE").value()).isEqualTo("DEV");
+        Assertions.assertThat(conf.get("env.PROFILE").value()).isEqualTo("DEV");
     }
 
     @Test

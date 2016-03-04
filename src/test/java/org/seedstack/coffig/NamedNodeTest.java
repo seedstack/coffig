@@ -5,10 +5,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
+package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.NamedNode;
 
 public class NamedNodeTest {
 

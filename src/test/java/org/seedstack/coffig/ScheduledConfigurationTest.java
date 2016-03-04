@@ -13,7 +13,6 @@ import mockit.MockUp;
 import mockit.Mocked;
 import org.junit.Before;
 import org.junit.Test;
-import org.seedstack.coffig.data.MapNode;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
