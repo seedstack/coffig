@@ -5,10 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
-
-import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.PropertyNotFoundException;
+package org.seedstack.coffig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,17 +16,21 @@ import java.util.stream.Collectors;
 import static org.seedstack.coffig.ConfigurationException.INCORRECT_MERGE;
 
 public class MapNode extends AbstractTreeNode {
-    protected final Map<String, PairNode> childNodes;
+    protected final Map<String, TreeNode> childNodes;
 
-    public MapNode(PairNode... childNodes) {
+    /**
+     * Used by mutable subclass to avoid auto-freezing nodes.
+     */
+    protected MapNode() {
         this.childNodes = new HashMap<>();
-        for (PairNode childNode : childNodes) {
-            this.childNodes.put(childNode.name(), childNode);
-        }
     }
 
-    public MapNode(Map<String, PairNode> newChildNodes) {
-        this.childNodes = newChildNodes;
+    public MapNode(NamedNode... childNodes) {
+        this.childNodes = Freezer.freeze(childNodes);
+    }
+
+    public MapNode(Map<String, TreeNode> newChildNodes) {
+        this.childNodes = Freezer.freeze(newChildNodes);
     }
 
     public Set<String> keys() {
@@ -37,16 +38,16 @@ public class MapNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode doSearch(String name) {
+    public TreeNode doGet(String name) {
         return value(name);
     }
 
     @Override
     public TreeNode value(String name) {
         if (childNodes.containsKey(name))
-            return childNodes.get(name).get();
+            return childNodes.get(name);
         else
-            throw new PropertyNotFoundException(name);
+            throw new PropertyNotFoundException("["+name+"]");
     }
 
     @Override
@@ -58,18 +59,23 @@ public class MapNode extends AbstractTreeNode {
     }
 
     private TreeNode mergeMapNode(MapNode otherNode) {
-        Map<String, PairNode> newChildNodes = childNodes;
-        for (Map.Entry<String, PairNode> entry : otherNode.childNodes.entrySet()) {
-            String nodeName = entry.getKey();
-            PairNode node;
-            if (childNodes.containsKey(nodeName)) {
-                node = (PairNode) childNodes.get(nodeName).merge(entry.getValue());
-            } else {
-                node = entry.getValue();
-            }
+        Map<String, TreeNode> newChildNodes = this.childNodes;
+
+        otherNode.childNodes.forEach((nodeName, treeNode) -> {
+            TreeNode node = this.childNodes.containsKey(nodeName) ? this.childNodes.get(nodeName).merge(treeNode) : treeNode;
             newChildNodes.put(nodeName, node);
-        }
+        });
         return new MapNode(newChildNodes);
+    }
+
+    @Override
+    public TreeNode freeze() {
+        return this;
+    }
+
+    @Override
+    public MutableTreeNode unfreeze() {
+        return new MutableMapNode(childNodes);
     }
 
     @Override
@@ -87,6 +93,12 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
-        return childNodes.values().stream().map(Object::toString).collect(Collectors.joining("\n"));
+        return childNodes.entrySet().stream().map(entry -> {
+            if (entry.getValue() instanceof ValueNode) {
+                return entry.getKey() + ": " + entry.getValue().toString();
+            } else {
+                return entry.getKey() + ":\n" + indent(entry.getValue().toString());
+            }
+        }).collect(Collectors.joining("\n"));
     }
 }

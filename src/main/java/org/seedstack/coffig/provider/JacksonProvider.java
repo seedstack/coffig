@@ -10,8 +10,7 @@ package org.seedstack.coffig.provider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.data.*;
+import org.seedstack.coffig.*;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.io.IOException;
@@ -42,13 +41,13 @@ public class JacksonProvider implements ConfigurationProvider {
     }
 
     private MapNode buildTreeFromFields(JsonNode node) {
-        List<PairNode> pairNodes = new ArrayList<>();
+        List<NamedNode> namedNodes = new ArrayList<>();
         node.fields().forEachRemaining(entry -> {
             String name = entry.getKey();
             TreeNode treeNode = buildTreeFromField(entry.getValue());
-            pairNodes.add(new PairNode(name, treeNode));
+            namedNodes.add(new NamedNode(name, treeNode));
         });
-        return new MapNode(pairNodes.toArray(new PairNode[pairNodes.size()]));
+        return new MapNode(namedNodes.toArray(new NamedNode[namedNodes.size()]));
     }
 
     private TreeNode buildTreeFromField(JsonNode jsonNode) {
@@ -98,15 +97,15 @@ public class JacksonProvider implements ConfigurationProvider {
 
         @Override
         public TreeNode build(JsonNode jsonNode) {
-            List<PairNode> pairNodes = new ArrayList<>();
+            List<NamedNode> namedNodes = new ArrayList<>();
             Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fields.next();
                 String fieldName = entry.getKey();
                 TreeNode treeNode = buildTreeFromField(entry.getValue());
-                pairNodes.add(new PairNode(fieldName, treeNode));
+                namedNodes.add(new NamedNode(fieldName, treeNode));
             }
-            PairNode[] nodes = pairNodes.toArray(new PairNode[pairNodes.size()]);
+            NamedNode[] nodes = namedNodes.toArray(new NamedNode[namedNodes.size()]);
             return new MapNode(nodes);
         }
     }

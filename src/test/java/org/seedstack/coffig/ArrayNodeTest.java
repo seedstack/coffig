@@ -5,12 +5,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
+package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,19 +55,19 @@ public class ArrayNodeTest {
     public void testSearch() throws Exception {
         ArrayNode arrayNode = new ArrayNode("foo", "bar");
 
-        Assertions.assertThat(arrayNode.search("0")).isNotNull();
-        Assertions.assertThat(arrayNode.search("0").value()).isEqualTo("foo");
-        Assertions.assertThat(arrayNode.search("1").value()).isEqualTo("bar");
+        Assertions.assertThat(arrayNode.get("0")).isNotNull();
+        Assertions.assertThat(arrayNode.get("0").value()).isEqualTo("foo");
+        Assertions.assertThat(arrayNode.get("1").value()).isEqualTo("bar");
     }
 
     @Test
     public void testSearchNotIndex() throws Exception {
         ArrayNode arrayNode = new ArrayNode("foo", "bar");
         try {
-            arrayNode.search("x");
+            arrayNode.get("x");
             Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
         } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e).hasMessage("Property \"x\" was not found");
+            Assertions.assertThat(e).hasMessage("Property \"[x]\" was not found");
         }
     }
 
@@ -76,10 +75,10 @@ public class ArrayNodeTest {
     public void testSearchOutOfBound() throws Exception {
         ArrayNode arrayNode = new ArrayNode("foo", "bar");
         try {
-            arrayNode.search("100");
+            arrayNode.get("100");
             Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
         } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e).hasMessage("Property \"100\" was not found");
+            Assertions.assertThat(e).hasMessage("Property \"[100]\" was not found");
         }
     }
 }

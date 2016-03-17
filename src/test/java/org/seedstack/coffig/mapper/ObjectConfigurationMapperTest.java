@@ -8,9 +8,9 @@
 package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
-import org.seedstack.coffig.data.ArrayNode;
-import org.seedstack.coffig.data.MapNode;
-import org.seedstack.coffig.data.PairNode;
+import org.seedstack.coffig.ArrayNode;
+import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.fixture.AccessorFixture;
 import org.seedstack.coffig.fixture.MultiTypesFixture;
 
@@ -19,36 +19,36 @@ import static org.assertj.core.api.Assertions.entry;
 
 public class ObjectConfigurationMapperTest {
 
-    private final MapNode accessorFixture = new MapNode(new PairNode("field1", "field1"), new PairNode("field2", "field2"));
+    private final MapNode accessorFixture = new MapNode(new NamedNode("field1", "field1"), new NamedNode("field2", "field2"));
     private final MapNode multiTypesFixture = new MapNode(
-            new PairNode("aBoolean", "true"),
-            new PairNode("aByte", "101"),
-            new PairNode("aChar", "A"),
-            new PairNode("aDouble", "3.14"),
-            new PairNode("aFloat", "3.14"),
-            new PairNode("anInt", "42"),
-            new PairNode("aLong", "42"),
-            new PairNode("aShort", "24"),
-            new PairNode("aString", "aString"),
+            new NamedNode("aBoolean", "true"),
+            new NamedNode("aByte", "101"),
+            new NamedNode("aChar", "A"),
+            new NamedNode("aDouble", "3.14"),
+            new NamedNode("aFloat", "3.14"),
+            new NamedNode("anInt", "42"),
+            new NamedNode("aLong", "42"),
+            new NamedNode("aShort", "24"),
+            new NamedNode("aString", "aString"),
 
-            new PairNode("someBoolean", "true", "true", "true"),
-            new PairNode("someByte", "101", "101", "101"),
-            new PairNode("someChar", "A", "A", "A"),
-            new PairNode("someInt", "42", "42", "42"),
-            new PairNode("someLong", "42", "42", "42"),
-            new PairNode("someShort", "24", "24", "24"),
-            new PairNode("someString", "aString", "aString", "aString"),
-            new PairNode("someDouble", "3.14", "3.14", "3.14"),
-            new PairNode("someFloat", "3.14", "3.14", "3.14"),
+            new NamedNode("someBoolean", "true", "true", "true"),
+            new NamedNode("someByte", "101", "101", "101"),
+            new NamedNode("someChar", "A", "A", "A"),
+            new NamedNode("someInt", "42", "42", "42"),
+            new NamedNode("someLong", "42", "42", "42"),
+            new NamedNode("someShort", "24", "24", "24"),
+            new NamedNode("someString", "aString", "aString", "aString"),
+            new NamedNode("someDouble", "3.14", "3.14", "3.14"),
+            new NamedNode("someFloat", "3.14", "3.14", "3.14"),
 
-            new PairNode("stringList", "aString", "aString", "aString"),
-            new PairNode("stringSet", "aString", "aString", "aString"),
+            new NamedNode("stringList", "aString", "aString", "aString"),
+            new NamedNode("stringSet", "aString", "aString", "aString"),
 
-            new PairNode("accessorFixture", accessorFixture),
-            new PairNode("aMap", new MapNode(new PairNode("1", "true"), new PairNode("2", "false"))),
-            new PairNode("fixtureArray", new ArrayNode(accessorFixture, accessorFixture)),
-            new PairNode("fixtureList", new ArrayNode(accessorFixture, accessorFixture)),
-            new PairNode("fixtureSet", new ArrayNode(accessorFixture, accessorFixture))
+            new NamedNode("accessorFixture", accessorFixture),
+            new NamedNode("aMap", new MapNode(new NamedNode("1", "true"), new NamedNode("2", "false"))),
+            new NamedNode("fixtureArray", new ArrayNode(accessorFixture, accessorFixture)),
+            new NamedNode("fixtureList", new ArrayNode(accessorFixture, accessorFixture)),
+            new NamedNode("fixtureSet", new ArrayNode(accessorFixture, accessorFixture))
     );
     private ObjectMapper<AccessorFixture> accessorMapper = new ObjectMapper<>(AccessorFixture.class);
     private ObjectMapper<MultiTypesFixture> multiTypesMapper = new ObjectMapper<>(MultiTypesFixture.class);

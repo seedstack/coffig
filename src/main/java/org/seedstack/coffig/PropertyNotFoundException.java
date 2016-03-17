@@ -12,21 +12,20 @@ import java.util.function.Function;
 public class PropertyNotFoundException extends ConfigurationException {
 
     private String name;
-    private static Function<String, String> messager = name -> String.format("Property \"%s\" was not found", name);
+    private static Function<String, String> message = name -> String.format("Property \"%s\" was not found", name);
 
     public PropertyNotFoundException(String name) {
-        super(messager.apply(name));
+        super(message.apply(name));
         this.name = name;
     }
 
-    public PropertyNotFoundException(Throwable cause, String name) {
-        super(cause);
-        this.name = name;
+    public PropertyNotFoundException(PropertyNotFoundException e, Prefix prefix) {
+        this(prefix.head + "." + e.getPropertyName());
     }
 
     @Override
     public String getMessage() {
-        return messager.apply(name);
+        return message.apply(name);
     }
 
     public String getPropertyName() {

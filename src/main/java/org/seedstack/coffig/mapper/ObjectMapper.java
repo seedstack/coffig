@@ -8,9 +8,9 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.data.MapNode;
+import org.seedstack.coffig.MapNode;
 import org.seedstack.coffig.PropertyNotFoundException;
-import org.seedstack.coffig.data.TreeNode;
+import org.seedstack.coffig.TreeNode;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

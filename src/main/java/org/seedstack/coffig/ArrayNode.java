@@ -5,42 +5,42 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
-
-import org.seedstack.coffig.PropertyNotFoundException;
+package org.seedstack.coffig;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public class ArrayNode extends AbstractTreeNode {
     protected final List<TreeNode> childNodes;
 
+    /**
+     * Used by mutable subclass to avoid auto-freezing nodes.
+     */
+    protected ArrayNode() {
+        childNodes = new ArrayList<>();
+    }
+
     public ArrayNode(TreeNode... childNodes) {
-        this.childNodes = new ArrayList<>(Arrays.asList(childNodes));
+        this.childNodes = new ArrayList<>(Freezer.freeze(childNodes));
     }
 
     public ArrayNode(String... childNodes) {
-        this.childNodes = Arrays.stream(childNodes).map(ValueNode::new).collect(toList());
+        this.childNodes = Freezer.freeze(childNodes);
     }
 
     public ArrayNode(List<TreeNode> childNodes) {
-        this.childNodes = new ArrayList<>(childNodes);
+        this.childNodes = new ArrayList<>(Freezer.freeze(childNodes));
     }
 
     @Override
-    public TreeNode doSearch(String name) {
+    public TreeNode doGet(String name) {
         try {
             Integer integer = Integer.valueOf(name);
             return childNodes.get(integer);
-        } catch (NumberFormatException e) {
-            throw new PropertyNotFoundException("Configuration array node is expected a number as index, but found: " + name);
-        } catch (IndexOutOfBoundsException e2) {
-            throw new PropertyNotFoundException(e2, name);
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            throw new PropertyNotFoundException("["+ name+"]");
         }
     }
 
@@ -51,6 +51,16 @@ public class ArrayNode extends AbstractTreeNode {
 
     public TreeNode value(int index) {
         return childNodes.get(index);
+    }
+
+    @Override
+    public TreeNode freeze() {
+        return this;
+    }
+
+    @Override
+    public MutableTreeNode unfreeze() {
+        return new MutableArrayNode(childNodes);
     }
 
     @Override

@@ -5,11 +5,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
+package org.seedstack.coffig;
 
 public interface TreeNode {
 
-    TreeNode search(String prefix);
+    TreeNode get(String prefix);
+
+    default boolean exist(String prefix) {
+        try {
+            get(prefix);
+            return true;
+        } catch (PropertyNotFoundException e) {
+            return false;
+        }
+    }
 
     TreeNode value(String name);
 
@@ -18,4 +27,8 @@ public interface TreeNode {
     TreeNode[] values();
 
     TreeNode merge(TreeNode otherNode);
+
+    TreeNode freeze();
+
+    MutableTreeNode unfreeze();
 }

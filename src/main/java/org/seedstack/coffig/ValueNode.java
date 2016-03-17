@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.data;
+package org.seedstack.coffig;
 
 import java.util.Objects;
 
@@ -37,5 +37,15 @@ public class ValueNode extends AbstractTreeNode {
     @Override
     public String toString() {
         return value;
+    }
+
+    @Override
+    public TreeNode freeze() {
+        return this;
+    }
+
+    @Override
+    public MutableTreeNode unfreeze() {
+        return new MutableValueNode(value);
     }
 }
