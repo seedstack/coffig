@@ -8,6 +8,7 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.MutableMapNode;
 import org.seedstack.coffig.TreeNode;
 
 import java.lang.reflect.ParameterizedType;
@@ -22,7 +23,7 @@ class MapConfigurationMapper implements ConfigurationMapper {
 
     @Override
     public boolean canHandle(Class<?> aClass) {
-        return aClass.equals(Map.class);
+        return Map.class.isAssignableFrom(aClass);
     }
 
     public Object map(TreeNode treeNode, Type type) {
@@ -32,13 +33,29 @@ class MapConfigurationMapper implements ConfigurationMapper {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             if (Map.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
                 // TODO Complex objects as key are not supported due to MapNode supporting only String as key
-                Class<?> keyClass = (Class<?>)parameterizedType.getActualTypeArguments()[0];
-                Class<?> valueClass = (Class<?>)parameterizedType.getActualTypeArguments()[1];
+                Class<?> keyClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                Class<?> valueClass = (Class<?>) parameterizedType.getActualTypeArguments()[1];
                 actualValue = mapNode.keys().stream()
                         .collect(toMap(key -> valueMapper.convertObject(key, keyClass),
                                 key -> MapperFactory.getInstance().map(treeNode.value(key), valueClass)));
             }
         }
         return actualValue;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public TreeNode unmap(Object object) {
+        if (object instanceof Map) {
+            final MutableMapNode mapNode = new MutableMapNode();
+            ((Map<?, ?>) object).forEach(((key, value) -> {
+                if (key != null) {
+                    mapNode.put(key.toString(), MapperFactory.getInstance().unmap(value));
+                }
+            }));
+            return mapNode;
+        } else {
+            return null;
+        }
     }
 }

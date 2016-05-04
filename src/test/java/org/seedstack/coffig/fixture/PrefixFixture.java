@@ -5,17 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.mapper;
+package org.seedstack.coffig.fixture;
 
-import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.Config;
 
-import java.lang.reflect.Type;
-
-public interface ConfigurationMapper {
-
-    boolean canHandle(Class<?> aClass);
-
-    Object map(TreeNode treeNode, Type type);
-
-    TreeNode unmap(Object object);
+@Config("foo.bar")
+public class PrefixFixture {
+    public String aString;
+    @Config("baz")
+    public AccessorFixture accessorFixture;
 }

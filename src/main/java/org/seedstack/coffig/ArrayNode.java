@@ -9,6 +9,7 @@ package org.seedstack.coffig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
 
@@ -35,12 +36,14 @@ public class ArrayNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode doGet(String name) {
+    protected Optional<TreeNode> doGet(String name) {
         try {
             Integer integer = Integer.valueOf(name);
-            return childNodes.get(integer);
-        } catch (NumberFormatException | IndexOutOfBoundsException e) {
-            throw new PropertyNotFoundException("["+ name+"]");
+            return Optional.ofNullable(childNodes.get(integer));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        } catch (IndexOutOfBoundsException e2) {
+            return Optional.empty();
         }
     }
 

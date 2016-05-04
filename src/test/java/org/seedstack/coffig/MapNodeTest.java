@@ -9,7 +9,6 @@ package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,16 +25,9 @@ public class MapNodeTest {
             mapNode1.value("name");
             Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
-            assertThat(e).hasMessage("Property \"[name]\" was not found");
-            assertThat(e.getPropertyName()).isEqualTo("[name]");
+            assertThat(e).hasMessage("Property \"name\" was not found");
+            assertThat(e.getPropertyName()).isEqualTo("name");
         }
-    }
-
-    @Test
-    public void testNodeExist() {
-        MapNode mapNode1 = new MapNode(new NamedNode("id", "foo"));
-        Assertions.assertThat(mapNode1.exist("id")).isTrue();
-        Assertions.assertThat(mapNode1.exist("zzz")).isFalse();
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -97,23 +89,11 @@ public class MapNodeTest {
     }
 
     @Test
-    public void testGet() throws Exception {
+    public void testSearch() throws Exception {
         MapNode mapNode = new MapNode(new NamedNode("id", "foo"), new NamedNode("name", "The foo app"));
         assertThat(mapNode.get("id")).isNotNull();
-        assertThat(mapNode.get("id").value()).isEqualTo("foo");
-        assertThat(mapNode.get("name").value()).isEqualTo("The foo app");
-
-        try {
-            mapNode.get("foo");
-            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
-        } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e.getPropertyName()).isEqualTo("[foo]");
-        }
-    }
-
-    @Test
-    public void testWithIntegerKey() {
-        MapNode mapNode = new MapNode(new NamedNode("0", "foo"));
-        assertThat(mapNode.get("0").value()).isEqualTo("foo");
+        assertThat(mapNode.get("id").get().value()).isEqualTo("foo");
+        assertThat(mapNode.get("name").get().value()).isEqualTo("The foo app");
+        assertThat(mapNode.get("foo").isPresent()).isFalse();
     }
 }

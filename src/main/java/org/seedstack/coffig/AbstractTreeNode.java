@@ -8,6 +8,7 @@
 package org.seedstack.coffig;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -15,26 +16,17 @@ import java.util.stream.Collectors;
  */
 abstract class AbstractTreeNode implements TreeNode {
 
-    public TreeNode get(String name) {
-        Prefix prefix = new Prefix(name);
-        TreeNode treeNode;
-        try {
-            treeNode = doGet(prefix.head);
-        } catch (PropertyNotFoundException e) {
-            throw new PropertyNotFoundException("[" + name + "]");
-        }
-        if (prefix.tail.isPresent()) {
-            try {
-                treeNode = treeNode.get(prefix.tail.get());
-            } catch (PropertyNotFoundException e) {
-                throw new PropertyNotFoundException(e, prefix);
-            }
+    public Optional<TreeNode> get(String prefix) {
+        String[] split = prefix.split("\\.", 2);
+        Optional<TreeNode> treeNode = doGet(split[0]);
+        if (treeNode.isPresent() && split.length == 2) {
+            treeNode = treeNode.get().get(split[1]);
         }
         return treeNode;
     }
 
-    protected TreeNode doGet(String name) {
-        throw new PropertyNotFoundException("[" + name + "]");
+    protected Optional<TreeNode> doGet(String name) {
+        return Optional.empty();
     }
 
     public TreeNode value(String name) {

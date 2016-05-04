@@ -7,18 +7,11 @@
  */
 package org.seedstack.coffig;
 
+import java.util.Optional;
+
 public interface TreeNode {
 
-    TreeNode get(String prefix);
-
-    default boolean exist(String prefix) {
-        try {
-            get(prefix);
-            return true;
-        } catch (PropertyNotFoundException e) {
-            return false;
-        }
-    }
+    Optional<TreeNode> get(String prefix);
 
     TreeNode value(String name);
 

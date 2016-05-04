@@ -8,15 +8,12 @@
 package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.MapNode;
-import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
-public class SystemPropertyProvider implements ConfigurationProvider {
+public class ObjectProvider implements ConfigurationProvider {
 
     @Override
     public MapNode provide() {
-        return new MapNode(new NamedNode("system", new MapNode(System.getProperties().entrySet().stream()
-                .map(e -> new NamedNode((String) e.getKey(), (String) e.getValue()))
-                .toArray(NamedNode[]::new))));
+        return null;
     }
 }

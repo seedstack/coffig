@@ -37,13 +37,31 @@ public class MapperFactory {
     }
 
     public Object map(TreeNode treeNode, Type type) {
+        if (treeNode == null) {
+            return null;
+        }
+
         Class<?> classToMap = typeToClass(type);
         for (ConfigurationMapper configurationMapper : configurationMappers) {
             if (configurationMapper.canHandle(classToMap)) {
                 return configurationMapper.map(treeNode, type);
             }
         }
-        return new ObjectMapper<>(classToMap).map((MapNode) treeNode);
+        return new ObjectConfigurationMapper<>(classToMap).map((MapNode) treeNode);
+    }
+
+    public TreeNode unmap(Object object) {
+        if (object == null) {
+            return null;
+        }
+
+        Class<?> objectClass = object.getClass();
+        for (ConfigurationMapper configurationMapper : configurationMappers) {
+            if (configurationMapper.canHandle(objectClass)) {
+                return configurationMapper.unmap(object).freeze();
+            }
+        }
+        return new ObjectConfigurationMapper<>(object).unmap().freeze();
     }
 
     private Class<?> typeToClass(Type type) {

@@ -7,14 +7,18 @@
  */
 package org.seedstack.coffig.mapper;
 
-
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.ValueNode;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -154,6 +158,15 @@ class ValueConfigurationMapper implements ConfigurationMapper {
     @Override
     public Object map(TreeNode value, Type type) {
         return convertObject(value.value(), type);
+    }
+
+    @Override
+    public TreeNode unmap(Object object) {
+        if (object == null) {
+            return null;
+        } else {
+            return new ValueNode(object.toString());
+        }
     }
 
     public Object convertObject(String value, Type type) {

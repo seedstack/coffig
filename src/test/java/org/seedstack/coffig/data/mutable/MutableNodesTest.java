@@ -5,13 +5,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.mutable;
 
 import org.junit.Test;
+import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.MutableArrayNode;
+import org.seedstack.coffig.MutableMapNode;
+import org.seedstack.coffig.NamedNode;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
-import static sun.security.krb5.internal.crypto.Nonce.value;
 
 public class MutableNodesTest {
 
@@ -83,29 +87,26 @@ public class MutableNodesTest {
         MutableMapNode mapNode = new MutableMapNode();
         mapNode.set("custom.key", new ValueNode("val"));
 
-        final MutableTreeNode remove = mapNode.remove("custom.key");
+        mapNode.remove("custom.key");
 
-        assertRemovedKey(mapNode, "custom", "[custom]");
-        assertThat(remove.value()).isEqualTo("val");
+        assertRemovedKey(mapNode, "custom");
     }
 
-    private void assertRemovedKey(TreeNode treeNode, String prefix, String expected) {
+    private void assertRemovedKey(TreeNode treeNode, String prefix) {
         assertThat(treeNode.get(prefix).isPresent()).isFalse();
     }
 
     @Test
     public void testRemoveOnlyEmptyMapNodes() {
         MutableMapNode mapNode = new MutableMapNode();
-        mapNode.set("custom.property.key1", new ValueNode("val1"));
-        mapNode.set("custom.key2", new ValueNode("val2"));
+        mapNode.set("custom.property.key1", new ValueNode("val"));
+        mapNode.set("custom.key2", new ValueNode("val"));
 
-        MutableTreeNode remove = mapNode.remove("custom.property.key1");
+        mapNode.remove("custom.property.key1");
 
-        assertRemovedKey(mapNode, "custom.property.key1", "custom.[property.key1]");
-        assertRemovedKey(mapNode, "custom.property", "custom.[property]");
-        assertThat(mapNode.get("custom.key2").get().value()).isEqualTo("val2");
-        assertThat(remove.value()).isEqualTo("val1");
-
+        assertRemovedKey(mapNode, "custom.property.key1");
+        assertRemovedKey(mapNode, "custom.property");
+        assertThat(mapNode.get("custom.key2").get().value()).isEqualTo("val");
     }
 
     @Test
@@ -114,33 +115,10 @@ public class MutableNodesTest {
         mapNode.set("custom.0.0", new ValueNode("val1"));
         mapNode.set("custom.1", new ValueNode("val2"));
 
-        MutableTreeNode remove = mapNode.remove("custom.0.0");
+        mapNode.remove("custom.0.0");
 
-        assertRemovedKey(mapNode, "custom.0.0", "custom.0.[0]");
-        assertRemovedKey(mapNode, "custom.1", "custom.[1]");
+        assertRemovedKey(mapNode, "custom.0.0");
+        assertRemovedKey(mapNode, "custom.1");
         assertThat(mapNode.get("custom.0").get().value()).isEqualTo("val2");
-        assertThat(remove.value()).isEqualTo("val1");
-    }
-
-    @Test
-    public void testRemoveNodeNotFound() {
-        MutableMapNode mapNode = new MutableMapNode();
-        mapNode.set("custom.0.0", new MutableMapNode());
-
-        try {
-            mapNode.remove("custom.0.0.fake.test");
-            failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
-        } catch (PropertyNotFoundException e) {
-            assertThat(e).hasMessage("Property \"custom.0.0.[fake.test]\" was not found");
-        }
-    }
-
-    @Test
-    public void testMove() throws Exception {
-        MutableMapNode mapNode = new MutableMapNode();
-        mapNode.set("custom.0.0", new ValueNode("val"));
-        mapNode.move("custom.0.0", "custom.key.test");
-        assertThat(mapNode.get("custom.key.test").get().value()).isEqualTo("val");
-        assertThat(mapNode.get("custom.0.0").isPresent()).isFalse();
     }
 }

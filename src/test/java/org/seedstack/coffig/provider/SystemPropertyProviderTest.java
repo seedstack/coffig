@@ -35,7 +35,7 @@ public class SystemPropertyProviderTest {
 
         MapNode conf = underTest.provide();
 
-        Assertions.assertThat(conf.get("system.PROFILE").value()).isEqualTo("DEV");
+        Assertions.assertThat(conf.get("system.PROFILE").get().value()).isEqualTo("DEV");
     }
 
     @Test

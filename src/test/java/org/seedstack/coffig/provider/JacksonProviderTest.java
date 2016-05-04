@@ -53,7 +53,7 @@ public class JacksonProviderTest {
 
         Assertions.assertThat(mapNode).isNotNull();
         Assertions.assertThat(mapNode.value("app").value()).isEqualTo("bar");
-        Assertions.assertThat(mapNode.get("security.users.1").value()).isEqualTo("user2");
+        Assertions.assertThat(mapNode.get("security.users.1").get().value()).isEqualTo("user2");
     }
 
     @Test
@@ -61,6 +61,6 @@ public class JacksonProviderTest {
         MapNode mapNode = jacksonProvider.provide();
 
         Assertions.assertThat(mapNode).isNotNull();
-        Assertions.assertThat(mapNode.get("jdbc.dataSources.0.name").value()).isEqualTo("myDS");
+        Assertions.assertThat(mapNode.get("jdbc.dataSources.0.name").get().value()).isEqualTo("myDS");
     }
 }

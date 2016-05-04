@@ -7,11 +7,7 @@
  */
 package org.seedstack.coffig;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.PropertyNotFoundException;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,13 +46,8 @@ public class ValueNodeTest {
     }
 
     @Test
-    public void testGet() throws Exception {
+    public void testSearch() throws Exception {
         ValueNode val1 = new ValueNode("val1");
-        try {
-            val1.get("foo");
-            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
-        } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e.getPropertyName()).isEqualTo("[foo]");
-        }
+        assertThat(val1.get("foo").isPresent()).isFalse();
     }
 }

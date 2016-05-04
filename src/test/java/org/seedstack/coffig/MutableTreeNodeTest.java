@@ -7,9 +7,9 @@
  */
 package org.seedstack.coffig;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MutableTreeNodeTest {
 
@@ -65,58 +65,54 @@ public class MutableTreeNodeTest {
 
     @Test
     public void testNode() {
-        Assertions.assertThat(root.value("id").value()).isEqualTo("foo");
-        Assertions.assertThat(root.value("name").value()).isEqualTo("The Foo app");
+        assertThat(root.value("id").value()).isEqualTo("foo");
+        assertThat(root.value("name").value()).isEqualTo("The Foo app");
 
-        Assertions.assertThat(root.value("users").values()).hasSize(2);
-        Assertions.assertThat(root.value("users").values()[0].value()).isEqualTo("u123456");
-        Assertions.assertThat(root.value("users").values()[1].value()).isEqualTo("u456789");
+        assertThat(root.value("users").values()).hasSize(2);
+        assertThat(root.value("users").values()[0].value()).isEqualTo("u123456");
+        assertThat(root.value("users").values()[1].value()).isEqualTo("u456789");
 
         TreeNode dataSource1 = root.value("datasources").values()[0];
-        Assertions.assertThat(dataSource1.value("name").value()).isEqualTo("ds1");
-        Assertions.assertThat(dataSource1.value("url").value()).isEqualTo("jdbc:hsqldb:hsql://localhost:9001/ds1");
+        assertThat(dataSource1.value("name").value()).isEqualTo("ds1");
+        assertThat(dataSource1.value("url").value()).isEqualTo("jdbc:hsqldb:hsql://localhost:9001/ds1");
 
-        Assertions.assertThat(root.value("server").value("host").value()).isEqualTo("localhost");
-        Assertions.assertThat(root.value("server").value("port").value()).isEqualTo("80");
+        assertThat(root.value("server").value("host").value()).isEqualTo("localhost");
+        assertThat(root.value("server").value("port").value()).isEqualTo("80");
     }
 
     @Test
     public void testMerge() {
-        Assertions.assertThat(root.merge(root2)).isEqualTo(mergedRoot);
+        assertThat(root.merge(root2)).isEqualTo(mergedRoot);
     }
 
     @Test
     public void testSearch() throws Exception {
-        Assertions.assertThat(mergedRoot.get("users.0").value()).isEqualTo("u123456");
-        Assertions.assertThat(mergedRoot.get("server.scheme.0").value()).isEqualTo("http");
+        assertThat(mergedRoot.get("users.0").get().value()).isEqualTo("u123456");
+        assertThat(mergedRoot.get("server.scheme.0").get().value()).isEqualTo("http");
     }
 
     @Test
     public void testSearchMissingProps() throws Exception {
-        try {
-            mergedRoot.get("server.scheme.0.foo.bar");
-            Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
-        } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e.getPropertyName()).isEqualTo("server.scheme.0.[foo.bar]");
-        }
+        assertThat(mergedRoot.get("server.scheme.0.foo.bar").isPresent()).isFalse();
+        assertThat(mergedRoot.get("server.scheme.44").isPresent()).isFalse();
     }
 
     @Test
     public void testToString() throws Exception {
         System.out.println(root.toString());
-        Assertions.assertThat(root.toString()).isEqualTo(
+        assertThat(root.toString()).isEqualTo(
                 "server:\n" +
-                "  port: 80\n" +
-                "  host: localhost\n" +
-                "datasources:\n" +
-                "  -\n" +
-                "    driver: org.hsqldb.jdbcDriver\n" +
-                "    name: ds1\n" +
-                "    url: jdbc:hsqldb:hsql://localhost:9001/ds1\n" +
-                "name: The Foo app\n" +
-                "id: foo\n" +
-                "users:\n" +
-                "  - u123456\n" +
-                "  - u456789");
+                        "  port: 80\n" +
+                        "  host: localhost\n" +
+                        "datasources:\n" +
+                        "  -\n" +
+                        "    driver: org.hsqldb.jdbcDriver\n" +
+                        "    name: ds1\n" +
+                        "    url: jdbc:hsqldb:hsql://localhost:9001/ds1\n" +
+                        "name: The Foo app\n" +
+                        "id: foo\n" +
+                        "users:\n" +
+                        "  - u123456\n" +
+                        "  - u456789");
     }
 }

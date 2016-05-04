@@ -9,7 +9,6 @@ package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,29 +55,19 @@ public class ArrayNodeTest {
         ArrayNode arrayNode = new ArrayNode("foo", "bar");
 
         Assertions.assertThat(arrayNode.get("0")).isNotNull();
-        Assertions.assertThat(arrayNode.get("0").value()).isEqualTo("foo");
-        Assertions.assertThat(arrayNode.get("1").value()).isEqualTo("bar");
+        Assertions.assertThat(arrayNode.get("0").get().value()).isEqualTo("foo");
+        Assertions.assertThat(arrayNode.get("1").get().value()).isEqualTo("bar");
     }
 
     @Test
     public void testSearchNotIndex() throws Exception {
         ArrayNode arrayNode = new ArrayNode("foo", "bar");
-        try {
-            arrayNode.get("x");
-            Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
-        } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e).hasMessage("Property \"[x]\" was not found");
-        }
+        assertThat(arrayNode.get("x").isPresent()).isFalse();
     }
 
     @Test
     public void testSearchOutOfBound() throws Exception {
         ArrayNode arrayNode = new ArrayNode("foo", "bar");
-        try {
-            arrayNode.get("100");
-            Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
-        } catch (PropertyNotFoundException e) {
-            Assertions.assertThat(e).hasMessage("Property \"[100]\" was not found");
-        }
+        assertThat(arrayNode.get("100").isPresent()).isFalse();
     }
 }

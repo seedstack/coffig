@@ -71,7 +71,17 @@ public class CoffigTest {
                         new MapNode(new NamedNode("server",
                                 new MapNode(new NamedNode("port", "8080")))))));
         coffig.compute();
-        Integer appServerPort = coffig.get("app.server.port", Integer.class);
+        Integer appServerPort = coffig.get("app.server.port", Integer.class).get();
         Assertions.assertThat(appServerPort).isEqualTo(8080);
+    }
+
+    @Test
+    public void testGetWithPrefixAndDefaultValue() throws Exception {
+        Coffig coffig = new Coffig();
+        coffig.addProvider(appConfigProvider);
+
+        coffig.compute();
+
+        Assertions.assertThat(coffig.get("unknown", String.class).orElse("defaultValue")).isEqualTo("defaultValue");
     }
 }

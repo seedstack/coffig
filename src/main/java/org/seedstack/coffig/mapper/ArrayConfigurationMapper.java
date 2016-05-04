@@ -7,6 +7,8 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.ArrayNode;
+import org.seedstack.coffig.MutableArrayNode;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.ValueNode;
 
@@ -16,6 +18,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -28,9 +31,10 @@ class ArrayConfigurationMapper implements ConfigurationMapper {
 
     @Override
     public boolean canHandle(Class<?> aClass) {
-        return aClass.equals(List.class) || aClass.equals(Set.class) || aClass.equals(Collection.class) || aClass.isArray();
+        return Collection.class.isAssignableFrom(aClass) || aClass.isArray();
     }
 
+    @Override
     public Object map(TreeNode treeNode, Type type) {
         Object actualValue = null;
         TreeNode[] nodes = treeNode.values();
@@ -47,6 +51,21 @@ class ArrayConfigurationMapper implements ConfigurationMapper {
             }
         }
         return actualValue;
+    }
+
+    @Override
+    public TreeNode unmap(Object object) {
+        if (object instanceof Collection) {
+            return new ArrayNode(((Collection<?>) object).stream().map(MapperFactory.getInstance()::unmap).collect(toList()));
+        } else if (object.getClass().isArray()) {
+            MutableArrayNode mutableArrayNode = new MutableArrayNode();
+            int length = Array.getLength(object);
+            for (int i = 0; i < length; i++) {
+                mutableArrayNode.add(MapperFactory.getInstance().unmap(Array.get(object, i)));
+            }
+            return mutableArrayNode;
+        }
+        return null;
     }
 
     private Collection mapArrayNodeToCollection(ParameterizedType parameterizedType, TreeNode[] nodes) {

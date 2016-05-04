@@ -11,7 +11,13 @@ import org.seedstack.coffig.mapper.MapperFactory;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Coffig {
 
@@ -54,6 +60,15 @@ public class Coffig {
         return doGet(configurationTree, configurationClass);
     }
 
+    public <T> Optional<T> get(String prefix, Class<T> configurationClass) {
+        Optional<TreeNode> result = configurationTree.get(prefix);
+        if (result.isPresent()) {
+            return Optional.of(doGet(result.get(), configurationClass));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private <T> T doGet(TreeNode treeNode, Class<T> configurationClass) {
         return (T) MapperFactory.getInstance().map(treeNode, configurationClass);
@@ -70,9 +85,5 @@ public class Coffig {
                 executorService = null;
             }
         }
-    }
-
-    public <T> T get(String prefix, Class<T> configurationClass) {
-        return doGet(configurationTree.get(prefix), configurationClass);
     }
 }
