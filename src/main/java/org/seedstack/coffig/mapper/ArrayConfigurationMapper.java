@@ -11,6 +11,7 @@ import org.seedstack.coffig.ArrayNode;
 import org.seedstack.coffig.MutableArrayNode;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
@@ -18,7 +19,6 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 

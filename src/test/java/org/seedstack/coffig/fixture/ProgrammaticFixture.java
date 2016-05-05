@@ -5,15 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.provider;
+package org.seedstack.coffig.fixture;
 
-import org.seedstack.coffig.MapNode;
-import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.Config;
 
-public class ObjectProvider implements ConfigurationProvider {
-
-    @Override
-    public MapNode provide() {
-        return null;
+public class ProgrammaticFixture {
+    @Config
+    private PrefixFixture providePrefixFixture() {
+        return new PrefixFixture("provided");
     }
 }

@@ -14,4 +14,11 @@ public class PrefixFixture {
     public String aString;
     @Config("baz")
     public AccessorFixture accessorFixture;
+
+    public PrefixFixture() {
+    }
+
+    public PrefixFixture(String aString) {
+        this.aString = aString;
+    }
 }

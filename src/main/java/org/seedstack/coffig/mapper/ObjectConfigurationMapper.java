@@ -9,7 +9,6 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.MapNode;
 import org.seedstack.coffig.MutableMapNode;
 import org.seedstack.coffig.TreeNode;
@@ -33,7 +32,7 @@ class ObjectConfigurationMapper<T> {
     private final List<FieldInfo> fieldInfo;
     private final T holder;
 
-    public ObjectConfigurationMapper(Class<T> aClass) {
+    ObjectConfigurationMapper(Class<T> aClass) {
         this.aClass = aClass;
         this.prefix = this.aClass.isAnnotationPresent(Config.class) ? aClass.getAnnotation(Config.class).value() : null;
         this.fieldInfo = getFieldInfo();
@@ -41,7 +40,7 @@ class ObjectConfigurationMapper<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public ObjectConfigurationMapper(T object) {
+    ObjectConfigurationMapper(T object) {
         this.aClass = (Class<? extends T>) object.getClass();
         this.prefix = this.aClass.isAnnotationPresent(Config.class) ? aClass.getAnnotation(Config.class).value() : null;
         this.fieldInfo = getFieldInfo();
@@ -60,7 +59,7 @@ class ObjectConfigurationMapper<T> {
         return Arrays.stream(aClass.getDeclaredFields()).map(FieldInfo::new).collect(toList());
     }
 
-    public T map(MapNode rootNode) {
+    T map(MapNode rootNode) {
         Optional<TreeNode> startNode;
         if (prefix != null) {
             startNode = rootNode.get(prefix);
@@ -70,35 +69,48 @@ class ObjectConfigurationMapper<T> {
 
         if (startNode.isPresent()) {
             fieldInfo.stream().forEach(fieldInfo -> {
-                try {
-                    Optional<TreeNode> treeNode = startNode;
-                    if (fieldInfo.prefix != null) {
-                        treeNode = startNode.get().get(fieldInfo.prefix);
-                    }
-                    if (treeNode.isPresent()) {
-                        Object fieldValue = MapperFactory.getInstance().map(treeNode.get().value(fieldInfo.name), fieldInfo.type);
-                        if (fieldValue != null) {
-                            Consumer<Object> fieldInitializer = fieldInfo.consumer;
-                            fieldInitializer.accept(fieldValue);
-                        }
-                    }
-                } catch (PropertyNotFoundException | UnsupportedOperationException exception) {
-                    // Nothing to do here. Missing properties are ignored
+                String path;
+                if (fieldInfo.prefix != null) {
+                    path = String.format("%s.%s", fieldInfo.prefix, fieldInfo.name);
+                } else {
+                    path = fieldInfo.name;
+                }
+
+                Object fieldValue = MapperFactory.getInstance().map(startNode.get().get(path).orElse(null), fieldInfo.type);
+                if (fieldValue != null) {
+                    Consumer<Object> fieldInitializer = fieldInfo.consumer;
+                    fieldInitializer.accept(fieldValue);
                 }
             });
         }
+
         return holder;
     }
 
-    public TreeNode unmap() {
-        MutableMapNode mapNode = new MutableMapNode();
+    TreeNode unmap() {
+        MutableMapNode rootNode = new MutableMapNode();
+        MutableMapNode startNode;
+        if (prefix != null) {
+            startNode = new MutableMapNode();
+            rootNode.set(prefix, startNode);
+        } else {
+            startNode = rootNode;
+        }
+
         fieldInfo.stream().forEach(fieldInfo -> {
             TreeNode unmapped = MapperFactory.getInstance().unmap(fieldInfo.supplier.get());
             if (unmapped != null) {
-                mapNode.put(fieldInfo.name, unmapped);
+                String path;
+                if (fieldInfo.prefix != null) {
+                    path = String.format("%s.%s", fieldInfo.prefix, fieldInfo.name);
+                } else {
+                    path = fieldInfo.name;
+                }
+                startNode.set(path, unmapped);
             }
         });
-        return mapNode;
+
+        return rootNode;
     }
 
     private class FieldInfo {
