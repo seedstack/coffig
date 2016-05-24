@@ -52,6 +52,11 @@ public class MapNode extends AbstractTreeNode {
     }
 
     @Override
+    public TreeNode[] values() {
+        return childNodes.values().toArray(new TreeNode[childNodes.size()]);
+    }
+
+    @Override
     public TreeNode merge(TreeNode otherNode) {
         if (!(otherNode instanceof MapNode)) {
             throw new ConfigurationException(INCORRECT_MERGE.apply(otherNode.getClass(), getClass()));

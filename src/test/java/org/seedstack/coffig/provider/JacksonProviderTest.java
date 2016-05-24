@@ -12,9 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.MapNode;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 public class JacksonProviderTest {
 
     private JacksonProvider jacksonProvider;
@@ -31,20 +28,8 @@ public class JacksonProviderTest {
     @Before
     public void setUp() throws Exception {
         jacksonProvider = new JacksonProvider();
-
-        InputStream jsonInputStream = new ByteArrayInputStream(("{\"app\":\"foo\", " +
-                "\"security\": {\"users\": [\"user1\", \"user2\"]}}").getBytes());
-        jacksonProvider.addSource(jsonInputStream);
-
-        String YAMLConfig = "app: bar\n" +
-                "jdbc:\n" +
-                "  dataSources:\n" +
-                "    -\n" +
-                "        name: \"myDS\"\n" +
-                "        driver: \"org.hsqldb.jdbcDriver\"\n" +
-                "        url: \"jdbc:hsqldb:hsql://localhost:9001/DS\"";
-        InputStream yamlInputStream = new ByteArrayInputStream(YAMLConfig.getBytes());
-        jacksonProvider.addSource(yamlInputStream);
+        jacksonProvider.addSource(JacksonProviderTest.class.getResource("/fixture.json"));
+        jacksonProvider.addSource(JacksonProviderTest.class.getResource("/fixture.yaml"));
     }
 
     @Test

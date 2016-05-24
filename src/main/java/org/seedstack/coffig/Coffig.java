@@ -14,76 +14,93 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class Coffig {
-
     private final List<ConfigurationProvider> providers = new CopyOnWriteArrayList<>();
     private volatile MapNode configurationTree = new MapNode();
-    private ScheduledExecutorService executorService;
+    private volatile boolean dirty = false;
 
     public void addProvider(ConfigurationProvider configurationProvider) {
-        providers.add(configurationProvider);
-    }
-
-    public void schedule(int initialDelay, int delay) {
-        if (executorService == null) {
-            executorService = Executors.newScheduledThreadPool(1);
-            executorService.scheduleWithFixedDelay(this::compute, initialDelay, delay, TimeUnit.MILLISECONDS);
-        } else {
-            shutdown();
-            schedule(initialDelay, delay);
+        try {
+            providers.add(configurationProvider);
+        } finally {
+            dirty = true;
         }
     }
 
     public void compute() {
-        if (providers.size() > 0) {
-            ForkJoinPool forkJoinPool = new ForkJoinPool();
-            try {
-                configurationTree = forkJoinPool.submit(() -> providers.parallelStream()
-                        .map(ConfigurationProvider::provide)
-                        .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
-                        .orElse(new MapNode())
-                ).get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new ConfigurationException(e);
-            } finally {
-                forkJoinPool.shutdown();
+        try {
+            if (providers.size() > 0) {
+                ForkJoinPool forkJoinPool = new ForkJoinPool();
+                try {
+                    configurationTree = forkJoinPool.submit(() -> providers.parallelStream()
+                            .map(ConfigurationProvider::provide)
+                            .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
+                            .orElse(new MapNode())
+                    ).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new ConfigurationException(e);
+                } finally {
+                    forkJoinPool.shutdown();
+                }
             }
+        } finally {
+            dirty = false;
         }
     }
 
-    public <T> T get(Class<T> configurationClass) {
-        return doGet(configurationTree, configurationClass);
+    public Coffig fork() {
+        Coffig fork = new Coffig();
+        for (ConfigurationProvider provider : providers) {
+            fork.addProvider(provider.fork());
+        }
+        return fork;
     }
 
-    public <T> Optional<T> get(String prefix, Class<T> configurationClass) {
+    public <T> Optional<T> getOptional(String prefix, Class<T> configurationClass) {
+        computeIfNecessary();
         Optional<TreeNode> result = configurationTree.get(prefix);
         if (result.isPresent()) {
-            return Optional.of(doGet(result.get(), configurationClass));
+            return Optional.ofNullable(doGet(result.get(), configurationClass));
         } else {
             return Optional.empty();
+        }
+    }
+
+    public <T> Optional<T> getOptional(Class<T> configurationClass) {
+        computeIfNecessary();
+        return Optional.ofNullable(doGet(configurationTree, configurationClass));
+    }
+
+    public <T> T get(Class<T> configurationClass) {
+        return getOptional(configurationClass).orElseGet(() -> instantiateDefault(configurationClass));
+    }
+
+    public <T> T get(String prefix, Class<T> configurationClass) {
+        return getOptional(prefix, configurationClass).orElseGet(() -> instantiateDefault(configurationClass));
+    }
+
+    public TreeNode dump() {
+        return configurationTree;
+    }
+
+    private <T> T instantiateDefault(Class<T> configurationClass) {
+        try {
+            return configurationClass.newInstance();
+        } catch (Exception e) {
+            throw new ConfigurationException("Cannot instantiate default value", e);
+        }
+    }
+
+    private void computeIfNecessary() {
+        if (dirty || providers.stream().filter(ConfigurationProvider::isDirty).count() > 0) {
+            compute();
         }
     }
 
     @SuppressWarnings("unchecked")
     private <T> T doGet(TreeNode treeNode, Class<T> configurationClass) {
         return (T) MapperFactory.getInstance().map(treeNode, configurationClass);
-    }
-
-    public void shutdown() {
-        if (executorService != null) {
-            try {
-                executorService.shutdown();
-            } finally {
-                if (!executorService.isTerminated()) {
-                    executorService.shutdownNow();
-                }
-                executorService = null;
-            }
-        }
     }
 }

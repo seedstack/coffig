@@ -13,11 +13,18 @@ import java.util.concurrent.Callable;
 
 @FunctionalInterface
 public interface ConfigurationProvider extends Callable<MapNode> {
-
     MapNode provide();
 
     @Override
     default MapNode call() throws Exception {
         return provide();
+    }
+
+    default ConfigurationProvider fork() {
+        return this;
+    }
+
+    default boolean isDirty() {
+        return true;
     }
 }

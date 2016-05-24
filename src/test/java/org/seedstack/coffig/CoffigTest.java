@@ -14,17 +14,21 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 public class CoffigTest {
 
     public final ConfigurationProvider appConfigProvider = () -> new MapNode(
-                    new NamedNode("id", "foo"),
-                    new NamedNode("name", "The Foo app"));
+            new NamedNode("id", "foo"),
+            new NamedNode("name", "The Foo app"));
 
     public final ConfigurationProvider usersConfigProvider = () -> new MapNode(
             new NamedNode("id", "bar"),
-            new NamedNode("users", new ArrayNode("u123456", "u456789")));
+            new NamedNode("users", new ArrayNode("u123456", "u456789")),
+            new NamedNode("elements", new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2"))),
+            new NamedNode("items", "one"));
 
     public static class App {
         String id;
         String name;
         String[] users;
+        String[] items;
+        String[] elements;
     }
 
     @Test
@@ -71,8 +75,18 @@ public class CoffigTest {
                         new MapNode(new NamedNode("server",
                                 new MapNode(new NamedNode("port", "8080")))))));
         coffig.compute();
-        Integer appServerPort = coffig.get("app.server.port", Integer.class).get();
+        Integer appServerPort = coffig.get("app.server.port", Integer.class);
         Assertions.assertThat(appServerPort).isEqualTo(8080);
+    }
+
+    @Test
+    public void testGetOptionalWithPrefixAndDefaultValue() throws Exception {
+        Coffig coffig = new Coffig();
+        coffig.addProvider(appConfigProvider);
+
+        coffig.compute();
+
+        Assertions.assertThat(coffig.getOptional("unknown", String.class).orElse("defaultValue")).isEqualTo("defaultValue");
     }
 
     @Test
@@ -82,6 +96,26 @@ public class CoffigTest {
 
         coffig.compute();
 
-        Assertions.assertThat(coffig.get("unknown", String.class).orElse("defaultValue")).isEqualTo("defaultValue");
+        Assertions.assertThat(coffig.get("unknown", String.class)).isEqualTo("");
+    }
+
+    @Test
+    public void testGetSingleValueAsArray() throws Exception {
+        Coffig coffig = new Coffig();
+        coffig.addProvider(usersConfigProvider);
+
+        coffig.compute();
+
+        Assertions.assertThat(coffig.get(App.class).items).containsExactly("one");
+    }
+
+    @Test
+    public void testGetMapAsArray() throws Exception {
+        Coffig coffig = new Coffig();
+        coffig.addProvider(usersConfigProvider);
+
+        coffig.compute();
+
+        Assertions.assertThat(coffig.get(App.class).elements).containsOnly("val1", "val2");
     }
 }

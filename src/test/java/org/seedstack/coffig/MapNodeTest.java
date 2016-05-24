@@ -30,9 +30,9 @@ public class MapNodeTest {
         }
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testChildNodes() {
-        new MapNode().values();
+    @Test
+    public void testValues() {
+        assertThat(new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2")).values()).containsOnly(new ValueNode("val1"), new ValueNode("val2"));
     }
 
     @Test(expected = UnsupportedOperationException.class)

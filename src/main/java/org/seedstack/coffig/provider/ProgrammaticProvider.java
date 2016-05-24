@@ -21,34 +21,59 @@ import java.util.function.Supplier;
 
 public class ProgrammaticProvider implements ConfigurationProvider {
     private List<Supplier<Object>> suppliers = new ArrayList<>();
+    private volatile boolean dirty = false;
 
     @Override
     public MapNode provide() {
-        MapperFactory mapperFactory = MapperFactory.getInstance();
-        return (MapNode) new MapNode()
-                .merge(suppliers.stream()
-                        .map(Supplier::get)
-                        .map(mapperFactory::unmap)
-                        .reduce(TreeNode::merge)
-                        .orElse(new MapNode())
-                );
+        try {
+            MapperFactory mapperFactory = MapperFactory.getInstance();
+            return (MapNode) new MapNode()
+                    .merge(suppliers.stream()
+                            .map(Supplier::get)
+                            .map(mapperFactory::unmap)
+                            .reduce(TreeNode::merge)
+                            .orElse(new MapNode())
+                    );
+        } finally {
+            dirty = false;
+        }
+    }
+
+    @Override
+    public ConfigurationProvider fork() {
+        ProgrammaticProvider fork = new ProgrammaticProvider();
+        fork.suppliers.addAll(suppliers);
+        return fork;
+    }
+
+    @Override
+    public boolean isDirty() {
+        return dirty;
     }
 
     public void addObject(Object object) {
-        Arrays.stream(object.getClass().getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(Config.class))
-                .map(method -> (Supplier) () -> {
-                    method.setAccessible(true);
-                    try {
-                        return method.invoke(object);
-                    } catch (Exception e) {
-                        throw new ConfigurationException("Cannot supply configuration object from " + method.toString());
-                    }
-                })
-                .forEach(suppliers::add);
+        try {
+            Arrays.stream(object.getClass().getDeclaredMethods())
+                    .filter(method -> method.isAnnotationPresent(Config.class))
+                    .map(method -> (Supplier) () -> {
+                        method.setAccessible(true);
+                        try {
+                            return method.invoke(object);
+                        } catch (Exception e) {
+                            throw new ConfigurationException("Cannot supply configuration object from " + method.toString());
+                        }
+                    })
+                    .forEach(suppliers::add);
+        } finally {
+            dirty = true;
+        }
     }
 
     public void addSupplier(Supplier<Object> supplier) {
-        suppliers.add(supplier);
+        try {
+            suppliers.add(supplier);
+        } finally {
+            dirty = true;
+        }
     }
 }

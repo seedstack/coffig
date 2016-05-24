@@ -12,7 +12,6 @@ import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class EnvironmentVariableProvider implements ConfigurationProvider {
-
     @Override
     public MapNode provide() {
         return new MapNode(new NamedNode("env", new MapNode(System.getenv().entrySet().stream()

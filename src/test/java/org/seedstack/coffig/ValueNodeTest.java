@@ -31,9 +31,9 @@ public class ValueNodeTest {
         val1.value(null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testChildNodes() {
-        val1.values();
+    @Test
+    public void testValues() {
+        assertThat(val1.values()).containsExactly(new ValueNode("val1"));
     }
 
     @Test

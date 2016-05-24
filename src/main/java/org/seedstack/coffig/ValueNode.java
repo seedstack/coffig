@@ -17,6 +17,11 @@ public class ValueNode extends AbstractTreeNode {
     }
 
     @Override
+    public TreeNode[] values() {
+        return new TreeNode[]{new ValueNode(value)};
+    }
+
+    @Override
     public String value() {
         return value;
     }
