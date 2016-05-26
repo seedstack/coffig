@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
 
 public interface ConfigurationMapper {
 
-    boolean canHandle(Class<?> aClass);
+    boolean canHandle(Type type);
 
     Object map(TreeNode treeNode, Type type);
 

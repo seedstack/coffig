@@ -26,6 +26,7 @@ public class MapperFactory {
         configurationMappers.add(new ValueConfigurationMapper());
         configurationMappers.add(new ArrayConfigurationMapper());
         configurationMappers.add(new MapConfigurationMapper());
+        configurationMappers.add(new EnumConfigurationMapper());
     }
 
     public static MapperFactory getInstance() {

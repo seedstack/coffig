@@ -13,19 +13,25 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class CoffigTest {
 
-    public final ConfigurationProvider appConfigProvider = () -> new MapNode(
+    private final ConfigurationProvider appConfigProvider = () -> new MapNode(
             new NamedNode("id", "foo"),
-            new NamedNode("name", "The Foo app"));
+            new NamedNode("name", "The Foo app"),
+            new NamedNode("someEnum", "FOO"));
 
-    public final ConfigurationProvider usersConfigProvider = () -> new MapNode(
+    private final ConfigurationProvider usersConfigProvider = () -> new MapNode(
             new NamedNode("id", "bar"),
             new NamedNode("users", new ArrayNode("u123456", "u456789")),
             new NamedNode("elements", new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2"))),
             new NamedNode("items", "one"));
 
-    public static class App {
+    private enum SomeEnum {
+        FOO
+    }
+
+    private static class App {
         String id;
         String name;
+        SomeEnum someEnum;
         String[] users;
         String[] items;
         String[] elements;

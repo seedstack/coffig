@@ -30,8 +30,8 @@ class ArrayConfigurationMapper implements ConfigurationMapper {
     private ValueConfigurationMapper valueMapper = new ValueConfigurationMapper();
 
     @Override
-    public boolean canHandle(Class<?> aClass) {
-        return Collection.class.isAssignableFrom(aClass) || aClass.isArray();
+    public boolean canHandle(Type type) {
+        return type instanceof Class && (Collection.class.isAssignableFrom((Class<?>) type) || ((Class<?>) type).isArray());
     }
 
     @Override

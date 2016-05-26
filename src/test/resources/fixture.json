@@ -1,0 +1,9 @@
+{
+  "app": "foo",
+  "security": {
+    "users": [
+      "user1",
+      "user2"
+    ]
+  }
+}

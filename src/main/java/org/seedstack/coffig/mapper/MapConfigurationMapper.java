@@ -23,8 +23,8 @@ class MapConfigurationMapper implements ConfigurationMapper {
     private ValueConfigurationMapper valueMapper = new ValueConfigurationMapper();
 
     @Override
-    public boolean canHandle(Class<?> aClass) {
-        return Map.class.isAssignableFrom(aClass);
+    public boolean canHandle(Type type) {
+        return type instanceof Class && Map.class.isAssignableFrom((Class<?>) type);
     }
 
     public Object map(TreeNode treeNode, Type type) {

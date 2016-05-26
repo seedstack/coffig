@@ -12,7 +12,9 @@ import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.MapNode;
 import org.seedstack.coffig.MutableMapNode;
 import org.seedstack.coffig.TreeNode;
+import sun.reflect.FieldInfo;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,8 +51,10 @@ class ObjectConfigurationMapper<T> {
 
     private T getNewInstance() {
         try {
-            return aClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            Constructor<? extends T> constructor = aClass.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (Exception e) {
             throw new ConfigurationException(e);
         }
     }
