@@ -17,5 +17,5 @@ public interface ConfigurationMapper {
 
     Object map(TreeNode treeNode, Type type);
 
-    TreeNode unmap(Object object);
+    TreeNode unmap(Object object, Type type);
 }

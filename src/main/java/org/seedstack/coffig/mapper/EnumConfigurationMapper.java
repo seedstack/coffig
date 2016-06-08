@@ -8,6 +8,7 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.Type;
@@ -25,7 +26,7 @@ class EnumConfigurationMapper implements ConfigurationMapper {
     }
 
     @Override
-    public TreeNode unmap(Object object) {
-        return null;
+    public TreeNode unmap(Object object, Type type) {
+        return new ValueNode(String.valueOf(object));
     }
 }

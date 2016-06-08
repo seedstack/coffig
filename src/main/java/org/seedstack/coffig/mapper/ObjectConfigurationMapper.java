@@ -12,11 +12,9 @@ import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.MapNode;
 import org.seedstack.coffig.MutableMapNode;
 import org.seedstack.coffig.TreeNode;
-import sun.reflect.FieldInfo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -28,13 +26,14 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.toList;
 
 class ObjectConfigurationMapper<T> {
-
+    private final MapperFactory mapperFactory;
     private final Class<? extends T> aClass;
     private final String prefix;
     private final List<FieldInfo> fieldInfo;
     private final T holder;
 
-    ObjectConfigurationMapper(Class<T> aClass) {
+    ObjectConfigurationMapper(MapperFactory mapperFactory, Class<T> aClass) {
+        this.mapperFactory = mapperFactory;
         this.aClass = aClass;
         this.prefix = this.aClass.isAnnotationPresent(Config.class) ? aClass.getAnnotation(Config.class).value() : null;
         this.fieldInfo = getFieldInfo();
@@ -42,7 +41,8 @@ class ObjectConfigurationMapper<T> {
     }
 
     @SuppressWarnings("unchecked")
-    ObjectConfigurationMapper(T object) {
+    ObjectConfigurationMapper(MapperFactory mapperFactory, T object) {
+        this.mapperFactory = mapperFactory;
         this.aClass = (Class<? extends T>) object.getClass();
         this.prefix = this.aClass.isAnnotationPresent(Config.class) ? aClass.getAnnotation(Config.class).value() : null;
         this.fieldInfo = getFieldInfo();
@@ -80,7 +80,7 @@ class ObjectConfigurationMapper<T> {
                     path = fieldInfo.name;
                 }
 
-                Object fieldValue = MapperFactory.getInstance().map(startNode.get().get(path).orElse(null), fieldInfo.type);
+                Object fieldValue = mapperFactory.map(startNode.get().get(path).orElse(null), fieldInfo.type);
                 if (fieldValue != null) {
                     Consumer<Object> fieldInitializer = fieldInfo.consumer;
                     fieldInitializer.accept(fieldValue);
@@ -102,7 +102,7 @@ class ObjectConfigurationMapper<T> {
         }
 
         fieldInfo.stream().forEach(fieldInfo -> {
-            TreeNode unmapped = MapperFactory.getInstance().unmap(fieldInfo.supplier.get());
+            TreeNode unmapped = mapperFactory.unmap(fieldInfo.supplier.get(), fieldInfo.type);
             if (unmapped != null) {
                 String path;
                 if (fieldInfo.prefix != null) {
@@ -120,7 +120,6 @@ class ObjectConfigurationMapper<T> {
     private class FieldInfo {
         String name;
         String prefix;
-        Class<?> fieldClass;
         Type type;
         Consumer<Object> consumer;
         Supplier<Object> supplier;
@@ -128,7 +127,6 @@ class ObjectConfigurationMapper<T> {
         FieldInfo(Field field) {
             this.name = field.getName();
             this.prefix = field.isAnnotationPresent(Config.class) ? field.getAnnotation(Config.class).value() : null;
-            this.fieldClass = field.getType();
             this.type = field.getGenericType();
             this.consumer = getPropertyConsumer(field);
             this.supplier = getPropertySupplier(field);
@@ -184,7 +182,7 @@ class ObjectConfigurationMapper<T> {
             return o -> {
                 try {
                     setter.invoke(holder, o);
-                } catch (InvocationTargetException | IllegalAccessException e) {
+                } catch (Exception e) {
                     throw new ConfigurationException(e);
                 }
             };
@@ -195,7 +193,7 @@ class ObjectConfigurationMapper<T> {
                 field.setAccessible(true);
                 try {
                     field.set(holder, o);
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     throw new ConfigurationException(e);
                 }
             };
@@ -205,7 +203,7 @@ class ObjectConfigurationMapper<T> {
             return () -> {
                 try {
                     return getter.invoke(holder);
-                } catch (InvocationTargetException | IllegalAccessException e) {
+                } catch (Exception e) {
                     throw new ConfigurationException(e);
                 }
             };
@@ -216,7 +214,7 @@ class ObjectConfigurationMapper<T> {
                 field.setAccessible(true);
                 try {
                     return field.get(holder);
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     throw new ConfigurationException(e);
                 }
             };

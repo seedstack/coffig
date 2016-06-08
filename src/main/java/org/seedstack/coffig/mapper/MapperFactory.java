@@ -7,35 +7,27 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.MapNode;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MapperFactory {
-
-    private static volatile MapperFactory mapperFactory;
-    private List<ConfigurationMapper> configurationMappers = new ArrayList<>();
+    private List<ConfigurationMapper> configurationMappers = new CopyOnWriteArrayList<>();
 
     public MapperFactory() {
-        configurationMappers.add(new ValueConfigurationMapper());
-        configurationMappers.add(new ArrayConfigurationMapper());
-        configurationMappers.add(new MapConfigurationMapper());
-        configurationMappers.add(new EnumConfigurationMapper());
+        addMapper(new EnumConfigurationMapper());
+        addMapper(new ValueConfigurationMapper());
+        addMapper(new ArrayConfigurationMapper(this));
+        addMapper(new CollectionConfigurationMapper(this));
+        addMapper(new MapConfigurationMapper(this));
     }
 
-    public static MapperFactory getInstance() {
-        if (mapperFactory == null) {
-            synchronized (MapperFactory.class) {
-                mapperFactory = new MapperFactory();
-            }
-        }
-        return mapperFactory;
+    public void addMapper(ConfigurationMapper configurationMapper) {
+        configurationMappers.add(configurationMapper);
     }
 
     public Object map(TreeNode treeNode, Type type) {
@@ -43,38 +35,24 @@ public class MapperFactory {
             return null;
         }
 
-        Class<?> classToMap = typeToClass(type);
         for (ConfigurationMapper configurationMapper : configurationMappers) {
-            if (configurationMapper.canHandle(classToMap)) {
+            if (configurationMapper.canHandle(type)) {
                 return configurationMapper.map(treeNode, type);
             }
         }
-        return new ObjectConfigurationMapper<>(classToMap).map((MapNode) treeNode);
+        return new ObjectConfigurationMapper<>(this, (Class<?>) type).map((MapNode) treeNode);
     }
 
-    public TreeNode unmap(Object object) {
+    public TreeNode unmap(Object object, Type type) {
         if (object == null) {
             return null;
         }
 
-        Class<?> objectClass = object.getClass();
         for (ConfigurationMapper configurationMapper : configurationMappers) {
-            if (configurationMapper.canHandle(objectClass)) {
-                return configurationMapper.unmap(object).freeze();
+            if (configurationMapper.canHandle(type)) {
+                return configurationMapper.unmap(object, type).freeze();
             }
         }
-        return new ObjectConfigurationMapper<>(object).unmap().freeze();
-    }
-
-    private Class<?> typeToClass(Type type) {
-        Class<?> classToMap;
-        if (type instanceof Class) {
-            classToMap = (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            classToMap = (Class<?>) ((ParameterizedType) type).getRawType();
-        } else {
-            throw new ConfigurationException("Unsupported type " + type);
-        }
-        return classToMap;
+        return new ObjectConfigurationMapper<>(this, object).unmap().freeze();
     }
 }

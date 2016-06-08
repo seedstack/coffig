@@ -9,6 +9,7 @@ package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.seedstack.coffig.fixture.SomeEnum;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class CoffigTest {
@@ -23,10 +24,6 @@ public class CoffigTest {
             new NamedNode("users", new ArrayNode("u123456", "u456789")),
             new NamedNode("elements", new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2"))),
             new NamedNode("items", "one"));
-
-    private enum SomeEnum {
-        FOO
-    }
 
     private static class App {
         String id;

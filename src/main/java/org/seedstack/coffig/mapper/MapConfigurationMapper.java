@@ -10,6 +10,7 @@ package org.seedstack.coffig.mapper;
 import org.seedstack.coffig.MapNode;
 import org.seedstack.coffig.MutableMapNode;
 import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.ParameterizedType;
@@ -19,44 +20,43 @@ import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 
 class MapConfigurationMapper implements ConfigurationMapper {
+    private final MapperFactory mapperFactory;
 
-    private ValueConfigurationMapper valueMapper = new ValueConfigurationMapper();
+    MapConfigurationMapper(MapperFactory mapperFactory) {
+        this.mapperFactory = mapperFactory;
+    }
 
     @Override
     public boolean canHandle(Type type) {
-        return type instanceof Class && Map.class.isAssignableFrom((Class<?>) type);
+        if (type instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) type).getRawType();
+            if (rawType instanceof Class) {
+                return Map.class.isAssignableFrom(((Class<?>) rawType));
+            }
+        }
+        return false;
     }
 
     public Object map(TreeNode treeNode, Type type) {
-        MapNode mapNode = (MapNode) treeNode;
-        Object actualValue = null;
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            if (Map.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-                // TODO Complex objects as key are not supported due to MapNode supporting only String as key
-                Class<?> keyClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-                Class<?> valueClass = (Class<?>) parameterizedType.getActualTypeArguments()[1];
-                actualValue = mapNode.keys().stream()
-                        .collect(toMap(key -> valueMapper.convertObject(key, keyClass),
-                                key -> MapperFactory.getInstance().map(treeNode.value(key), valueClass)));
-            }
-        }
-        return actualValue;
+        Type keyType = ((ParameterizedType) type).getActualTypeArguments()[0];
+        Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
+
+        return ((MapNode) treeNode).keys().stream()
+                .collect(toMap(
+                        key -> mapperFactory.map(new ValueNode(key), keyType),
+                        key -> mapperFactory.map(treeNode.value(key), valueType)
+                ));
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public TreeNode unmap(Object object) {
-        if (object instanceof Map) {
-            final MutableMapNode mapNode = new MutableMapNode();
-            ((Map<?, ?>) object).forEach(((key, value) -> {
-                if (key != null) {
-                    mapNode.put(key.toString(), MapperFactory.getInstance().unmap(value));
-                }
-            }));
-            return mapNode;
-        } else {
-            return null;
-        }
+    public TreeNode unmap(Object object, Type type) {
+        MutableMapNode mapNode = new MutableMapNode();
+        Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
+        ((Map<?, ?>) object).forEach(((key, value) -> {
+            if (key != null) {
+                mapNode.put(String.valueOf(key), mapperFactory.unmap(value, valueType));
+            }
+        }));
+        return mapNode;
     }
 }

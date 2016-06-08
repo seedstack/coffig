@@ -18,8 +18,13 @@ import java.util.concurrent.ForkJoinPool;
 
 public class Coffig {
     private final List<ConfigurationProvider> providers = new CopyOnWriteArrayList<>();
+    private final MapperFactory mapperFactory = new MapperFactory();
     private volatile MapNode configurationTree = new MapNode();
     private volatile boolean dirty = false;
+
+    public MapperFactory getMapperFactory() {
+        return mapperFactory;
+    }
 
     public void addProvider(ConfigurationProvider configurationProvider) {
         try {
@@ -52,6 +57,9 @@ public class Coffig {
 
     public Coffig fork() {
         Coffig fork = new Coffig();
+        for (ConfigurationProvider provider : providers) {
+
+        }
         for (ConfigurationProvider provider : providers) {
             fork.addProvider(provider.fork());
         }
@@ -101,6 +109,6 @@ public class Coffig {
 
     @SuppressWarnings("unchecked")
     private <T> T doGet(TreeNode treeNode, Class<T> configurationClass) {
-        return (T) MapperFactory.getInstance().map(treeNode, configurationClass);
+        return (T) mapperFactory.map(treeNode, configurationClass);
     }
 }

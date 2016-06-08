@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.seedstack.coffig.MapNode;
 import org.seedstack.coffig.fixture.PrefixFixture;
 import org.seedstack.coffig.fixture.ProgrammaticFixture;
+import org.seedstack.coffig.mapper.MapperFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +21,7 @@ public class ProgrammaticProviderTest {
 
     @Before
     public void setUp() throws Exception {
-        programmaticProvider = new ProgrammaticProvider();
+        programmaticProvider = new ProgrammaticProvider(new MapperFactory());
     }
 
     @Test

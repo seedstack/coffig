@@ -20,17 +20,21 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class ProgrammaticProvider implements ConfigurationProvider {
-    private List<Supplier<Object>> suppliers = new ArrayList<>();
+    private final MapperFactory mapperFactory;
+    private final List<Supplier<Object>> suppliers = new ArrayList<>();
     private volatile boolean dirty = false;
+
+    public ProgrammaticProvider(MapperFactory mapperFactory) {
+        this.mapperFactory = mapperFactory;
+    }
 
     @Override
     public MapNode provide() {
         try {
-            MapperFactory mapperFactory = MapperFactory.getInstance();
             return (MapNode) new MapNode()
                     .merge(suppliers.stream()
                             .map(Supplier::get)
-                            .map(mapperFactory::unmap)
+                            .map(o -> mapperFactory.unmap(o, o.getClass()))
                             .reduce(TreeNode::merge)
                             .orElse(new MapNode())
                     );
@@ -41,7 +45,7 @@ public class ProgrammaticProvider implements ConfigurationProvider {
 
     @Override
     public ConfigurationProvider fork() {
-        ProgrammaticProvider fork = new ProgrammaticProvider();
+        ProgrammaticProvider fork = new ProgrammaticProvider(mapperFactory);
         fork.suppliers.addAll(suppliers);
         return fork;
     }
