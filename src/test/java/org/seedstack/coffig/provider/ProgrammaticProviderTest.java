@@ -9,7 +9,7 @@ package org.seedstack.coffig.provider;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.fixture.PrefixFixture;
 import org.seedstack.coffig.fixture.ProgrammaticFixture;
 import org.seedstack.coffig.mapper.MapperFactory;

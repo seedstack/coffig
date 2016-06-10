@@ -8,8 +8,7 @@
 package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
-import org.seedstack.coffig.ArrayNode;
-import org.seedstack.coffig.ValueNode;
+import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.fixture.SomeEnum;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,5 +20,11 @@ public class EnumConfigurationMapperTest {
     public void testMapEnum() {
         assertThat(enumConfigurationMapper.map(new ValueNode("FOO"), SomeEnum.class)).isEqualTo(SomeEnum.FOO);
         assertThat(enumConfigurationMapper.map(new ValueNode("BAR"), SomeEnum.class)).isEqualTo(SomeEnum.BAR);
+    }
+
+    @Test
+    public void testUnmapEnum() {
+        assertThat(enumConfigurationMapper.unmap(SomeEnum.FOO, SomeEnum.class)).isEqualTo(new ValueNode("FOO"));
+        assertThat(enumConfigurationMapper.unmap(SomeEnum.BAR, SomeEnum.class)).isEqualTo(new ValueNode("BAR"));
     }
 }

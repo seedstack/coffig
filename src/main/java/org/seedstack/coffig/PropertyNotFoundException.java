@@ -7,28 +7,27 @@
  */
 package org.seedstack.coffig;
 
-import java.util.function.Function;
-
 public class PropertyNotFoundException extends ConfigurationException {
+    private final String propertyName;
+    private String highlightedName;
 
-    private String name;
-    private static Function<String, String> message = name -> String.format("Property \"%s\" was not found", name);
-
-    public PropertyNotFoundException(String name) {
-        super(message.apply(name));
-        this.name = name;
+    public PropertyNotFoundException(String propertyName, Throwable cause) {
+        super("Property not found: " + propertyName, cause);
+        this.propertyName = propertyName;
+        this.highlightedName = "<" + propertyName + ">";
     }
 
-    public PropertyNotFoundException(PropertyNotFoundException e, Prefix prefix) {
-        this(prefix.head + "." + e.getPropertyName());
+    public PropertyNotFoundException(String propertyName) {
+        this(propertyName, null);
     }
 
-    @Override
-    public String getMessage() {
-        return message.apply(name);
+    public PropertyNotFoundException(PropertyNotFoundException e, String name) {
+        super("Sub-property not found: " + name + "." + e.highlightedName);
+        this.propertyName = name + "." + e.propertyName;
+        this.highlightedName = name + "." + e.highlightedName;
     }
 
     public String getPropertyName() {
-        return name;
+        return propertyName;
     }
 }

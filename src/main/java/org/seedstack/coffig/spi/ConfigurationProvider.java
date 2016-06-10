@@ -7,7 +7,7 @@
  */
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.node.MapNode;
 
 import java.util.concurrent.Callable;
 

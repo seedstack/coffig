@@ -7,7 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.ArrayNode;
+import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
@@ -47,11 +47,11 @@ class CollectionConfigurationMapper implements ConfigurationMapper {
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
 
         if (List.class.isAssignableFrom(rawClass)) {
-            return Arrays.stream(treeNode.values()).map(childNode -> mapperFactory.map(childNode, itemType)).collect(toList());
+            return Arrays.stream(treeNode.items()).map(childNode -> mapperFactory.map(childNode, itemType)).collect(toList());
         } else if (Set.class.isAssignableFrom(rawClass)) {
-            return Arrays.stream(treeNode.values()).map(childNode -> mapperFactory.map(childNode, itemType)).collect(toSet());
+            return Arrays.stream(treeNode.items()).map(childNode -> mapperFactory.map(childNode, itemType)).collect(toSet());
         } else {
-            return Arrays.stream(treeNode.values()).map(childNode -> mapperFactory.map(childNode, itemType)).collect(toCollection(() -> {
+            return Arrays.stream(treeNode.items()).map(childNode -> mapperFactory.map(childNode, itemType)).collect(toCollection(() -> {
                 try {
                     return (Collection<Object>) rawClass.newInstance();
                 } catch (Exception e) {

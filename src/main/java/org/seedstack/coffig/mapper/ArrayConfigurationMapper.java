@@ -7,7 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.MutableArrayNode;
+import org.seedstack.coffig.node.MutableArrayNode;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
@@ -31,7 +31,7 @@ class ArrayConfigurationMapper implements ConfigurationMapper {
     @Override
     public Object map(TreeNode treeNode, Type type) {
         Class componentType = ((Class) type).getComponentType();
-        TreeNode[] values = treeNode.values();
+        TreeNode[] values = treeNode.items();
         Object array = Array.newInstance(componentType, values.length);
         AtomicInteger index = new AtomicInteger();
         Arrays.stream(values).map(childNode -> mapperFactory.map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));

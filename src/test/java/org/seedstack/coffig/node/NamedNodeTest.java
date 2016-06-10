@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -16,7 +16,7 @@ public class NamedNodeTest {
 
     @Test
     public void testGet() {
-        Assertions.assertThat(pairWithMap.get().value("port").value()).isEqualTo("80");
+        Assertions.assertThat(pairWithMap.get().item("port").value()).isEqualTo("80");
     }
 
     @Test

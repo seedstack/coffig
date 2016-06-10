@@ -8,7 +8,7 @@
 package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
-import org.seedstack.coffig.ArrayNode;
+import org.seedstack.coffig.node.ArrayNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

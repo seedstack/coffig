@@ -5,9 +5,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
+
+import org.seedstack.coffig.MutableTreeNode;
+import org.seedstack.coffig.TreeNode;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ValueNode extends AbstractTreeNode {
     protected String value;
@@ -17,19 +22,40 @@ public class ValueNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode[] values() {
-        return new TreeNode[]{new ValueNode(value)};
-    }
-
-    @Override
     public String value() {
         return value;
     }
 
     @Override
+    public TreeNode item(String key) {
+        return this;
+    }
+
+    @Override
+    public TreeNode[] items() {
+        return new TreeNode[]{this};
+    }
+
+    @Override
+    public Optional<TreeNode> get(String path) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Stream<TreeNode> stream() {
+        return Stream.of(this);
+    }
+
+    @Override
+    public TreeNode merge(TreeNode otherNode) {
+        return otherNode;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) return false;
+        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass()))
+            return false;
         ValueNode valueNode = (ValueNode) o;
         return Objects.equals(value, valueNode.value);
     }

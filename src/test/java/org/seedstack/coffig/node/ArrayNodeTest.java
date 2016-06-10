@@ -5,28 +5,30 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.TreeNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ArrayNodeTest {
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = ConfigurationException.class)
     public void testValue() {
         new ArrayNode("plop").value();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testChildNode() {
-        new ArrayNode("plop").value("plop");
+    @Test
+    public void testAccessWithName() {
+        new ArrayNode("plop").item("0");
     }
 
     @Test
     public void testChildNodes() {
-        TreeNode[] treeNodes = new ArrayNode("foo", "bar").values();
+        TreeNode[] treeNodes = new ArrayNode("foo", "bar").items();
         assertThat(treeNodes).hasSize(2);
         assertThat(treeNodes[0].value()).isEqualTo("foo");
         assertThat(treeNodes[1].value()).isEqualTo("bar");
@@ -54,9 +56,9 @@ public class ArrayNodeTest {
     public void testSearch() throws Exception {
         ArrayNode arrayNode = new ArrayNode("foo", "bar");
 
-        Assertions.assertThat(arrayNode.get("0")).isNotNull();
-        Assertions.assertThat(arrayNode.get("0").get().value()).isEqualTo("foo");
-        Assertions.assertThat(arrayNode.get("1").get().value()).isEqualTo("bar");
+        Assertions.assertThat(arrayNode.get("[0]")).isPresent();
+        Assertions.assertThat(arrayNode.get("[0]").get().value()).isEqualTo("foo");
+        Assertions.assertThat(arrayNode.get("[1]").get().value()).isEqualTo("bar");
     }
 
     @Test

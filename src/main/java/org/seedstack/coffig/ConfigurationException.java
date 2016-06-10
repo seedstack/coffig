@@ -7,17 +7,7 @@
  */
 package org.seedstack.coffig;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 public class ConfigurationException extends RuntimeException {
-
-    public static final BiFunction<Class<?>,Class<?>, String> INCORRECT_MERGE =
-            (c1, c2) -> String.format("Attempt to merge a %s with a %s", c1.getCanonicalName(), c2.getCanonicalName());
-
-    public static final Function<Object, String> ILLEGAL_MUTATION =
-            (c) -> "Try to update an immutable TreeNode: " + c.getClass();
-
     public ConfigurationException(String message) {
         super(message);
     }

@@ -5,9 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
 
 import org.junit.Test;
+import org.seedstack.coffig.TreeNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,19 +66,19 @@ public class MutableTreeNodeTest {
 
     @Test
     public void testNode() {
-        assertThat(root.value("id").value()).isEqualTo("foo");
-        assertThat(root.value("name").value()).isEqualTo("The Foo app");
+        assertThat(root.item("id").value()).isEqualTo("foo");
+        assertThat(root.item("name").value()).isEqualTo("The Foo app");
 
-        assertThat(root.value("users").values()).hasSize(2);
-        assertThat(root.value("users").values()[0].value()).isEqualTo("u123456");
-        assertThat(root.value("users").values()[1].value()).isEqualTo("u456789");
+        assertThat(root.item("users").items()).hasSize(2);
+        assertThat(root.item("users").item("0").value()).isEqualTo("u123456");
+        assertThat(root.item("users").item("1").value()).isEqualTo("u456789");
 
-        TreeNode dataSource1 = root.value("datasources").values()[0];
-        assertThat(dataSource1.value("name").value()).isEqualTo("ds1");
-        assertThat(dataSource1.value("url").value()).isEqualTo("jdbc:hsqldb:hsql://localhost:9001/ds1");
+        TreeNode dataSource1 = root.item("datasources").item("0");
+        assertThat(dataSource1.item("name").value()).isEqualTo("ds1");
+        assertThat(dataSource1.item("url").value()).isEqualTo("jdbc:hsqldb:hsql://localhost:9001/ds1");
 
-        assertThat(root.value("server").value("host").value()).isEqualTo("localhost");
-        assertThat(root.value("server").value("port").value()).isEqualTo("80");
+        assertThat(root.item("server").item("host").value()).isEqualTo("localhost");
+        assertThat(root.item("server").item("port").value()).isEqualTo("80");
     }
 
     @Test
@@ -87,19 +88,18 @@ public class MutableTreeNodeTest {
 
     @Test
     public void testSearch() throws Exception {
-        assertThat(mergedRoot.get("users.0").get().value()).isEqualTo("u123456");
-        assertThat(mergedRoot.get("server.scheme.0").get().value()).isEqualTo("http");
+        assertThat(mergedRoot.get("users[0]").get().value()).isEqualTo("u123456");
+        assertThat(mergedRoot.get("server.scheme[0]").get().value()).isEqualTo("http");
     }
 
     @Test
     public void testSearchMissingProps() throws Exception {
-        assertThat(mergedRoot.get("server.scheme.0.foo.bar").isPresent()).isFalse();
-        assertThat(mergedRoot.get("server.scheme.44").isPresent()).isFalse();
+        assertThat(mergedRoot.get("server.scheme[0]foo.bar").isPresent()).isFalse();
+        assertThat(mergedRoot.get("server.scheme[44]").isPresent()).isFalse();
     }
 
     @Test
     public void testToString() throws Exception {
-        System.out.println(root.toString());
         assertThat(root.toString()).isEqualTo(
                 "server:\n" +
                         "  port: 80\n" +

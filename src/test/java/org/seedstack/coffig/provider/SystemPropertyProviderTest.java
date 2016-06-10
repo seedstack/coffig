@@ -13,7 +13,7 @@ import mockit.integration.junit4.JMockit;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.seedstack.coffig.MapNode;
+import org.seedstack.coffig.node.MapNode;
 
 import java.util.Properties;
 

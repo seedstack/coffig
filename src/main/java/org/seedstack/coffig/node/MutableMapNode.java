@@ -5,7 +5,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
+
+import org.seedstack.coffig.MutableNodeAttributes;
+import org.seedstack.coffig.MutableTreeNode;
+import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.TreeNode;
 
 import java.util.Map;
 
@@ -14,40 +19,45 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
     }
 
     public MutableMapNode(NamedNode... childNodes) {
-        super.childNodes.putAll(Freezer.unfreeze(childNodes));
+        super.children.putAll(Freezer.unfreeze(childNodes));
     }
 
     public MutableMapNode(Map<String, TreeNode> newChildNodes) {
-        super.childNodes.putAll(Freezer.unfreeze(newChildNodes));
+        super.children.putAll(Freezer.unfreeze(newChildNodes));
+    }
+
+    @Override
+    public MutableNodeAttributes attributes() {
+        return (MutableNodeAttributes) super.attributes();
     }
 
     public TreeNode put(String key, TreeNode value) {
-        return childNodes.put(key, value.unfreeze());
+        return children.put(key, value.unfreeze());
     }
 
     public void putAll(Map<String, TreeNode> m) {
-        childNodes.putAll(Freezer.unfreeze(m));
+        children.putAll(Freezer.unfreeze(m));
     }
 
     public TreeNode remove(TreeNode treeNode) {
-        return childNodes.remove(treeNode);
+        return children.remove(treeNode);
     }
 
     public void clear() {
-        childNodes.clear();
+        children.clear();
     }
 
     @Override
     public MutableTreeNode set(String name, TreeNode value) {
         Prefix prefix = new Prefix(name);
         TreeNode treeNode = value.unfreeze();
-        if (prefix.tail.isPresent()) {
+        if (prefix.hasTail()) {
             MutableTreeNode nexNode = getOrCreateNode(prefix);
-            MutableTreeNode finalNode = nexNode.set(prefix.tail.get(), treeNode);
-            childNodes.put(prefix.head, nexNode);
+            MutableTreeNode finalNode = nexNode.set(prefix.getTail(), treeNode);
+            children.put(prefix.getHead(), nexNode);
             return finalNode;
         } else {
-            childNodes.put(prefix.head, treeNode);
+            children.put(prefix.getHead(), treeNode);
             return (MutableTreeNode) treeNode;
         }
     }
@@ -55,33 +65,33 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
     @Override
     public MutableTreeNode remove(String name) {
         Prefix prefix = new Prefix(name);
-        if (prefix.tail.isPresent()) {
-            if (childNodes.containsKey(prefix.head)) {
-                TreeNode treeNode = childNodes.get(prefix.head);
+        if (prefix.hasTail()) {
+            if (children.containsKey(prefix.getHead())) {
+                TreeNode treeNode = children.get(prefix.getHead());
                 MutableTreeNode mutableTreeNode = (MutableTreeNode) treeNode;
                 try {
-                    MutableTreeNode removedNode = mutableTreeNode.remove(prefix.tail.get());
+                    MutableTreeNode removedNode = mutableTreeNode.remove(prefix.getTail());
                     removeEmptyIntermediateNode(prefix, mutableTreeNode);
                     return removedNode;
                 } catch (PropertyNotFoundException e) {
-                    throw new PropertyNotFoundException(e, prefix);
+                    throw new PropertyNotFoundException(e, prefix.getHead());
                 }
             } else {
-                throw new PropertyNotFoundException("[" + name + "]");
+                throw new PropertyNotFoundException(name);
             }
         } else {
-            return (MutableTreeNode) childNodes.remove(prefix.head);
+            return (MutableTreeNode) children.remove(prefix.getHead());
         }
     }
 
     @Override
     public boolean isEmpty() {
-        return childNodes.isEmpty();
+        return children.isEmpty();
     }
 
     @Override
     public TreeNode freeze() {
-        return new MapNode(childNodes);
+        return new MapNode(children);
     }
 
     @Override
@@ -91,18 +101,18 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
 
     private MutableTreeNode getOrCreateNode(Prefix prefix) {
         MutableTreeNode mutableTreeNode;
-        if (childNodes.containsKey(prefix.head)) {
-            TreeNode treeNode = childNodes.get(prefix.head);
+        if (children.containsKey(prefix.getHead())) {
+            TreeNode treeNode = children.get(prefix.getHead());
             mutableTreeNode = (MutableTreeNode) treeNode;
         } else {
-            mutableTreeNode = MutableTreeNodeFactory.createFromPrefix(prefix.tail.get());
+            mutableTreeNode = MutableTreeNodeFactory.createFromPrefix(prefix.getTail());
         }
         return mutableTreeNode;
     }
 
     private void removeEmptyIntermediateNode(Prefix prefix, MutableTreeNode mutableTreeNode) {
         if (mutableTreeNode.isEmpty()) {
-            childNodes.remove(prefix.head);
+            children.remove(prefix.getHead());
         }
     }
 }

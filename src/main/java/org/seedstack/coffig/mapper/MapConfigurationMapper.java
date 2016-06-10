@@ -7,10 +7,10 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.MapNode;
-import org.seedstack.coffig.MutableMapNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.ValueNode;
+import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.ParameterizedType;
@@ -37,6 +37,7 @@ class MapConfigurationMapper implements ConfigurationMapper {
         return false;
     }
 
+    @Override
     public Object map(TreeNode treeNode, Type type) {
         Type keyType = ((ParameterizedType) type).getActualTypeArguments()[0];
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
@@ -44,7 +45,7 @@ class MapConfigurationMapper implements ConfigurationMapper {
         return ((MapNode) treeNode).keys().stream()
                 .collect(toMap(
                         key -> mapperFactory.map(new ValueNode(key), keyType),
-                        key -> mapperFactory.map(treeNode.value(key), valueType)
+                        key -> mapperFactory.map(treeNode.item(key), valueType)
                 ));
     }
 

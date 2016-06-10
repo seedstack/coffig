@@ -7,16 +7,9 @@
  */
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.MutableTreeNode;
 
-import java.lang.reflect.Type;
-
-public interface ConfigurationMapper {
-
-    boolean canHandle(Type type);
-
-    Object map(TreeNode treeNode, Type type);
-
-    TreeNode unmap(Object object, Type type);
-
+@FunctionalInterface
+public interface ConfigurationProcessor {
+    void process(MutableTreeNode configuration);
 }

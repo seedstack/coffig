@@ -9,8 +9,8 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.MapNode;
-import org.seedstack.coffig.MutableMapNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.TreeNode;
 
 import java.lang.reflect.Constructor;

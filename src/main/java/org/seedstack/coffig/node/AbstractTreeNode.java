@@ -5,18 +5,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.spi;
+package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.NodeAttributes;
 import org.seedstack.coffig.TreeNode;
 
-import java.lang.reflect.Type;
+abstract class AbstractTreeNode implements TreeNode {
+    private final NodeAttributesImpl attributes = new NodeAttributesImpl();
 
-public interface ConfigurationMapper {
-
-    boolean canHandle(Type type);
-
-    Object map(TreeNode treeNode, Type type);
-
-    TreeNode unmap(Object object, Type type);
-
+    @Override
+    public NodeAttributes attributes() {
+        return attributes;
+    }
 }

@@ -5,7 +5,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
+
+import org.seedstack.coffig.MutableNodeAttributes;
+import org.seedstack.coffig.MutableTreeNode;
+import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.TreeNode;
 
 import java.util.List;
 
@@ -23,6 +28,11 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
 
     public MutableArrayNode(List<TreeNode> childNodes) {
         super.childNodes.addAll(Freezer.unfreeze(childNodes));
+    }
+
+    @Override
+    public MutableNodeAttributes attributes() {
+        return (MutableNodeAttributes) super.attributes();
     }
 
     public void add(TreeNode treeNode) {
@@ -50,17 +60,17 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
         Prefix prefix = new Prefix(name);
         TreeNode treeNode = value.unfreeze();
         TreeNode newTreeNode;
-        if (prefix.tail.isPresent()) {
+        if (prefix.hasTail()) {
             newTreeNode = getOrCreateTreeNode(prefix);
-            ((MutableTreeNode) newTreeNode).set(prefix.tail.get(), treeNode);
+            ((MutableTreeNode) newTreeNode).set(prefix.getTail(), treeNode);
         } else {
             newTreeNode = treeNode;
         }
 
-        if (prefix.index == childNodes.size()) {
+        if (prefix.getIndex() == childNodes.size()) {
             childNodes.add(newTreeNode);
         } else {
-            childNodes.set(prefix.index, newTreeNode);
+            childNodes.set(prefix.getIndex(), newTreeNode);
         }
         return this;
     }
@@ -68,23 +78,23 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
     @Override
     public MutableTreeNode remove(String name) {
         Prefix prefix = new Prefix(name);
-        if (prefix.tail.isPresent()) {
+        if (prefix.hasTail()) {
             if (isIndexPresent(prefix)) {
-                MutableTreeNode treeNode = (MutableTreeNode) childNodes.get(prefix.index);
+                MutableTreeNode treeNode = (MutableTreeNode) childNodes.get(prefix.getIndex());
                 try {
-                    MutableTreeNode removedNode = treeNode.remove(prefix.tail.get());
+                    MutableTreeNode removedNode = treeNode.remove(prefix.getTail());
                     if (treeNode.isEmpty()) {
-                        childNodes.remove(prefix.index);
+                        childNodes.remove(prefix.getIndex());
                     }
                     return removedNode;
                 } catch (PropertyNotFoundException e) {
-                    throw new PropertyNotFoundException(e, prefix);
+                    throw new PropertyNotFoundException(e, prefix.getHead());
                 }
             } else {
-                throw new PropertyNotFoundException("[" + name + "]");
+                throw new PropertyNotFoundException(name);
             }
         } else {
-            return (MutableTreeNode) childNodes.remove(prefix.index);
+            return (MutableTreeNode) childNodes.remove(prefix.getIndex());
         }
     }
 
@@ -106,14 +116,14 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
     private TreeNode getOrCreateTreeNode(Prefix prefix) {
         TreeNode treeNode;
         if (!isIndexPresent(prefix)) {
-            treeNode = MutableTreeNodeFactory.createFromPrefix(prefix.tail.get());
+            treeNode = MutableTreeNodeFactory.createFromPrefix(prefix.getTail());
         } else {
-            treeNode = childNodes.get(prefix.index);
+            treeNode = childNodes.get(prefix.getIndex());
         }
         return treeNode;
     }
 
     private boolean isIndexPresent(Prefix prefix) {
-        return childNodes.size() > prefix.index;
+        return childNodes.size() > prefix.getIndex();
     }
 }

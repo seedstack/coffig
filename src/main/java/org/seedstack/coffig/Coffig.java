@@ -8,6 +8,9 @@
 package org.seedstack.coffig;
 
 import org.seedstack.coffig.mapper.MapperFactory;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.concurrent.ForkJoinPool;
 
 public class Coffig {
     private final List<ConfigurationProvider> providers = new CopyOnWriteArrayList<>();
+    private final List<ConfigurationProcessor> processors = new CopyOnWriteArrayList<>();
     private final MapperFactory mapperFactory = new MapperFactory();
     private volatile MapNode configurationTree = new MapNode();
     private volatile boolean dirty = false;
@@ -34,16 +38,33 @@ public class Coffig {
         }
     }
 
+    public void addProcessor(ConfigurationProcessor configurationProcessor) {
+        try {
+            processors.add(configurationProcessor);
+        } finally {
+            dirty = true;
+        }
+    }
+
     public void compute() {
         try {
             if (providers.size() > 0) {
                 ForkJoinPool forkJoinPool = new ForkJoinPool();
                 try {
-                    configurationTree = forkJoinPool.submit(() -> providers.parallelStream()
+                    // Build mutable merged configuration from providers
+                    MutableMapNode localConfigurationTree = (MutableMapNode) forkJoinPool.submit(() -> providers.parallelStream()
                             .map(ConfigurationProvider::provide)
                             .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                             .orElse(new MapNode())
-                    ).get();
+                    ).get().unfreeze();
+
+                    // Apply configuration processors
+                    for (ConfigurationProcessor processor : processors) {
+                        processor.process(localConfigurationTree);
+                    }
+
+                    // Freeze and store the processed configuration
+                    configurationTree = (MapNode) localConfigurationTree.freeze();
                 } catch (InterruptedException | ExecutionException e) {
                     throw new ConfigurationException(e);
                 } finally {
@@ -55,11 +76,12 @@ public class Coffig {
         }
     }
 
+    public TreeNode dump() {
+        return configurationTree;
+    }
+
     public Coffig fork() {
         Coffig fork = new Coffig();
-        for (ConfigurationProvider provider : providers) {
-
-        }
         for (ConfigurationProvider provider : providers) {
             fork.addProvider(provider.fork());
         }
@@ -87,10 +109,6 @@ public class Coffig {
 
     public <T> T get(String prefix, Class<T> configurationClass) {
         return getOptional(prefix, configurationClass).orElseGet(() -> instantiateDefault(configurationClass));
-    }
-
-    public TreeNode dump() {
-        return configurationTree;
     }
 
     private <T> T instantiateDefault(Class<T> configurationClass) {

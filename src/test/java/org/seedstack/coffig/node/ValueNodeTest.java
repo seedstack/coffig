@@ -5,9 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
 
 import org.junit.Test;
+import org.seedstack.coffig.TreeNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,14 +27,14 @@ public class ValueNodeTest {
         assertThat(val1.value()).isEqualTo("val1");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testChildNode() {
-        val1.value(null);
+        assertThat(val1.item("dummy")).isEqualTo(new ValueNode("val1"));
     }
 
     @Test
     public void testValues() {
-        assertThat(val1.values()).containsExactly(new ValueNode("val1"));
+        assertThat(val1.items()).containsExactly(new ValueNode("val1"));
     }
 
     @Test

@@ -5,10 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.TreeNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,24 +21,24 @@ public class MapNodeTest {
     public void testChildNode() {
         MapNode mapNode1 = new MapNode(new NamedNode("id", "foo"));
 
-        assertThat(mapNode1.value("id")).isNotNull();
-        assertThat(mapNode1.value("id")).isInstanceOf(ValueNode.class);
+        assertThat(mapNode1.item("id")).isNotNull();
+        assertThat(mapNode1.item("id")).isInstanceOf(ValueNode.class);
 
         try {
-            mapNode1.value("name");
+            mapNode1.item("name");
             Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
-            assertThat(e).hasMessage("Property \"name\" was not found");
+            assertThat(e).hasMessage("Property not found: name");
             assertThat(e.getPropertyName()).isEqualTo("name");
         }
     }
 
     @Test
     public void testValues() {
-        assertThat(new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2")).values()).containsOnly(new ValueNode("val1"), new ValueNode("val2"));
+        assertThat(new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2")).items()).containsOnly(new ValueNode("val1"), new ValueNode("val2"));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = ConfigurationException.class)
     public void testValue() {
         new MapNode().value();
     }
@@ -47,10 +50,10 @@ public class MapNodeTest {
 
         TreeNode mapNode3 = mapNode1.merge(mapNode2);
         assertThat(mapNode3).isNotNull();
-        assertThat(mapNode3.value("id")).isSameAs(mapNode1.value("id"));
-        assertThat(mapNode3.value("id").value()).isEqualTo("foo");
-        assertThat(mapNode3.value("name").value()).isEqualTo("foo app");
-        assertThat(mapNode3.value("description").value()).isEqualTo("The app description");
+        assertThat(mapNode3.item("id")).isSameAs(mapNode1.item("id"));
+        assertThat(mapNode3.item("id").value()).isEqualTo("foo");
+        assertThat(mapNode3.item("name").value()).isEqualTo("foo app");
+        assertThat(mapNode3.item("description").value()).isEqualTo("The app description");
     }
 
     @Test
@@ -63,8 +66,8 @@ public class MapNodeTest {
         assertThat(newMapNode).isNotSameAs(mapNode2);
 
         // test that we avoid to create unnecessary objects
-        assertThat(newMapNode.value("id")).isSameAs(mapNode1.value("id"));
-        assertThat(newMapNode.value("name")).isSameAs(mapNode2.value("name"));
+        assertThat(newMapNode.item("id")).isSameAs(mapNode1.item("id"));
+        assertThat(newMapNode.item("name")).isSameAs(mapNode2.item("name"));
     }
 
     @Test
@@ -76,7 +79,7 @@ public class MapNodeTest {
             mapNode1.merge(mapNode2);
             Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
         } catch (ConfigurationException e) {
-            assertThat(e).hasMessage(ConfigurationException.INCORRECT_MERGE.apply(ValueNode.class, MapNode.class));
+            assertThat(e).hasMessage(String.format("Illegal attempt to merge %s with %s", ValueNode.class.getCanonicalName(), MapNode.class.getCanonicalName()));
         }
     }
 

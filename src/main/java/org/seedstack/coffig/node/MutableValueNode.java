@@ -5,7 +5,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
+
+import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.MutableNodeAttributes;
+import org.seedstack.coffig.MutableTreeNode;
+import org.seedstack.coffig.TreeNode;
 
 public class MutableValueNode extends ValueNode implements MutableTreeNode {
     public MutableValueNode(String value) {
@@ -16,18 +21,23 @@ public class MutableValueNode extends ValueNode implements MutableTreeNode {
         super(null);
     }
 
-    public void setValue(String value) {
+    @Override
+    public MutableNodeAttributes attributes() {
+        return (MutableNodeAttributes) super.attributes();
+    }
+
+    public void value(String value) {
         this.value = value;
     }
 
     @Override
     public MutableTreeNode set(String prefix, TreeNode value) {
-        throw new UnsupportedOperationException();
+        throw new ConfigurationException("Illegal attempt to set inner path " + prefix);
     }
 
     @Override
     public MutableTreeNode remove(String prefix) {
-        throw new UnsupportedOperationException();
+        throw new ConfigurationException("Illegal attempt to remove inner path " + prefix);
     }
 
     @Override

@@ -9,14 +9,16 @@ package org.seedstack.coffig;
 
 public interface MutableTreeNode extends TreeNode {
 
-    default MutableTreeNode move(String source, String destination) {
-        this.set(destination, this.remove(source));
-        return this;
-    }
+    MutableNodeAttributes attributes();
 
     MutableTreeNode set(String prefix, TreeNode value);
 
     MutableTreeNode remove(String prefix);
+
+    default MutableTreeNode move(String source, String destination) {
+        this.set(destination, this.remove(source));
+        return this;
+    }
 
     boolean isEmpty();
 }

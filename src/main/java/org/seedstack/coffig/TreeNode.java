@@ -7,21 +7,33 @@
  */
 package org.seedstack.coffig;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface TreeNode {
 
-    Optional<TreeNode> get(String prefix);
-
-    TreeNode value(String name);
+    NodeAttributes attributes();
 
     String value();
 
-    TreeNode[] values();
+    TreeNode item(String key);
+
+    TreeNode[] items();
+
+    Optional<TreeNode> get(String path);
+
+    Stream<TreeNode> stream();
 
     TreeNode merge(TreeNode otherNode);
 
     TreeNode freeze();
 
     MutableTreeNode unfreeze();
+
+    default String indent(String s) {
+        return Arrays.stream(s.split("\n")).map(line -> "  " + line).collect(Collectors.joining("\n"));
+    }
+
 }

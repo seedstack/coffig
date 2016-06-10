@@ -5,13 +5,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
 
 import org.junit.Test;
+import org.seedstack.coffig.MutableTreeNode;
+import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.MutableArrayNode;
+import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.node.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
-import static sun.security.krb5.internal.crypto.Nonce.value;
 
 public class MutableNodesTest {
 
@@ -24,9 +31,9 @@ public class MutableNodesTest {
         arrayNode.add(0, new ValueNode("foo"));
         mapNode.put("custom", arrayNode);
 
-        assertThat(mapNode.get("custom.0").get().value()).isEqualTo("foo");
-        assertThat(mapNode.get("custom.1").get().value()).isEqualTo("foo");
-        assertThat(mapNode.get("custom.2").get().value()).isEqualTo("bar");
+        assertThat(mapNode.get("custom[0]").get().value()).isEqualTo("foo");
+        assertThat(mapNode.get("custom[1]").get().value()).isEqualTo("foo");
+        assertThat(mapNode.get("custom[2]").get().value()).isEqualTo("bar");
     }
 
     // Set
@@ -51,13 +58,13 @@ public class MutableNodesTest {
     @Test
     public void testSetArray() {
         MutableMapNode mapNode = new MutableMapNode();
-        mapNode.set("custom.foo.0", new ValueNode("val1"));
-        assertThat(mapNode.get("custom.foo.0").get().value()).isEqualTo("val1");
-        mapNode.set("custom.foo.1", new ValueNode("val2"));
-        assertThat(mapNode.get("custom.foo.1").get().value()).isEqualTo("val2");
-        mapNode.set("custom.foo.1", new ValueNode("val3"));
-        assertThat(mapNode.get("custom.foo.0").get().value()).isEqualTo("val1");
-        assertThat(mapNode.get("custom.foo.1").get().value()).isEqualTo("val3");
+        mapNode.set("custom.foo[0]", new ValueNode("val1"));
+        assertThat(mapNode.get("custom.foo[0]").get().value()).isEqualTo("val1");
+        mapNode.set("custom.foo[1]", new ValueNode("val2"));
+        assertThat(mapNode.get("custom.foo[1]").get().value()).isEqualTo("val2");
+        mapNode.set("custom.foo[1]", new ValueNode("val3"));
+        assertThat(mapNode.get("custom.foo[0]").get().value()).isEqualTo("val1");
+        assertThat(mapNode.get("custom.foo[1]").get().value()).isEqualTo("val3");
     }
 
     @Test
@@ -117,8 +124,8 @@ public class MutableNodesTest {
         MutableTreeNode remove = mapNode.remove("custom.0.0");
 
         assertRemovedKey(mapNode, "custom.0.0", "custom.0.[0]");
-        assertRemovedKey(mapNode, "custom.1", "custom.[1]");
-        assertThat(mapNode.get("custom.0").get().value()).isEqualTo("val2");
+        assertRemovedKey(mapNode, "custom.0", "custom.[0]");
+        assertThat(mapNode.get("custom.1").get().value()).isEqualTo("val2");
         assertThat(remove.value()).isEqualTo("val1");
     }
 
@@ -131,7 +138,7 @@ public class MutableNodesTest {
             mapNode.remove("custom.0.0.fake.test");
             failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
-            assertThat(e).hasMessage("Property \"custom.0.0.[fake.test]\" was not found");
+            assertThat(e).hasMessage("Sub-property not found: custom.0.0.<fake.test>");
         }
     }
 

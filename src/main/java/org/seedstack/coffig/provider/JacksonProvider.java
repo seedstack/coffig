@@ -10,12 +10,12 @@ package org.seedstack.coffig.provider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.seedstack.coffig.ArrayNode;
+import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.MapNode;
-import org.seedstack.coffig.NamedNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.ValueNode;
+import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.io.IOException;
