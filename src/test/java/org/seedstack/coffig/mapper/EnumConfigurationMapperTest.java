@@ -8,8 +8,8 @@
 package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
-import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.fixture.SomeEnum;
+import org.seedstack.coffig.node.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

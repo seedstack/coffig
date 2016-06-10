@@ -28,14 +28,14 @@ public class SystemPropertyProviderTest {
             @Mock
             Properties getProperties() {
                 Properties properties = new Properties();
-                properties.put("PROFILE", "DEV");
+                properties.put("test.property", "testValue");
                 return properties;
             }
         };
 
         MapNode conf = underTest.provide();
 
-        Assertions.assertThat(conf.get("system.PROFILE").get().value()).isEqualTo("DEV");
+        Assertions.assertThat(conf.get("sys.test\\.property").get().value()).isEqualTo("testValue");
     }
 
     @Test

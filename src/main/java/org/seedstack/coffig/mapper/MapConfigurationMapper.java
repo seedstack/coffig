@@ -7,9 +7,9 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 

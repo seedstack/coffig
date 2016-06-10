@@ -85,30 +85,36 @@ public class Coffig {
         for (ConfigurationProvider provider : providers) {
             fork.addProvider(provider.fork());
         }
+        for (ConfigurationProcessor processor : processors) {
+            fork.addProcessor(processor.fork());
+        }
         return fork;
     }
 
-    public <T> Optional<T> getOptional(String prefix, Class<T> configurationClass) {
+    public <T> T get(Class<T> configurationClass, String... path) {
+        return getOptional(configurationClass, path).orElseGet(() -> instantiateDefault(configurationClass));
+    }
+
+    public <T> T getMandatory(Class<T> configurationClass, String... path) {
+        return getOptional(configurationClass, path).orElseThrow(() -> new ConfigurationException("Path not found: " + (path == null ? "null" : String.join(".", (CharSequence[]) path))));
+    }
+
+    public <T> Optional<T> getOptional(Class<T> configurationClass, String... path) {
+        Optional<TreeNode> result;
+
         computeIfNecessary();
-        Optional<TreeNode> result = configurationTree.get(prefix);
+
+        if (path == null || path.length == 0) {
+            result = Optional.of(configurationTree);
+        } else {
+            result = configurationTree.get(String.join(".", (CharSequence[]) path));
+        }
+
         if (result.isPresent()) {
             return Optional.ofNullable(doGet(result.get(), configurationClass));
         } else {
             return Optional.empty();
         }
-    }
-
-    public <T> Optional<T> getOptional(Class<T> configurationClass) {
-        computeIfNecessary();
-        return Optional.ofNullable(doGet(configurationTree, configurationClass));
-    }
-
-    public <T> T get(Class<T> configurationClass) {
-        return getOptional(configurationClass).orElseGet(() -> instantiateDefault(configurationClass));
-    }
-
-    public <T> T get(String prefix, Class<T> configurationClass) {
-        return getOptional(prefix, configurationClass).orElseGet(() -> instantiateDefault(configurationClass));
     }
 
     private <T> T instantiateDefault(Class<T> configurationClass) {

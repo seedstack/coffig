@@ -11,11 +11,6 @@ import org.junit.Test;
 import org.seedstack.coffig.MutableTreeNode;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableArrayNode;
-import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.node.NamedNode;
-import org.seedstack.coffig.node.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
@@ -92,12 +87,12 @@ public class MutableNodesTest {
 
         final MutableTreeNode remove = mapNode.remove("custom.key");
 
-        assertRemovedKey(mapNode, "custom", "[custom]");
+        assertRemovedKey(mapNode, "custom");
         assertThat(remove.value()).isEqualTo("val");
     }
 
-    private void assertRemovedKey(TreeNode treeNode, String prefix, String expected) {
-        assertThat(treeNode.get(prefix).isPresent()).isFalse();
+    private void assertRemovedKey(TreeNode treeNode, String path) {
+        assertThat(treeNode.get(path).isPresent()).isFalse();
     }
 
     @Test
@@ -108,8 +103,8 @@ public class MutableNodesTest {
 
         MutableTreeNode remove = mapNode.remove("custom.property.key1");
 
-        assertRemovedKey(mapNode, "custom.property.key1", "custom.[property.key1]");
-        assertRemovedKey(mapNode, "custom.property", "custom.[property]");
+        assertRemovedKey(mapNode, "custom.property.key1");
+        assertRemovedKey(mapNode, "custom.property");
         assertThat(mapNode.get("custom.key2").get().value()).isEqualTo("val2");
         assertThat(remove.value()).isEqualTo("val1");
 
@@ -123,8 +118,8 @@ public class MutableNodesTest {
 
         MutableTreeNode remove = mapNode.remove("custom.0.0");
 
-        assertRemovedKey(mapNode, "custom.0.0", "custom.0.[0]");
-        assertRemovedKey(mapNode, "custom.0", "custom.[0]");
+        assertRemovedKey(mapNode, "custom.0.0");
+        assertRemovedKey(mapNode, "custom.0");
         assertThat(mapNode.get("custom.1").get().value()).isEqualTo("val2");
         assertThat(remove.value()).isEqualTo("val1");
     }

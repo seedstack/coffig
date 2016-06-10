@@ -74,35 +74,35 @@ public class CoffigTest {
     }
 
     @Test
-    public void testGetWithPrefix() throws Exception {
+    public void testGetWithPath() throws Exception {
         Coffig coffig = new Coffig();
         coffig.addProvider(() -> new MapNode(
                 new NamedNode("app",
                         new MapNode(new NamedNode("server",
                                 new MapNode(new NamedNode("port", "8080")))))));
         coffig.compute();
-        Integer appServerPort = coffig.get("app.server.port", Integer.class);
+        Integer appServerPort = coffig.get(Integer.class, "app.server.port");
         Assertions.assertThat(appServerPort).isEqualTo(8080);
     }
 
     @Test
-    public void testGetOptionalWithPrefixAndDefaultValue() throws Exception {
+    public void testGetOptionalWithPathAndDefaultValue() throws Exception {
         Coffig coffig = new Coffig();
         coffig.addProvider(appConfigProvider);
 
         coffig.compute();
 
-        Assertions.assertThat(coffig.getOptional("unknown", String.class).orElse("defaultValue")).isEqualTo("defaultValue");
+        Assertions.assertThat(coffig.getOptional(String.class, "unknown").orElse("defaultValue")).isEqualTo("defaultValue");
     }
 
     @Test
-    public void testGetWithPrefixAndDefaultValue() throws Exception {
+    public void testGetWithPathAndDefaultValue() throws Exception {
         Coffig coffig = new Coffig();
         coffig.addProvider(appConfigProvider);
 
         coffig.compute();
 
-        Assertions.assertThat(coffig.get("unknown", String.class)).isEqualTo("");
+        Assertions.assertThat(coffig.get(String.class, "unknown")).isEqualTo("");
     }
 
     @Test

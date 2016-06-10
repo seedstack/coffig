@@ -9,9 +9,9 @@ package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.mapper.MapperFactory;
+import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.util.ArrayList;

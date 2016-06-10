@@ -8,13 +8,13 @@
 package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
-import org.seedstack.coffig.node.ArrayNode;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.fixture.AccessorFixture;
 import org.seedstack.coffig.fixture.MultiTypesFixture;
 import org.seedstack.coffig.fixture.PrefixFixture;
+import org.seedstack.coffig.node.ArrayNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.NamedNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;

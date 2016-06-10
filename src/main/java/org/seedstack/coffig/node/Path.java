@@ -11,36 +11,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A prefix is a configuration tree path. It splits the path in two part.
- * The head and the tail, for instance the following prefix:
+ * A path is a configuration tree path. It splits the path in two part.
+ * The head and the tail, for instance the following path:
  *
- * <h2>Prefix with tail</h2>
+ * <h2>Path with tail</h2>
  *
  * <pre>
  *     app.server.port
  * </pre>
  * will give:
  * <pre>
- *     prefix.head == "app"
- *     prefix.tail == Optional.of("server.port")
- *     prefix.index == -1
- *     prefix.isArray == false
+ *     path.head == "app"
+ *     path.tail == Optional.of("server.port")
+ *     path.index == -1
+ *     path.isArray == false
  * </pre>
  *
- * <h2>Prefix without tail</h2>
+ * <h2>Path without tail</h2>
  *
  * <pre>
  *     app
  * </pre>
  * will give:
  * <pre>
- *     prefix.head == "app"
- *     prefix.tail == Optional.empty()
- *     prefix.index == -1
- *     prefix.isArray == false
+ *     path.head == "app"
+ *     path.tail == Optional.empty()
+ *     path.index == -1
+ *     path.isArray == false
  * </pre>
  *
- * <h2>Prefix represents an array</h2>
+ * <h2>Path represents an array</h2>
  *
  * if the head correspond to an integer the index will be initialize.
  * <pre>
@@ -48,13 +48,14 @@ import java.util.regex.Pattern;
  * </pre>
  * will give:
  * <pre>
- *     prefix.head == "0"
- *     prefix.tail == Optional.of("custom.key")
- *     prefix.index == 0
- *     prefix.isArray == true
+ *     path.head == "0"
+ *     path.tail == Optional.of("custom.key")
+ *     path.index == 0
+ *     path.isArray == true
  * </pre>
  */
-class Prefix {
+class Path {
+    private static final String PATH_REGEX = "(?<!\\\\)" + Pattern.quote(".");
     private static final Pattern SUBSCRIPTION_PATTERN = Pattern.compile("(.*)\\[(\\d+)\\]");
 
     private final String head;
@@ -62,27 +63,27 @@ class Prefix {
     private final int index;
 
     /**
-     * Constructs a prefix based on a string.
+     * Constructs a path based on a string.
      *
-     * @param prefix the configuration path
+     * @param path the configuration path
      */
-    Prefix(String prefix) {
-        String[] splitPrefix = prefix.split("\\.", 2);
-        Matcher matcher = SUBSCRIPTION_PATTERN.matcher(splitPrefix[0]);
+    Path(String path) {
+        String[] splitPath = path.split(PATH_REGEX, 2);
+        Matcher matcher = SUBSCRIPTION_PATTERN.matcher(splitPath[0]);
 
         if (matcher.matches()) {
             if (matcher.group(1).isEmpty()) {
                 head = matcher.group(2);
-                tail = splitPrefix.length > 1 ? splitPrefix[1] : null;
+                tail = splitPath.length > 1 ? splitPath[1] : null;
                 index = Integer.parseInt(head);
             } else {
-                head = matcher.group(1);
-                tail = String.format("[%s]", matcher.group(2)) + (splitPrefix.length > 1 ? "." + splitPrefix[1] : "");
+                head = matcher.group(1).replaceAll("\\\\", "");
+                tail = String.format("[%s]", matcher.group(2)) + (splitPath.length > 1 ? "." + splitPath[1] : "");
                 index = -1;
             }
         } else {
-            head = splitPrefix[0];
-            tail = splitPrefix.length > 1 ? splitPrefix[1] : null;
+            head = splitPath[0].replaceAll("\\\\", "");
+            tail = splitPath.length > 1 ? splitPath[1] : null;
             index = -1;
         }
     }
@@ -93,7 +94,7 @@ class Prefix {
 
     String getHead() {
         if (!hasHead()) {
-            throw new IllegalStateException("Prefix does not have a head");
+            throw new IllegalStateException("Path does not have a head");
         }
         return head;
     }
@@ -104,7 +105,7 @@ class Prefix {
 
     String getTail() {
         if (!hasTail()) {
-            throw new IllegalStateException("Prefix does not have a tail");
+            throw new IllegalStateException("Path does not have a tail");
         }
         return tail;
     }
@@ -115,7 +116,7 @@ class Prefix {
 
     int getIndex() {
         if (!isArray()) {
-            throw new IllegalStateException("Prefix does not denote an array");
+            throw new IllegalStateException("Path does not denote an array");
         }
         return index;
     }

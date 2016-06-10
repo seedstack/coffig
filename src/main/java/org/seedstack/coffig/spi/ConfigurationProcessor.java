@@ -12,4 +12,8 @@ import org.seedstack.coffig.MutableTreeNode;
 @FunctionalInterface
 public interface ConfigurationProcessor {
     void process(MutableTreeNode configuration);
+
+    default ConfigurationProcessor fork() {
+        return this;
+    }
 }

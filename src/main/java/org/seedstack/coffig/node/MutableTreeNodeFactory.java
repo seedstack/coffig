@@ -11,9 +11,9 @@ import org.seedstack.coffig.MutableTreeNode;
 
 class MutableTreeNodeFactory {
 
-    static MutableTreeNode createFromPrefix(String prefix) {
+    static MutableTreeNode createFromPath(String path) {
         MutableTreeNode treeNode;
-        if (new Prefix(prefix).isArray()) {
+        if (new Path(path).isArray()) {
             treeNode = new MutableArrayNode();
         } else {
             treeNode = new MutableMapNode();

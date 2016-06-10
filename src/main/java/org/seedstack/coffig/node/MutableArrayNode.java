@@ -57,44 +57,44 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
 
     @Override
     public MutableTreeNode set(String name, TreeNode value) {
-        Prefix prefix = new Prefix(name);
+        Path path = new Path(name);
         TreeNode treeNode = value.unfreeze();
         TreeNode newTreeNode;
-        if (prefix.hasTail()) {
-            newTreeNode = getOrCreateTreeNode(prefix);
-            ((MutableTreeNode) newTreeNode).set(prefix.getTail(), treeNode);
+        if (path.hasTail()) {
+            newTreeNode = getOrCreateTreeNode(path);
+            ((MutableTreeNode) newTreeNode).set(path.getTail(), treeNode);
         } else {
             newTreeNode = treeNode;
         }
 
-        if (prefix.getIndex() == childNodes.size()) {
+        if (path.getIndex() == childNodes.size()) {
             childNodes.add(newTreeNode);
         } else {
-            childNodes.set(prefix.getIndex(), newTreeNode);
+            childNodes.set(path.getIndex(), newTreeNode);
         }
         return this;
     }
 
     @Override
     public MutableTreeNode remove(String name) {
-        Prefix prefix = new Prefix(name);
-        if (prefix.hasTail()) {
-            if (isIndexPresent(prefix)) {
-                MutableTreeNode treeNode = (MutableTreeNode) childNodes.get(prefix.getIndex());
+        Path path = new Path(name);
+        if (path.hasTail()) {
+            if (isIndexPresent(path)) {
+                MutableTreeNode treeNode = (MutableTreeNode) childNodes.get(path.getIndex());
                 try {
-                    MutableTreeNode removedNode = treeNode.remove(prefix.getTail());
+                    MutableTreeNode removedNode = treeNode.remove(path.getTail());
                     if (treeNode.isEmpty()) {
-                        childNodes.remove(prefix.getIndex());
+                        childNodes.remove(path.getIndex());
                     }
                     return removedNode;
                 } catch (PropertyNotFoundException e) {
-                    throw new PropertyNotFoundException(e, prefix.getHead());
+                    throw new PropertyNotFoundException(e, path.getHead());
                 }
             } else {
                 throw new PropertyNotFoundException(name);
             }
         } else {
-            return (MutableTreeNode) childNodes.remove(prefix.getIndex());
+            return (MutableTreeNode) childNodes.remove(path.getIndex());
         }
     }
 
@@ -113,17 +113,17 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
         return this;
     }
 
-    private TreeNode getOrCreateTreeNode(Prefix prefix) {
+    private TreeNode getOrCreateTreeNode(Path path) {
         TreeNode treeNode;
-        if (!isIndexPresent(prefix)) {
-            treeNode = MutableTreeNodeFactory.createFromPrefix(prefix.getTail());
+        if (!isIndexPresent(path)) {
+            treeNode = MutableTreeNodeFactory.createFromPath(path.getTail());
         } else {
-            treeNode = childNodes.get(prefix.getIndex());
+            treeNode = childNodes.get(path.getIndex());
         }
         return treeNode;
     }
 
-    private boolean isIndexPresent(Prefix prefix) {
-        return childNodes.size() > prefix.getIndex();
+    private boolean isIndexPresent(Path path) {
+        return childNodes.size() > path.getIndex();
     }
 }

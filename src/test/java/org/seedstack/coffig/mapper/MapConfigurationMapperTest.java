@@ -8,9 +8,9 @@
 package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
+import org.seedstack.coffig.fixture.SomeEnum;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
-import org.seedstack.coffig.fixture.SomeEnum;
 
 import java.util.HashMap;
 import java.util.Map;

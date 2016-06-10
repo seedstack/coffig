@@ -31,13 +31,13 @@ public class MutableValueNode extends ValueNode implements MutableTreeNode {
     }
 
     @Override
-    public MutableTreeNode set(String prefix, TreeNode value) {
-        throw new ConfigurationException("Illegal attempt to set inner path " + prefix);
+    public MutableTreeNode set(String path, TreeNode value) {
+        throw new ConfigurationException("Illegal attempt to set inner path " + path);
     }
 
     @Override
-    public MutableTreeNode remove(String prefix) {
-        throw new ConfigurationException("Illegal attempt to remove inner path " + prefix);
+    public MutableTreeNode remove(String path) {
+        throw new ConfigurationException("Illegal attempt to remove inner path " + path);
     }
 
     @Override

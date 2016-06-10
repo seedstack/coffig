@@ -8,8 +8,8 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.node.MutableValueNode;
 import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.MutableValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.Type;

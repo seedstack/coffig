@@ -11,12 +11,12 @@ public interface MutableTreeNode extends TreeNode {
 
     MutableNodeAttributes attributes();
 
-    MutableTreeNode set(String prefix, TreeNode value);
+    MutableTreeNode set(String path, TreeNode value);
 
-    MutableTreeNode remove(String prefix);
+    MutableTreeNode remove(String path);
 
-    default MutableTreeNode move(String source, String destination) {
-        this.set(destination, this.remove(source));
+    default MutableTreeNode move(String sourcePath, String destinationPath) {
+        this.set(destinationPath, this.remove(sourcePath));
         return this;
     }
 

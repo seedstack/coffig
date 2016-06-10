@@ -59,13 +59,13 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public Optional<TreeNode> get(String path) {
-        Prefix prefix = new Prefix(path);
+        Path _path = new Path(path);
         Optional<TreeNode> treeNode = Optional.empty();
 
-        if (prefix.hasHead()) {
-            treeNode = Optional.ofNullable(children.get(prefix.getHead()));
-            if (treeNode.isPresent() && prefix.hasTail()) {
-                return treeNode.get().get(prefix.getTail());
+        if (_path.hasHead()) {
+            treeNode = Optional.ofNullable(children.get(_path.getHead()));
+            if (treeNode.isPresent() && _path.hasTail()) {
+                return treeNode.get().get(_path.getTail());
             }
         }
 

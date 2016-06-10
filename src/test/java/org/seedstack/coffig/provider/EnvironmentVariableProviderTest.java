@@ -27,7 +27,7 @@ public class EnvironmentVariableProviderTest {
     public void testProvide() {
         new MockUp<System>() {
             @Mock
-            java.util.Map<String,String> getenv() {
+            java.util.Map<String, String> getenv() {
                 Map<String, String> env = new HashMap<>();
                 env.put("PROFILE", "DEV");
                 return env;
@@ -43,7 +43,7 @@ public class EnvironmentVariableProviderTest {
     public void testProvideEmptyMap() {
         new MockUp<System>() {
             @Mock
-            java.util.Map<String,String> getenv() {
+            java.util.Map<String, String> getenv() {
                 return new HashMap<>();
             }
         };

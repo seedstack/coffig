@@ -49,38 +49,38 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
 
     @Override
     public MutableTreeNode set(String name, TreeNode value) {
-        Prefix prefix = new Prefix(name);
+        Path path = new Path(name);
         TreeNode treeNode = value.unfreeze();
-        if (prefix.hasTail()) {
-            MutableTreeNode nexNode = getOrCreateNode(prefix);
-            MutableTreeNode finalNode = nexNode.set(prefix.getTail(), treeNode);
-            children.put(prefix.getHead(), nexNode);
+        if (path.hasTail()) {
+            MutableTreeNode nexNode = getOrCreateNode(path);
+            MutableTreeNode finalNode = nexNode.set(path.getTail(), treeNode);
+            children.put(path.getHead(), nexNode);
             return finalNode;
         } else {
-            children.put(prefix.getHead(), treeNode);
+            children.put(path.getHead(), treeNode);
             return (MutableTreeNode) treeNode;
         }
     }
 
     @Override
     public MutableTreeNode remove(String name) {
-        Prefix prefix = new Prefix(name);
-        if (prefix.hasTail()) {
-            if (children.containsKey(prefix.getHead())) {
-                TreeNode treeNode = children.get(prefix.getHead());
+        Path path = new Path(name);
+        if (path.hasTail()) {
+            if (children.containsKey(path.getHead())) {
+                TreeNode treeNode = children.get(path.getHead());
                 MutableTreeNode mutableTreeNode = (MutableTreeNode) treeNode;
                 try {
-                    MutableTreeNode removedNode = mutableTreeNode.remove(prefix.getTail());
-                    removeEmptyIntermediateNode(prefix, mutableTreeNode);
+                    MutableTreeNode removedNode = mutableTreeNode.remove(path.getTail());
+                    removeEmptyIntermediateNode(path, mutableTreeNode);
                     return removedNode;
                 } catch (PropertyNotFoundException e) {
-                    throw new PropertyNotFoundException(e, prefix.getHead());
+                    throw new PropertyNotFoundException(e, path.getHead());
                 }
             } else {
                 throw new PropertyNotFoundException(name);
             }
         } else {
-            return (MutableTreeNode) children.remove(prefix.getHead());
+            return (MutableTreeNode) children.remove(path.getHead());
         }
     }
 
@@ -99,20 +99,20 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
         return this;
     }
 
-    private MutableTreeNode getOrCreateNode(Prefix prefix) {
+    private MutableTreeNode getOrCreateNode(Path path) {
         MutableTreeNode mutableTreeNode;
-        if (children.containsKey(prefix.getHead())) {
-            TreeNode treeNode = children.get(prefix.getHead());
+        if (children.containsKey(path.getHead())) {
+            TreeNode treeNode = children.get(path.getHead());
             mutableTreeNode = (MutableTreeNode) treeNode;
         } else {
-            mutableTreeNode = MutableTreeNodeFactory.createFromPrefix(prefix.getTail());
+            mutableTreeNode = MutableTreeNodeFactory.createFromPath(path.getTail());
         }
         return mutableTreeNode;
     }
 
-    private void removeEmptyIntermediateNode(Prefix prefix, MutableTreeNode mutableTreeNode) {
+    private void removeEmptyIntermediateNode(Path path, MutableTreeNode mutableTreeNode) {
         if (mutableTreeNode.isEmpty()) {
-            children.remove(prefix.getHead());
+            children.remove(path.getHead());
         }
     }
 }

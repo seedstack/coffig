@@ -59,16 +59,16 @@ public class ArrayNode extends AbstractTreeNode {
 
     @Override
     public Optional<TreeNode> get(String path) {
-        Prefix prefix = new Prefix(path);
+        Path _path = new Path(path);
         Optional<TreeNode> treeNode = Optional.empty();
 
-        if (prefix.isArray()) {
-            int index = prefix.getIndex();
+        if (_path.isArray()) {
+            int index = _path.getIndex();
             if (index >= 0 && index < childNodes.size()) {
                 treeNode = Optional.ofNullable(childNodes.get(index));
             }
-            if (treeNode.isPresent() && prefix.hasTail()) {
-                return treeNode.get().get(prefix.getTail());
+            if (treeNode.isPresent() && _path.hasTail()) {
+                return treeNode.get().get(_path.getTail());
             }
         }
 
