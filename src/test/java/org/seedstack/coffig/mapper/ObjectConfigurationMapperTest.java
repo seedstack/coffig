@@ -10,6 +10,7 @@ package org.seedstack.coffig.mapper;
 import org.junit.Test;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.fixture.AccessorFixture;
+import org.seedstack.coffig.fixture.EmptyPrefixFixture;
 import org.seedstack.coffig.fixture.MultiTypesFixture;
 import org.seedstack.coffig.fixture.PrefixFixture;
 import org.seedstack.coffig.node.ArrayNode;
@@ -30,6 +31,9 @@ public class ObjectConfigurationMapperTest {
                                     new NamedNode("accessorFixture", accessorFixture)))
                     )))
             )
+    );
+    private final MapNode emptyPrefixFixture = new MapNode(
+            new NamedNode("aString", "theValue")
     );
     private final MapNode multiTypesFixture = new MapNode(
             new NamedNode("aBoolean", "true"),
@@ -66,6 +70,7 @@ public class ObjectConfigurationMapperTest {
     private ObjectConfigurationMapper<AccessorFixture> accessorMapper = new ObjectConfigurationMapper<>(mapperFactory, AccessorFixture.class);
     private ObjectConfigurationMapper<MultiTypesFixture> multiTypesMapper = new ObjectConfigurationMapper<>(mapperFactory, MultiTypesFixture.class);
     private ObjectConfigurationMapper<PrefixFixture> prefixMapper = new ObjectConfigurationMapper<>(mapperFactory, PrefixFixture.class);
+    private ObjectConfigurationMapper<EmptyPrefixFixture> emptyPrefixMapper = new ObjectConfigurationMapper<>(mapperFactory, EmptyPrefixFixture.class);
 
     @Test
     public void testField() {
@@ -235,5 +240,14 @@ public class ObjectConfigurationMapperTest {
         assertThat(treeNode.get("foo.bar.aString").get().value()).isEqualTo("theValue");
         assertThat(treeNode.get("foo.bar.baz.accessorFixture.field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("foo.bar.baz.accessorFixture.field2").get().value()).isEqualTo("field22");
+    }
+
+    @Test
+    public void testEmptyPrefixedObject() throws Exception {
+        EmptyPrefixFixture emptyPrefixFixture = emptyPrefixMapper.map(this.emptyPrefixFixture);
+        assertThat(emptyPrefixFixture.aString).isEqualTo("theValue");
+
+        TreeNode treeNode = new ObjectConfigurationMapper<>(mapperFactory, emptyPrefixFixture).unmap();
+        assertThat(treeNode.get("aString").get().value()).isEqualTo("theValue");
     }
 }

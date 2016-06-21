@@ -65,7 +65,7 @@ class ObjectConfigurationMapper<T> {
 
     T map(MapNode rootNode) {
         Optional<TreeNode> startNode;
-        if (prefix != null) {
+        if (prefix != null && !prefix.isEmpty()) {
             startNode = rootNode.get(prefix);
         } else {
             startNode = Optional.of(rootNode);
@@ -94,7 +94,7 @@ class ObjectConfigurationMapper<T> {
     TreeNode unmap() {
         MutableMapNode rootNode = new MutableMapNode();
         MutableMapNode startNode;
-        if (prefix != null) {
+        if (prefix != null && !prefix.isEmpty()) {
             startNode = new MutableMapNode();
             rootNode.set(prefix, startNode);
         } else {
