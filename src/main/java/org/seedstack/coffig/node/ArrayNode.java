@@ -8,7 +8,6 @@
 package org.seedstack.coffig.node;
 
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.MutableTreeNode;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
@@ -86,12 +85,12 @@ public class ArrayNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode freeze() {
+    public ArrayNode freeze() {
         return this;
     }
 
     @Override
-    public MutableTreeNode unfreeze() {
+    public MutableArrayNode unfreeze() {
         return new MutableArrayNode(childNodes);
     }
 

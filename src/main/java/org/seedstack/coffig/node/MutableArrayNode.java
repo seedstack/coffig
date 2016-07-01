@@ -104,12 +104,12 @@ public class MutableArrayNode extends ArrayNode implements MutableTreeNode {
     }
 
     @Override
-    public TreeNode freeze() {
+    public ArrayNode freeze() {
         return new ArrayNode(childNodes);
     }
 
     @Override
-    public MutableTreeNode unfreeze() {
+    public MutableArrayNode unfreeze() {
         return this;
     }
 

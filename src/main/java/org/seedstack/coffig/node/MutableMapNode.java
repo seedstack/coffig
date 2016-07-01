@@ -90,12 +90,12 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
     }
 
     @Override
-    public TreeNode freeze() {
+    public MapNode freeze() {
         return new MapNode(children);
     }
 
     @Override
-    public MutableTreeNode unfreeze() {
+    public MutableMapNode unfreeze() {
         return this;
     }
 

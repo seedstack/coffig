@@ -8,7 +8,6 @@
 package org.seedstack.coffig.node;
 
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.MutableTreeNode;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
@@ -96,12 +95,12 @@ public class MapNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode freeze() {
+    public MapNode freeze() {
         return this;
     }
 
     @Override
-    public MutableTreeNode unfreeze() {
+    public MutableMapNode unfreeze() {
         return new MutableMapNode(children);
     }
 

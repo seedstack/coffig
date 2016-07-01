@@ -46,12 +46,12 @@ public class MutableValueNode extends ValueNode implements MutableTreeNode {
     }
 
     @Override
-    public TreeNode freeze() {
+    public ValueNode freeze() {
         return new ValueNode(value);
     }
 
     @Override
-    public MutableTreeNode unfreeze() {
+    public MutableValueNode unfreeze() {
         return this;
     }
 }

@@ -9,6 +9,7 @@ package org.seedstack.coffig.processor;
 
 import org.seedstack.coffig.MutableTreeNode;
 import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.MutableValueNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 public class MacroProcessor implements ConfigurationProcessor {
     @Override
-    public void process(MutableTreeNode configuration) {
+    public void process(MutableMapNode configuration) {
         configuration.stream()
                 .filter(node -> node instanceof MutableValueNode)
                 .forEach((valueNode) -> ((MutableValueNode) valueNode).value(evaluate(configuration, valueNode.value())));
