@@ -28,15 +28,17 @@ import java.util.Map;
 public class JacksonProvider implements ConfigurationProvider {
     private final List<URL> sources = new ArrayList<>();
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    private volatile boolean dirty = false;
+    private volatile boolean dirty = true;
 
     @Override
     public MapNode provide() {
-        return sources
+        MapNode mapNode = sources
                 .stream()
                 .map(this::buildTreeFromSource)
                 .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                 .orElse(new MapNode());
+        dirty = false;
+        return mapNode;
     }
 
     @Override
@@ -49,6 +51,16 @@ public class JacksonProvider implements ConfigurationProvider {
     @Override
     public boolean isDirty() {
         return dirty;
+    }
+
+    public JacksonProvider addSource(URL url) {
+        if (url == null) {
+            throw new NullPointerException("Source URL cannot be null");
+        }
+
+        this.sources.add(url);
+        dirty = true;
+        return this;
     }
 
     private MapNode buildTreeFromSource(URL url) {
@@ -79,19 +91,6 @@ public class JacksonProvider implements ConfigurationProvider {
             nodeBuilder = new ObjectNodeBuilder();
         }
         return nodeBuilder.build(jsonNode);
-    }
-
-    public JacksonProvider addSource(URL url) {
-        if (url == null) {
-            throw new NullPointerException("Source URL cannot be null");
-        }
-
-        try {
-            this.sources.add(url);
-            return this;
-        } finally {
-            dirty = true;
-        }
     }
 
     private interface NodeBuilder {

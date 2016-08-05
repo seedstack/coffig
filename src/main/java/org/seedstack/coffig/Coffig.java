@@ -9,27 +9,36 @@ package org.seedstack.coffig;
 
 import org.seedstack.coffig.mapper.MapperFactory;
 import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Coffig {
     private final MapperFactory mapperFactory = new MapperFactory();
-    private final ConfigurationProvider configurationProvider;
+    private final Map<Integer, ConfigurationProvider> providers = new ConcurrentHashMap<>();
     private volatile boolean dirty = true;
     private volatile MapNode configurationTree = new MapNode();
     private volatile ConfigurationProcessor configurationProcessor;
 
-    public Coffig(ConfigurationProvider configurationProvider) {
-        if (configurationProvider == null) {
-            throw new IllegalArgumentException("Configuration provider cannot be null");
-        }
-        this.configurationProvider = configurationProvider;
+    public void registerProvider(ConfigurationProvider configurationProvider) {
+        registerProvider(configurationProvider, 0);
     }
 
-    public void setConfigurationProcessor(ConfigurationProcessor configurationProcessor) {
+    public void registerProvider(ConfigurationProvider configurationProvider, int priority) {
+        if (providers.putIfAbsent(priority, configurationProvider) != null) {
+            throw new IllegalStateException("A provider is already register for priority " + priority);
+        } else {
+            dirty = true;
+        }
+    }
+
+    public void registerProcessor(ConfigurationProcessor configurationProcessor) {
         this.configurationProcessor = configurationProcessor;
+        dirty = true;
     }
 
     public void invalidate() {
@@ -45,9 +54,12 @@ public class Coffig {
     }
 
     public Coffig fork() {
-        Coffig fork = new Coffig(configurationProvider.fork());
+        Coffig fork = new Coffig();
+        for (Map.Entry<Integer, ConfigurationProvider> providerEntry : providers.entrySet()) {
+            fork.registerProvider(providerEntry.getValue().fork(), providerEntry.getKey());
+        }
         if (configurationProcessor != null) {
-            fork.setConfigurationProcessor(configurationProcessor.fork());
+            fork.registerProcessor(configurationProcessor.fork());
         }
         return fork;
     }
@@ -60,36 +72,42 @@ public class Coffig {
         return getOptional(configurationClass, path).orElseThrow(() -> new ConfigurationException("Path not found: " + (path == null ? "null" : String.join(".", (CharSequence[]) path))));
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Optional<T> getOptional(Class<T> configurationClass, String... path) {
-        Optional<TreeNode> result;
-
         computeIfNecessary();
 
         if (path == null || path.length == 0) {
-            result = Optional.of(configurationTree);
+            return Optional.of(configurationTree).map(treeNode -> (T) mapperFactory.map(treeNode, configurationClass));
         } else {
-            result = configurationTree.get(String.join(".", (CharSequence[]) path));
-        }
-
-        if (result.isPresent()) {
-            return Optional.ofNullable(doGet(result.get(), configurationClass));
-        } else {
-            return Optional.empty();
+            return configurationTree
+                    .get(String.join(".", (CharSequence[]) path))
+                    .map(treeNode -> (T) mapperFactory.map(treeNode, configurationClass));
         }
     }
 
     private void computeIfNecessary() {
-        try {
-            if (dirty || configurationProvider.isDirty()) {
-                configurationTree = configurationProvider.provide();
-                if (configurationProcessor != null) {
-                    configurationProcessor.process(configurationTree.unfreeze());
-                }
-                configurationTree = configurationTree.freeze();
+        if (isDirty()) {
+            MapNode pendingConfigurationTree = providers.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .map(Map.Entry::getValue)
+                    .map(ConfigurationProvider::provide)
+                    .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
+                    .orElse(new MapNode());
+
+            if (configurationProcessor != null) {
+                pendingConfigurationTree = pendingConfigurationTree.unfreeze();
+                configurationProcessor.process((MutableMapNode) pendingConfigurationTree);
             }
-        } finally {
-            dirty = false;
+
+            synchronized (this) {
+                configurationTree = pendingConfigurationTree.freeze();
+                dirty = false;
+            }
         }
+    }
+
+    private synchronized boolean isDirty() {
+        return dirty || providers.values().stream().filter(ConfigurationProvider::isDirty).count() > 0;
     }
 
     private <T> T instantiateDefault(Class<T> configurationClass) {

@@ -29,11 +29,13 @@ public class CompositeProvider implements ConfigurationProvider {
     public MapNode provide() {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
         try {
-            return forkJoinPool.submit(() -> providers.parallelStream()
+            MapNode mapNode = forkJoinPool.submit(() -> providers.parallelStream()
                     .map(ConfigurationProvider::provide)
                     .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                     .orElse(new MapNode())
             ).get();
+            dirty = false;
+            return mapNode;
         } catch (InterruptedException | ExecutionException e) {
             throw new ConfigurationException(e);
         } finally {
@@ -54,42 +56,27 @@ public class CompositeProvider implements ConfigurationProvider {
     }
 
     public void clear() {
-        try {
-            providers.clear();
-        } finally {
-            dirty = true;
-        }
+        providers.clear();
+        dirty = true;
     }
 
     public void add(int index, ConfigurationProvider configurationProvider) {
-        try {
-            providers.add(index, configurationProvider);
-        } finally {
-            dirty = true;
-        }
+        providers.add(index, configurationProvider);
+        dirty = true;
     }
 
     public void add(ConfigurationProvider configurationProvider) {
-        try {
-            providers.add(configurationProvider);
-        } finally {
-            dirty = true;
-        }
+        providers.add(configurationProvider);
+        dirty = true;
     }
 
     public void remove(int index) {
-        try {
-            providers.remove(index);
-        } finally {
-            dirty = true;
-        }
+        providers.remove(index);
+        dirty = true;
     }
 
     public void remove(ConfigurationProvider configurationProvider) {
-        try {
-            providers.remove(configurationProvider);
-        } finally {
-            dirty = true;
-        }
+        providers.remove(configurationProvider);
+        dirty = true;
     }
 }

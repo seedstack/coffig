@@ -22,45 +22,32 @@ public class InMemoryProvider implements ConfigurationProvider {
 
     @Override
     public MapNode provide() {
-        try {
-            MutableMapNode tree = new MutableMapNode();
-            data.entrySet().stream().forEach(entry -> tree.set(entry.getKey(), new ValueNode(entry.getValue())));
-            return tree;
-        } finally {
-            dirty = false;
-        }
+        MutableMapNode tree = new MutableMapNode();
+        data.entrySet().forEach(entry -> tree.set(entry.getKey(), new ValueNode(entry.getValue())));
+        dirty = false;
+        return tree;
     }
 
     public String put(String key, String value) {
-        try {
-            return data.put(key, value);
-        } finally {
-            dirty = true;
-        }
+        String result = data.put(key, value);
+        dirty = true;
+        return result;
     }
 
     public String remove(String key) {
-        try {
-            return data.remove(key);
-        } finally {
-            dirty = true;
-        }
+        String result = data.remove(key);
+        dirty = true;
+        return result;
     }
 
     public void putAll(Map<? extends String, ? extends String> m) {
-        try {
-            data.putAll(m);
-        } finally {
-            dirty = true;
-        }
+        data.putAll(m);
+        dirty = true;
     }
 
     public void clear() {
-        try {
-            data.clear();
-        } finally {
-            dirty = true;
-        }
+        data.clear();
+        dirty = true;
     }
 
     @Override
