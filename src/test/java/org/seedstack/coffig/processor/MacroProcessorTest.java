@@ -61,6 +61,9 @@ public class MacroProcessorTest {
                         ),
                         new MapNode(
                                 new NamedNode("message", "Hello ${names[${erroneousIndex}]:names[${key2.subIndex}]}!")
+                        ),
+                        new MapNode(
+                                new NamedNode("message", "Hello ${names[0]} and ${names[1]}!")
                         )
                 ))
         );
@@ -77,5 +80,6 @@ public class MacroProcessorTest {
         assertThat(config.get("test[5].message").get().value()).isEqualTo("Hello Toto!");
         assertThat(config.get("test[6].message").get().value()).isEqualTo("Hello Redouane!");
         assertThat(config.get("test[7].message").get().value()).isEqualTo("Hello Pierre!");
+        assertThat(config.get("test[8].message").get().value()).isEqualTo("Hello Adrien and Kavi!");
     }
 }

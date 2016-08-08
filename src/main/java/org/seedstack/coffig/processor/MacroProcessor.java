@@ -14,38 +14,74 @@ import org.seedstack.coffig.node.MutableValueNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MacroProcessor implements ConfigurationProcessor {
     @Override
     public void process(MutableMapNode configuration) {
         configuration.stream()
                 .filter(node -> node instanceof MutableValueNode)
-                .forEach((valueNode) -> ((MutableValueNode) valueNode).value(evaluate(configuration, valueNode.value())));
+                .forEach((valueNode) -> ((MutableValueNode) valueNode).value(processValue(configuration, valueNode.value())));
     }
 
-    private String evaluate(MutableTreeNode tree, String value) {
-        int startIndex = value.indexOf("${");
-        int endIndex = value.lastIndexOf("}");
+    private String processValue(MutableTreeNode tree, String value) {
+        StringBuilder result = new StringBuilder();
+        int currentPos = 0;
+        int[] indices;
 
-        if (startIndex != -1 && endIndex != -1) {
-            String result = "";
+        // Process all macros
+        while ((indices = findMatchingCurlyBraces(value, currentPos)) != null) {
+            // Add the beginning of the string (before the macro)
+            result.append(value.substring(currentPos, indices[0]));
 
-            for (String part : value.substring(startIndex + 2, endIndex).split(":")) {
+            // Process the macro
+            for (String part : value.substring(indices[0] + 2, indices[1]).split(":")) {
                 if (part.startsWith("'") && part.endsWith("'")) {
-                    result = part.substring(1, part.length() - 1);
+                    result.append(part.substring(1, part.length() - 1));
                     break;
                 } else {
-                    Optional<TreeNode> node = tree.get(evaluate(tree, part));
+                    Optional<TreeNode> node = tree.get(processValue(tree, part));
                     if (node.isPresent()) {
-                        result = node.get().value();
+                        result.append(node.get().value());
                         break;
                     }
                 }
             }
-
-            return value.substring(0, startIndex) + result + value.substring(endIndex + 1);
-        } else {
-            return value;
+            currentPos = indices[1] + 1;
         }
+
+        // Add the remaining of the string (after all macros)
+        result.append(value.substring(currentPos));
+
+        return result.toString();
+    }
+
+    private int[] findMatchingCurlyBraces(String value, int startIndex) {
+        Pattern pattern = Pattern.compile("\\$\\{|\\}");
+        int level = 0, startPos = -1;
+        Matcher matcher = pattern.matcher(value);
+        while (matcher.find()) {
+            if (matcher.start() < startIndex) {
+                continue;
+            }
+            switch (matcher.group()) {
+                case "${":
+                    if (level == 0) {
+                        startPos = matcher.start();
+                    }
+                    level++;
+                    break;
+                case "}":
+                    level--;
+                    if (level == 0) {
+                        return new int[]{startPos, matcher.start()};
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected string in macro " + matcher.group());
+            }
+        }
+        return null;
     }
 }
