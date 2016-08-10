@@ -13,6 +13,7 @@ import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -76,12 +77,45 @@ public class Coffig {
     public <T> Optional<T> getOptional(Class<T> configurationClass, String... path) {
         computeIfNecessary();
 
-        if (path == null || path.length == 0) {
-            return Optional.of(configurationTree).map(treeNode -> (T) mapperFactory.map(treeNode, configurationClass));
+        String joinedPath;
+        if (path != null && path.length > 0) {
+            joinedPath = String.join(".", (CharSequence[]) path);
+        } else {
+            joinedPath = resolvePath(configurationClass);
+        }
+
+        if (joinedPath == null || joinedPath.isEmpty()) {
+            return Optional.of(configurationTree)
+                    .map(treeNode -> (T) mapperFactory.map(treeNode, configurationClass));
         } else {
             return configurationTree
-                    .get(String.join(".", (CharSequence[]) path))
+                    .get(joinedPath)
                     .map(treeNode -> (T) mapperFactory.map(treeNode, configurationClass));
+        }
+    }
+
+    public static String resolvePath(AnnotatedElement annotatedElement) {
+        Config annotation;
+        StringBuilder path = new StringBuilder();
+        if (annotatedElement instanceof Class) {
+            Class<?> currentClass = (Class) annotatedElement;
+            while (currentClass != null && (annotation = currentClass.getAnnotation(Config.class)) != null) {
+                if (!annotation.value().isEmpty()) {
+                    if (path.length() > 0) {
+                        path.insert(0, ".");
+                    }
+                    path.insert(0, annotation.value());
+                }
+                currentClass = currentClass.getDeclaringClass();
+            }
+            return path.toString();
+        } else {
+            annotation = annotatedElement.getAnnotation(Config.class);
+            if (annotation != null) {
+                return annotation.value();
+            } else {
+                return null;
+            }
         }
     }
 
@@ -116,10 +150,5 @@ public class Coffig {
         } catch (Exception e) {
             throw new ConfigurationException("Cannot instantiate default value", e);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T doGet(TreeNode treeNode, Class<T> configurationClass) {
-        return (T) mapperFactory.map(treeNode, configurationClass);
     }
 }

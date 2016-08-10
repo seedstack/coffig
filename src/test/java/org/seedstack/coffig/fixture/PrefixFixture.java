@@ -14,11 +14,17 @@ public class PrefixFixture {
     public String aString;
     @Config("baz")
     public AccessorFixture accessorFixture;
+    public InnerClass innerClass;
 
     public PrefixFixture() {
     }
 
     public PrefixFixture(String aString) {
         this.aString = aString;
+    }
+
+    @Config("qux")
+    public static class InnerClass {
+        public String innerField;
     }
 }

@@ -47,5 +47,6 @@ public class ProgrammaticProviderTest {
 
         assertThat(mapNode).isNotNull();
         assertThat(mapNode.get("foo.bar.aString").get().value()).isEqualTo("provided");
+        assertThat(mapNode.get("overridden.aString").get().value()).isEqualTo("provided");
     }
 }

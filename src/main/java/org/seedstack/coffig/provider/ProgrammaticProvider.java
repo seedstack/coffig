@@ -7,21 +7,23 @@
  */
 package org.seedstack.coffig.provider;
 
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.mapper.MapperFactory;
 import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class ProgrammaticProvider implements ConfigurationProvider {
     private final MapperFactory mapperFactory;
-    private final List<Supplier<Object>> suppliers = new ArrayList<>();
+    private final Map<Supplier<Object>, String> suppliers = new HashMap<>();
     private volatile boolean dirty = true;
 
     public ProgrammaticProvider(MapperFactory mapperFactory) {
@@ -31,9 +33,8 @@ public class ProgrammaticProvider implements ConfigurationProvider {
     @Override
     public MapNode provide() {
         MapNode mapNode = (MapNode) new MapNode()
-                .merge(suppliers.stream()
-                        .map(Supplier::get)
-                        .map(o -> mapperFactory.unmap(o, o.getClass()))
+                .merge(suppliers.keySet().stream()
+                        .map(this::retrieveTreeNode)
                         .reduce(TreeNode::merge)
                         .orElse(new MapNode())
                 );
@@ -44,7 +45,7 @@ public class ProgrammaticProvider implements ConfigurationProvider {
     @Override
     public ConfigurationProvider fork() {
         ProgrammaticProvider fork = new ProgrammaticProvider(mapperFactory);
-        fork.suppliers.addAll(suppliers);
+        fork.suppliers.putAll(suppliers);
         return fork;
     }
 
@@ -56,20 +57,39 @@ public class ProgrammaticProvider implements ConfigurationProvider {
     public void addObject(Object object) {
         Arrays.stream(object.getClass().getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(Config.class))
-                .map(method -> (Supplier) () -> {
+                .forEach(method -> addSupplier(() -> {
                     method.setAccessible(true);
                     try {
                         return method.invoke(object);
                     } catch (Exception e) {
                         throw new ConfigurationException("Cannot supply configuration object from " + method.toString());
                     }
-                })
-                .forEach(suppliers::add);
-        dirty = true;
+                }, Coffig.resolvePath(method)));
     }
 
     public void addSupplier(Supplier<Object> supplier) {
-        suppliers.add(supplier);
+        suppliers.put(supplier, null);
         dirty = true;
+    }
+
+    public void addSupplier(Supplier<Object> supplier, String prefix) {
+        suppliers.put(supplier, prefix);
+        dirty = true;
+    }
+
+    private TreeNode retrieveTreeNode(Supplier<Object> supplier) {
+        Object o = supplier.get();
+        TreeNode treeNode = mapperFactory.unmap(o, o.getClass());
+        String prefix = suppliers.get(supplier);
+        if (prefix == null || prefix.isEmpty()) {
+            prefix = Coffig.resolvePath(o.getClass());
+        }
+        if (prefix != null && !prefix.isEmpty()) {
+            MutableMapNode mapNode = new MutableMapNode();
+            mapNode.set(prefix, treeNode);
+            return mapNode;
+        } else {
+            return treeNode;
+        }
     }
 }

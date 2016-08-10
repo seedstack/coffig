@@ -27,15 +27,13 @@ import static java.util.stream.Collectors.toList;
 
 class ObjectConfigurationMapper<T> {
     private final MapperFactory mapperFactory;
-    private final Class<? extends T> aClass;
-    private final String prefix;
+    private final Class<T> aClass;
     private final List<FieldInfo> fieldInfo;
     private final T holder;
 
     ObjectConfigurationMapper(MapperFactory mapperFactory, Class<T> aClass) {
         this.mapperFactory = mapperFactory;
         this.aClass = aClass;
-        this.prefix = this.aClass.isAnnotationPresent(Config.class) ? aClass.getAnnotation(Config.class).value() : null;
         this.fieldInfo = getFieldInfo();
         this.holder = getNewInstance();
     }
@@ -43,8 +41,7 @@ class ObjectConfigurationMapper<T> {
     @SuppressWarnings("unchecked")
     ObjectConfigurationMapper(MapperFactory mapperFactory, T object) {
         this.mapperFactory = mapperFactory;
-        this.aClass = (Class<? extends T>) object.getClass();
-        this.prefix = this.aClass.isAnnotationPresent(Config.class) ? aClass.getAnnotation(Config.class).value() : null;
+        this.aClass = (Class<T>) object.getClass();
         this.fieldInfo = getFieldInfo();
         this.holder = object;
     }
@@ -64,72 +61,56 @@ class ObjectConfigurationMapper<T> {
     }
 
     T map(MapNode rootNode) {
-        Optional<TreeNode> startNode;
-        if (prefix != null && !prefix.isEmpty()) {
-            startNode = rootNode.get(prefix);
-        } else {
-            startNode = Optional.of(rootNode);
-        }
-
-        if (startNode.isPresent()) {
-            fieldInfo.stream().forEach(fieldInfo -> {
-                String path;
-                if (fieldInfo.prefix != null) {
-                    path = String.format("%s.%s", fieldInfo.prefix, fieldInfo.name);
-                } else {
-                    path = fieldInfo.name;
-                }
-
-                Object fieldValue = mapperFactory.map(startNode.get().get(path).orElse(null), fieldInfo.type);
-                if (fieldValue != null) {
-                    Consumer<Object> fieldInitializer = fieldInfo.consumer;
-                    fieldInitializer.accept(fieldValue);
-                }
-            });
-        }
+        fieldInfo.forEach(fieldInfo -> {
+            Object fieldValue = mapperFactory.map(
+                    rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
+                    fieldInfo.type
+            );
+            if (fieldValue != null) {
+                Consumer<Object> fieldInitializer = fieldInfo.consumer;
+                fieldInitializer.accept(fieldValue);
+            }
+        });
 
         return holder;
     }
 
     TreeNode unmap() {
         MutableMapNode rootNode = new MutableMapNode();
-        MutableMapNode startNode;
-        if (prefix != null && !prefix.isEmpty()) {
-            startNode = new MutableMapNode();
-            rootNode.set(prefix, startNode);
-        } else {
-            startNode = rootNode;
-        }
-
-        fieldInfo.stream().forEach(fieldInfo -> {
+        fieldInfo.forEach(fieldInfo -> {
             TreeNode unmapped = mapperFactory.unmap(fieldInfo.supplier.get(), fieldInfo.type);
             if (unmapped != null) {
-                String path;
-                if (fieldInfo.prefix != null) {
-                    path = String.format("%s.%s", fieldInfo.prefix, fieldInfo.name);
-                } else {
-                    path = fieldInfo.name;
-                }
-                startNode.set(path, unmapped);
+                rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
             }
         });
-
         return rootNode;
     }
 
     private class FieldInfo {
-        String name;
-        String prefix;
-        Type type;
-        Consumer<Object> consumer;
-        Supplier<Object> supplier;
+        final String name;
+        final String alias;
+        final Type type;
+        final Consumer<Object> consumer;
+        final Supplier<Object> supplier;
 
         FieldInfo(Field field) {
             this.name = field.getName();
-            this.prefix = field.isAnnotationPresent(Config.class) ? field.getAnnotation(Config.class).value() : null;
+            this.alias = resolveAlias(field);
             this.type = field.getGenericType();
             this.consumer = getPropertyConsumer(field);
             this.supplier = getPropertySupplier(field);
+        }
+
+        private String resolveAlias(Field field) {
+            Config annotation = field.getAnnotation(Config.class);
+            if (annotation != null) {
+                return annotation.value();
+            }
+            annotation = field.getType().getAnnotation(Config.class);
+            if (annotation != null) {
+                return annotation.value();
+            }
+            return null;
         }
 
         private Consumer<Object> getPropertyConsumer(Field field) {

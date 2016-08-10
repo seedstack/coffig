@@ -14,4 +14,9 @@ public class ProgrammaticFixture {
     private PrefixFixture providePrefixFixture() {
         return new PrefixFixture("provided");
     }
+
+    @Config("overridden")
+    private PrefixFixture provideOverriddenPrefixFixture() {
+        return new PrefixFixture("provided");
+    }
 }

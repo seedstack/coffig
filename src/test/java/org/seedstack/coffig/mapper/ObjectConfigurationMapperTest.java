@@ -21,16 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 public class ObjectConfigurationMapperTest {
-
     private final MapNode accessorFixture = new MapNode(new NamedNode("field1", "field1"), new NamedNode("field2", "field2"));
     private final MapNode prefixFixture = new MapNode(
-            new NamedNode("foo",
-                    new MapNode(new NamedNode("bar", new MapNode(
-                            new NamedNode("aString", "theValue"),
-                            new NamedNode("baz", new MapNode(
-                                    new NamedNode("accessorFixture", accessorFixture)))
-                    )))
-            )
+            new NamedNode("aString", "theValue"),
+            new NamedNode("baz", accessorFixture),
+            new NamedNode("qux", new MapNode(new NamedNode("innerField", "innerValue")))
     );
     private final MapNode emptyPrefixFixture = new MapNode(
             new NamedNode("aString", "theValue")
@@ -237,9 +232,15 @@ public class ObjectConfigurationMapperTest {
         assertThat(prefixFixture.accessorFixture.getField2()).isEqualTo("field22");
 
         TreeNode treeNode = new ObjectConfigurationMapper<>(mapperFactory, prefixFixture).unmap();
-        assertThat(treeNode.get("foo.bar.aString").get().value()).isEqualTo("theValue");
-        assertThat(treeNode.get("foo.bar.baz.accessorFixture.field1").get().value()).isEqualTo("field1");
-        assertThat(treeNode.get("foo.bar.baz.accessorFixture.field2").get().value()).isEqualTo("field22");
+        assertThat(treeNode.get("aString").get().value()).isEqualTo("theValue");
+        assertThat(treeNode.get("baz.field1").get().value()).isEqualTo("field1");
+        assertThat(treeNode.get("baz.field2").get().value()).isEqualTo("field22");
+    }
+
+    @Test
+    public void testPrefixedInnerClass() throws Exception {
+        PrefixFixture prefixFixture = prefixMapper.map(this.prefixFixture);
+        assertThat(prefixFixture.innerClass.innerField).isEqualTo("innerValue");
     }
 
     @Test
