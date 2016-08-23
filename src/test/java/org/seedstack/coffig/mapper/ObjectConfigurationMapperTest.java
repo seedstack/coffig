@@ -13,6 +13,7 @@ import org.seedstack.coffig.fixture.AccessorFixture;
 import org.seedstack.coffig.fixture.EmptyPrefixFixture;
 import org.seedstack.coffig.fixture.MultiTypesFixture;
 import org.seedstack.coffig.fixture.PrefixFixture;
+import org.seedstack.coffig.fixture.SingleValueFixture;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
@@ -60,12 +61,22 @@ public class ObjectConfigurationMapperTest {
             new NamedNode("fixtureList", new ArrayNode(accessorFixture, accessorFixture)),
             new NamedNode("fixtureSet", new ArrayNode(accessorFixture, accessorFixture))
     );
+    private final MapNode singleValueFixture1 = new MapNode(
+            new NamedNode("innerFixture", "true")
+    );
+    private final MapNode singleValueFixture2 = new MapNode(
+            new NamedNode("innerFixture", new MapNode(
+                    new NamedNode("enabled", "true"),
+                    new NamedNode("value", "12")
+            ))
+    );
 
     private MapperFactory mapperFactory = new MapperFactory();
     private ObjectConfigurationMapper<AccessorFixture> accessorMapper = new ObjectConfigurationMapper<>(mapperFactory, AccessorFixture.class);
     private ObjectConfigurationMapper<MultiTypesFixture> multiTypesMapper = new ObjectConfigurationMapper<>(mapperFactory, MultiTypesFixture.class);
     private ObjectConfigurationMapper<PrefixFixture> prefixMapper = new ObjectConfigurationMapper<>(mapperFactory, PrefixFixture.class);
     private ObjectConfigurationMapper<EmptyPrefixFixture> emptyPrefixMapper = new ObjectConfigurationMapper<>(mapperFactory, EmptyPrefixFixture.class);
+    private ObjectConfigurationMapper<SingleValueFixture> singleValueMapper = new ObjectConfigurationMapper<>(mapperFactory, SingleValueFixture.class);
 
     @Test
     public void testField() {
@@ -250,5 +261,19 @@ public class ObjectConfigurationMapperTest {
 
         TreeNode treeNode = new ObjectConfigurationMapper<>(mapperFactory, emptyPrefixFixture).unmap();
         assertThat(treeNode.get("aString").get().value()).isEqualTo("theValue");
+    }
+
+    @Test
+    public void testSingleValueFixture1() throws Exception {
+        SingleValueFixture singleValueFixture = singleValueMapper.map(this.singleValueFixture1);
+        assertThat(singleValueFixture.getInnerFixture().isEnabled()).isTrue();
+        assertThat(singleValueFixture.getInnerFixture().getValue()).isEqualTo(5);
+    }
+
+    @Test
+    public void testSingleValueFixture2() throws Exception {
+        SingleValueFixture singleValueFixture = singleValueMapper.map(this.singleValueFixture2);
+        assertThat(singleValueFixture.getInnerFixture().isEnabled()).isTrue();
+        assertThat(singleValueFixture.getInnerFixture().getValue()).isEqualTo(12);
     }
 }

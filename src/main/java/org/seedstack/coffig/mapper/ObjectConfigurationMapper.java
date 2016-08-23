@@ -10,8 +10,10 @@ package org.seedstack.coffig.mapper;
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.SingleValue;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.node.ValueNode;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -29,12 +31,14 @@ class ObjectConfigurationMapper<T> {
     private final MapperFactory mapperFactory;
     private final Class<T> aClass;
     private final List<FieldInfo> fieldInfo;
+    private final FieldInfo valueFieldInfo;
     private final T holder;
 
     ObjectConfigurationMapper(MapperFactory mapperFactory, Class<T> aClass) {
         this.mapperFactory = mapperFactory;
         this.aClass = aClass;
         this.fieldInfo = getFieldInfo();
+        this.valueFieldInfo = getValueFieldInfo();
         this.holder = getNewInstance();
     }
 
@@ -43,7 +47,19 @@ class ObjectConfigurationMapper<T> {
         this.mapperFactory = mapperFactory;
         this.aClass = (Class<T>) object.getClass();
         this.fieldInfo = getFieldInfo();
+        this.valueFieldInfo = getValueFieldInfo();
         this.holder = object;
+    }
+
+    private FieldInfo getValueFieldInfo() {
+        FieldInfo valueFieldInfo = null;
+        for (FieldInfo fieldInfo : this.fieldInfo) {
+            if (fieldInfo.singleValue) {
+                valueFieldInfo = fieldInfo;
+                break;
+            }
+        }
+        return valueFieldInfo;
     }
 
     private T getNewInstance() {
@@ -60,17 +76,23 @@ class ObjectConfigurationMapper<T> {
         return Arrays.stream(aClass.getDeclaredFields()).map(FieldInfo::new).collect(toList());
     }
 
-    T map(MapNode rootNode) {
-        fieldInfo.forEach(fieldInfo -> {
-            Object fieldValue = mapperFactory.map(
-                    rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
-                    fieldInfo.type
-            );
+    T map(TreeNode rootNode) {
+        if (rootNode instanceof ValueNode && valueFieldInfo != null) {
+            Object fieldValue = mapperFactory.map(rootNode, valueFieldInfo.type);
             if (fieldValue != null) {
-                Consumer<Object> fieldInitializer = fieldInfo.consumer;
-                fieldInitializer.accept(fieldValue);
+                valueFieldInfo.consumer.accept(fieldValue);
             }
-        });
+        } else if (rootNode instanceof MapNode) {
+            fieldInfo.forEach(fieldInfo -> {
+                Object fieldValue = mapperFactory.map(
+                        rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
+                        fieldInfo.type
+                );
+                if (fieldValue != null) {
+                    fieldInfo.consumer.accept(fieldValue);
+                }
+            });
+        }
 
         return holder;
     }
@@ -92,6 +114,7 @@ class ObjectConfigurationMapper<T> {
         final Type type;
         final Consumer<Object> consumer;
         final Supplier<Object> supplier;
+        final boolean singleValue;
 
         FieldInfo(Field field) {
             this.name = field.getName();
@@ -99,6 +122,7 @@ class ObjectConfigurationMapper<T> {
             this.type = field.getGenericType();
             this.consumer = getPropertyConsumer(field);
             this.supplier = getPropertySupplier(field);
+            this.singleValue = field.isAnnotationPresent(SingleValue.class);
         }
 
         private String resolveAlias(Field field) {

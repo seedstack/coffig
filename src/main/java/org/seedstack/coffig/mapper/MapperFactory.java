@@ -8,10 +8,13 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -40,7 +43,7 @@ public class MapperFactory {
                 return configurationMapper.map(treeNode, type);
             }
         }
-        return new ObjectConfigurationMapper<>(this, (Class<?>) type).map((MapNode) treeNode);
+        return new ObjectConfigurationMapper<>(this, getRawClass(type)).map(treeNode);
     }
 
     public TreeNode unmap(Object object, Type type) {
@@ -54,5 +57,22 @@ public class MapperFactory {
             }
         }
         return new ObjectConfigurationMapper<>(this, object).unmap().freeze();
+    }
+
+    public static Class<?> getRawClass(Type type) {
+        if (type instanceof Class<?>) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            Type rawType = parameterizedType.getRawType();
+            return (Class<?>) rawType;
+        } else if (type instanceof GenericArrayType) {
+            Type componentType = ((GenericArrayType) type).getGenericComponentType();
+            return Array.newInstance(getRawClass(componentType), 0).getClass();
+        } else if (type instanceof TypeVariable) {
+            return Object.class;
+        } else {
+            throw new IllegalArgumentException("Unsupported type " + type.getTypeName());
+        }
     }
 }
