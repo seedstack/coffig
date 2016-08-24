@@ -20,18 +20,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Coffig {
     private final MapperFactory mapperFactory = new MapperFactory();
-    private final Map<Integer, ConfigurationProvider> providers = new ConcurrentHashMap<>();
+    private final Map<String, PrioritizedConfigurationProvider> providers = new ConcurrentHashMap<>();
     private volatile boolean dirty = true;
     private volatile MapNode configurationTree = new MapNode();
     private volatile ConfigurationProcessor configurationProcessor;
 
-    public void registerProvider(ConfigurationProvider configurationProvider) {
-        registerProvider(configurationProvider, 0);
+    public void registerProvider(String name, ConfigurationProvider configurationProvider) {
+        registerProvider(name, configurationProvider, 0);
     }
 
-    public void registerProvider(ConfigurationProvider configurationProvider, int priority) {
-        if (providers.putIfAbsent(priority, configurationProvider) != null) {
-            throw new IllegalStateException("A provider is already register for priority " + priority);
+    public void registerProvider(String name, ConfigurationProvider configurationProvider, int priority) {
+        if (providers.putIfAbsent(name, new PrioritizedConfigurationProvider(priority, configurationProvider)) != null) {
+            throw new IllegalStateException("A provider already exists with name " + name);
         } else {
             dirty = true;
         }
@@ -56,8 +56,8 @@ public class Coffig {
 
     public Coffig fork() {
         Coffig fork = new Coffig();
-        for (Map.Entry<Integer, ConfigurationProvider> providerEntry : providers.entrySet()) {
-            fork.registerProvider(providerEntry.getValue().fork(), providerEntry.getKey());
+        for (Map.Entry<String, PrioritizedConfigurationProvider> providerEntry : providers.entrySet()) {
+            fork.registerProvider(providerEntry.getKey(), providerEntry.getValue().getConfigurationProvider().fork(), providerEntry.getValue().getPriority());
         }
         if (configurationProcessor != null) {
             fork.registerProcessor(configurationProcessor.fork());
@@ -136,7 +136,7 @@ public class Coffig {
         } else if (Byte.class.equals(configurationClass)) {
             return (T) new Byte((byte) 0);
         } else if (Character.class.equals(configurationClass)) {
-            return (T) new Character(' ');
+            return (T) new Character((char) 0);
         } else {
             try {
                 return configurationClass.newInstance();
@@ -149,8 +149,9 @@ public class Coffig {
     private void computeIfNecessary() {
         if (isDirty()) {
             MapNode pendingConfigurationTree = providers.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
                     .map(Map.Entry::getValue)
+                    .sorted(PrioritizedConfigurationProvider::compareTo)
+                    .map(PrioritizedConfigurationProvider::getConfigurationProvider)
                     .map(ConfigurationProvider::provide)
                     .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                     .orElse(new MapNode());
@@ -168,6 +169,31 @@ public class Coffig {
     }
 
     private synchronized boolean isDirty() {
-        return dirty || providers.values().stream().filter(ConfigurationProvider::isDirty).count() > 0;
+        return dirty || providers.values().stream()
+                .map(PrioritizedConfigurationProvider::getConfigurationProvider)
+                .filter(ConfigurationProvider::isDirty).count() > 0;
+    }
+
+    private static class PrioritizedConfigurationProvider implements Comparable<PrioritizedConfigurationProvider> {
+        private final int priority;
+        private final ConfigurationProvider configurationProvider;
+
+        private PrioritizedConfigurationProvider(int priority, ConfigurationProvider configurationProvider) {
+            this.priority = priority;
+            this.configurationProvider = configurationProvider;
+        }
+
+        @Override
+        public int compareTo(PrioritizedConfigurationProvider o) {
+            return Integer.compare(priority, o.priority);
+        }
+
+        int getPriority() {
+            return priority;
+        }
+
+        ConfigurationProvider getConfigurationProvider() {
+            return configurationProvider;
+        }
     }
 }
