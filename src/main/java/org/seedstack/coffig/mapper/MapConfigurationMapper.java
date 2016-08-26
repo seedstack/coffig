@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
@@ -15,6 +16,7 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
@@ -42,11 +44,19 @@ class MapConfigurationMapper implements ConfigurationMapper {
         Type keyType = ((ParameterizedType) type).getActualTypeArguments()[0];
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
 
-        return ((MapNode) treeNode).keys().stream()
-                .collect(toMap(
-                        key -> mapperFactory.map(new ValueNode(key), keyType),
-                        key -> mapperFactory.map(treeNode.item(key), valueType)
-                ));
+        if (treeNode instanceof MapNode) {
+            return ((MapNode) treeNode).keys().stream()
+                    .collect(toMap(
+                            key -> mapperFactory.map(new ValueNode(key), keyType),
+                            key -> mapperFactory.map(treeNode.item(key), valueType)
+                    ));
+        } else {
+            return Arrays.stream(treeNode.items())
+                    .collect(toMap(
+                            node -> mapperFactory.map(node, keyType),
+                            node -> Coffig.instantiateDefault((Class<?>) valueType))
+                    );
+        }
     }
 
     @Override

@@ -9,10 +9,11 @@ package org.seedstack.coffig.node;
 
 import org.seedstack.coffig.MutableNodeAttributes;
 
+import java.util.HashMap;
 import java.util.Map;
 
 class NodeAttributesImpl implements MutableNodeAttributes {
-    private Map<String, String> attributes;
+    private final Map<String, String> attributes = new HashMap<>();
 
     @Override
     public String get(String name) {

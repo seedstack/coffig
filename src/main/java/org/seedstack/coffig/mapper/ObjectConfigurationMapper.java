@@ -9,8 +9,8 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.SingleValue;
+import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
@@ -78,18 +78,26 @@ class ObjectConfigurationMapper<T> {
 
     T map(TreeNode rootNode) {
         if (rootNode instanceof ValueNode && valueFieldInfo != null) {
-            Object fieldValue = mapperFactory.map(rootNode, valueFieldInfo.type);
-            if (fieldValue != null) {
-                valueFieldInfo.consumer.accept(fieldValue);
+            try {
+                Object fieldValue = mapperFactory.map(rootNode, valueFieldInfo.type);
+                if (fieldValue != null) {
+                    valueFieldInfo.consumer.accept(fieldValue);
+                }
+            } catch (Exception e) {
+                throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", valueFieldInfo.name, aClass.getCanonicalName()), e);
             }
         } else if (rootNode instanceof MapNode) {
             fieldInfo.forEach(fieldInfo -> {
-                Object fieldValue = mapperFactory.map(
-                        rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
-                        fieldInfo.type
-                );
-                if (fieldValue != null) {
-                    fieldInfo.consumer.accept(fieldValue);
+                try {
+                    Object fieldValue = mapperFactory.map(
+                            rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
+                            fieldInfo.type
+                    );
+                    if (fieldValue != null) {
+                        fieldInfo.consumer.accept(fieldValue);
+                    }
+                } catch (Exception e) {
+                    throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
                 }
             });
         }
@@ -100,9 +108,13 @@ class ObjectConfigurationMapper<T> {
     TreeNode unmap() {
         MutableMapNode rootNode = new MutableMapNode();
         fieldInfo.forEach(fieldInfo -> {
-            TreeNode unmapped = mapperFactory.unmap(fieldInfo.supplier.get(), fieldInfo.type);
-            if (unmapped != null) {
-                rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
+            try {
+                TreeNode unmapped = mapperFactory.unmap(fieldInfo.supplier.get(), fieldInfo.type);
+                if (unmapped != null) {
+                    rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
+                }
+            } catch (Exception e) {
+                throw new ConfigurationException(String.format("Unable to extract value from field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
             }
         });
         return rootNode;
