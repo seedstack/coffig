@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.processor;
 
+import org.seedstack.coffig.LRUCache;
 import org.seedstack.coffig.MutableTreeNode;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MutableMapNode;
@@ -18,6 +19,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MacroProcessor implements ConfigurationProcessor {
+    private static final Pattern MACRO_PATTERN = Pattern.compile("\\$\\{|\\}");
+    private final LRUCache<String, String> cache = new LRUCache<>(10000);
+
     @Override
     public void process(MutableMapNode configuration) {
         configuration.stream()
@@ -26,6 +30,11 @@ public class MacroProcessor implements ConfigurationProcessor {
     }
 
     private String processValue(MutableTreeNode tree, String value) {
+        String cachedResult = cache.get(value);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+
         StringBuilder result = new StringBuilder();
         int currentPos = 0;
         int[] indices;
@@ -54,13 +63,15 @@ public class MacroProcessor implements ConfigurationProcessor {
         // Add the remaining of the string (after all macros)
         result.append(value.substring(currentPos));
 
-        return result.toString();
+        cachedResult = result.toString();
+        cache.put(value, cachedResult);
+
+        return cachedResult;
     }
 
     private int[] findMatchingCurlyBraces(String value, int startIndex) {
-        Pattern pattern = Pattern.compile("\\$\\{|\\}");
         int level = 0, startPos = -1;
-        Matcher matcher = pattern.matcher(value);
+        Matcher matcher = MACRO_PATTERN.matcher(value);
         while (matcher.find()) {
             if (matcher.start() < startIndex) {
                 continue;

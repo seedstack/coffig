@@ -67,11 +67,11 @@ public class MacroProcessorTest {
                         )
                 ))
         );
+        macroProcessor.process(config);
     }
 
     @Test
     public void testProcessMacro() throws Exception {
-        macroProcessor.process(config);
         assertThat(config.get("test[0].message").get().value()).isEqualTo("Hello World!");
         assertThat(config.get("test[1].message").get().value()).isEqualTo("Hello boy!");
         assertThat(config.get("test[2].message").get().value()).isEqualTo("Hello Kavi!");

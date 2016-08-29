@@ -79,13 +79,4 @@ public class CompositeProvider implements ConfigurationProvider {
         providers.remove(configurationProvider);
         dirty = true;
     }
-
-    public ConfigurationProvider get(Class<? extends ConfigurationProvider> configurationProviderClass) {
-        for (ConfigurationProvider provider : providers) {
-            if (configurationProviderClass.isAssignableFrom(provider.getClass())) {
-                return provider;
-            }
-        }
-        throw new IllegalArgumentException("No provider from class " + configurationProviderClass + " available");
-    }
 }

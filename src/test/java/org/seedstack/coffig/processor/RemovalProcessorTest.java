@@ -41,11 +41,11 @@ public class RemovalProcessorTest {
 
                 new NamedNode("-d", new ValueNode(""))
         );
+        removalProcessor.process(config);
     }
 
     @Test
     public void testRemoval() throws Exception {
-        removalProcessor.process(config);
         assertThat(config.get("a").get().value()).isEqualTo("1");
         assertThat(config.get("b").isPresent()).isFalse();
         assertThat(config.get("-b").isPresent()).isFalse();

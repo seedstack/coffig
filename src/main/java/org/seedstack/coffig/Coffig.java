@@ -14,31 +14,30 @@ import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Coffig {
     private final MapperFactory mapperFactory = new MapperFactory();
-    private final Map<String, PrioritizedConfigurationProvider> providers = new ConcurrentHashMap<>();
     private volatile boolean dirty = true;
     private volatile MapNode configurationTree = new MapNode();
-    private volatile ConfigurationProcessor configurationProcessor;
+    private volatile ConfigurationProvider provider;
+    private volatile ConfigurationProcessor processor;
 
-    public void registerProvider(String name, ConfigurationProvider configurationProvider) {
-        registerProvider(name, configurationProvider, 0);
+    public ConfigurationProvider getProvider() {
+        return provider;
     }
 
-    public void registerProvider(String name, ConfigurationProvider configurationProvider, int priority) {
-        if (providers.putIfAbsent(name, new PrioritizedConfigurationProvider(priority, configurationProvider)) != null) {
-            throw new IllegalStateException("A provider already exists with name " + name);
-        } else {
-            dirty = true;
-        }
+    public void setProvider(ConfigurationProvider configurationProvider) {
+        this.provider = configurationProvider;
+        dirty = true;
     }
 
-    public void registerProcessor(ConfigurationProcessor configurationProcessor) {
-        this.configurationProcessor = configurationProcessor;
+    public ConfigurationProcessor getProcessor() {
+        return processor;
+    }
+
+    public void setProcessor(ConfigurationProcessor configurationProcessor) {
+        this.processor = configurationProcessor;
         dirty = true;
     }
 
@@ -56,11 +55,11 @@ public class Coffig {
 
     public Coffig fork() {
         Coffig fork = new Coffig();
-        for (Map.Entry<String, PrioritizedConfigurationProvider> providerEntry : providers.entrySet()) {
-            fork.registerProvider(providerEntry.getKey(), providerEntry.getValue().getConfigurationProvider().fork(), providerEntry.getValue().getPriority());
+        if (provider != null) {
+            fork.setProvider(provider.fork());
         }
-        if (configurationProcessor != null) {
-            fork.registerProcessor(configurationProcessor.fork());
+        if (processor != null) {
+            fork.setProcessor(processor.fork());
         }
         return fork;
     }
@@ -148,17 +147,16 @@ public class Coffig {
 
     private void computeIfNecessary() {
         if (isDirty()) {
-            MapNode pendingConfigurationTree = providers.entrySet().stream()
-                    .map(Map.Entry::getValue)
-                    .sorted(PrioritizedConfigurationProvider::compareTo)
-                    .map(PrioritizedConfigurationProvider::getConfigurationProvider)
-                    .map(ConfigurationProvider::provide)
-                    .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
-                    .orElse(new MapNode());
+            MapNode pendingConfigurationTree;
+            if (provider != null) {
+                pendingConfigurationTree = provider.provide();
+            } else {
+                pendingConfigurationTree = new MapNode();
+            }
 
-            if (configurationProcessor != null) {
+            if (processor != null) {
                 pendingConfigurationTree = pendingConfigurationTree.unfreeze();
-                configurationProcessor.process((MutableMapNode) pendingConfigurationTree);
+                processor.process((MutableMapNode) pendingConfigurationTree);
             }
 
             synchronized (this) {
@@ -169,31 +167,6 @@ public class Coffig {
     }
 
     private synchronized boolean isDirty() {
-        return dirty || providers.values().stream()
-                .map(PrioritizedConfigurationProvider::getConfigurationProvider)
-                .filter(ConfigurationProvider::isDirty).count() > 0;
-    }
-
-    private static class PrioritizedConfigurationProvider implements Comparable<PrioritizedConfigurationProvider> {
-        private final int priority;
-        private final ConfigurationProvider configurationProvider;
-
-        private PrioritizedConfigurationProvider(int priority, ConfigurationProvider configurationProvider) {
-            this.priority = priority;
-            this.configurationProvider = configurationProvider;
-        }
-
-        @Override
-        public int compareTo(PrioritizedConfigurationProvider o) {
-            return Integer.compare(priority, o.priority);
-        }
-
-        int getPriority() {
-            return priority;
-        }
-
-        ConfigurationProvider getConfigurationProvider() {
-            return configurationProvider;
-        }
+        return dirty || provider.isDirty();
     }
 }

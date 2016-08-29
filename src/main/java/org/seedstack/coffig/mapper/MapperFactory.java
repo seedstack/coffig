@@ -43,6 +43,7 @@ public class MapperFactory {
                 return configurationMapper.map(treeNode, type);
             }
         }
+
         return new ObjectConfigurationMapper<>(this, getRawClass(type)).map(treeNode);
     }
 
@@ -56,6 +57,7 @@ public class MapperFactory {
                 return configurationMapper.unmap(object, type).freeze();
             }
         }
+
         return new ObjectConfigurationMapper<>(this, object).unmap().freeze();
     }
 

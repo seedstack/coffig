@@ -54,4 +54,6 @@ public class CompositeProcessor implements ConfigurationProcessor {
     public void remove(ConfigurationProcessor configurationProcessor) {
         processors.remove(configurationProcessor);
     }
+
+
 }
