@@ -93,6 +93,12 @@ public class Coffig {
         }
     }
 
+    @Override
+    public String toString() {
+        computeIfNecessary();
+        return configurationTree.toString();
+    }
+
     public static String resolvePath(AnnotatedElement annotatedElement) {
         Config annotation;
         StringBuilder path = new StringBuilder();
