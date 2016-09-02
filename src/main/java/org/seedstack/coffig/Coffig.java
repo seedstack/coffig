@@ -7,46 +7,66 @@
  */
 package org.seedstack.coffig;
 
-import org.seedstack.coffig.mapper.MapperFactory;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.utils.EvaluatingMapper;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.Optional;
 
 public class Coffig {
-    private final MapperFactory mapperFactory = new MapperFactory();
     private volatile boolean dirty = true;
     private volatile MapNode configurationTree = new MapNode();
+    private volatile EvaluatingMapper mapper = new EvaluatingMapper();
     private volatile ConfigurationProvider provider;
     private volatile ConfigurationProcessor processor;
+
+    public ConfigurationMapper getMapper() {
+        return mapper.getMapper();
+    }
+
+    public Coffig setMapper(ConfigurationMapper mapper) {
+        this.mapper.setMapper(mapper);
+        dirty = true;
+        return this;
+    }
 
     public ConfigurationProvider getProvider() {
         return provider;
     }
 
-    public void setProvider(ConfigurationProvider configurationProvider) {
+    public Coffig setProvider(ConfigurationProvider configurationProvider) {
         this.provider = configurationProvider;
         dirty = true;
+        return this;
     }
 
     public ConfigurationProcessor getProcessor() {
         return processor;
     }
 
-    public void setProcessor(ConfigurationProcessor configurationProcessor) {
+    public Coffig setProcessor(ConfigurationProcessor configurationProcessor) {
         this.processor = configurationProcessor;
         dirty = true;
+        return this;
+    }
+
+    public ConfigurationEvaluator getEvaluator() {
+        return mapper.getEvaluator();
+    }
+
+    public Coffig setEvaluator(ConfigurationEvaluator evaluator) {
+        mapper.setEvaluator(evaluator);
+        dirty = true;
+        return this;
     }
 
     public void invalidate() {
         this.dirty = true;
-    }
-
-    public MapperFactory getMapperFactory() {
-        return mapperFactory;
     }
 
     public TreeNode dump() {
@@ -55,11 +75,14 @@ public class Coffig {
 
     public Coffig fork() {
         Coffig fork = new Coffig();
+        if (mapper != null) {
+            fork.setMapper((ConfigurationMapper) mapper.fork());
+        }
         if (provider != null) {
-            fork.setProvider(provider.fork());
+            fork.setProvider((ConfigurationProvider) provider.fork());
         }
         if (processor != null) {
-            fork.setProcessor(processor.fork());
+            fork.setProcessor((ConfigurationProcessor) processor.fork());
         }
         return fork;
     }
@@ -85,11 +108,11 @@ public class Coffig {
 
         if (joinedPath == null || joinedPath.isEmpty()) {
             return Optional.of(configurationTree)
-                    .map(treeNode -> (T) mapperFactory.map(treeNode, configurationClass));
+                    .map(treeNode -> (T) mapper.map(treeNode, configurationClass));
         } else {
             return configurationTree
                     .get(joinedPath)
-                    .map(treeNode -> (T) mapperFactory.map(treeNode, configurationClass));
+                    .map(treeNode -> (T) mapper.map(treeNode, configurationClass));
         }
     }
 
@@ -167,6 +190,7 @@ public class Coffig {
 
             synchronized (this) {
                 configurationTree = pendingConfigurationTree.freeze();
+                mapper.setRootNode(configurationTree);
                 dirty = false;
             }
         }

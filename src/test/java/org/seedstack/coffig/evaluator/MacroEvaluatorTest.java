@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.processor;
+package org.seedstack.coffig.evaluator;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,10 +13,11 @@ import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.node.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MacroProcessorTest {
+public class MacroEvaluatorTest {
     private MacroProcessor macroProcessor = new MacroProcessor();
     private MutableMapNode config;
 
@@ -67,19 +68,22 @@ public class MacroProcessorTest {
                         )
                 ))
         );
-        macroProcessor.process(config);
     }
 
     @Test
     public void testProcessMacro() throws Exception {
-        assertThat(config.get("test[0].message").get().value()).isEqualTo("Hello World!");
-        assertThat(config.get("test[1].message").get().value()).isEqualTo("Hello boy!");
-        assertThat(config.get("test[2].message").get().value()).isEqualTo("Hello Kavi!");
-        assertThat(config.get("test[3].message").get().value()).isEqualTo("Hello Redouane!");
-        assertThat(config.get("test[4].message").get().value()).isEqualTo("Hello Redouane!");
-        assertThat(config.get("test[5].message").get().value()).isEqualTo("Hello Toto!");
-        assertThat(config.get("test[6].message").get().value()).isEqualTo("Hello Redouane!");
-        assertThat(config.get("test[7].message").get().value()).isEqualTo("Hello Pierre!");
-        assertThat(config.get("test[8].message").get().value()).isEqualTo("Hello Adrien and Kavi!");
+        assertThat(evaluate("test[0].message")).isEqualTo("Hello World!");
+        assertThat(evaluate("test[1].message")).isEqualTo("Hello boy!");
+        assertThat(evaluate("test[2].message")).isEqualTo("Hello Kavi!");
+        assertThat(evaluate("test[3].message")).isEqualTo("Hello Redouane!");
+        assertThat(evaluate("test[4].message")).isEqualTo("Hello Redouane!");
+        assertThat(evaluate("test[5].message")).isEqualTo("Hello Toto!");
+        assertThat(evaluate("test[6].message")).isEqualTo("Hello Redouane!");
+        assertThat(evaluate("test[7].message")).isEqualTo("Hello Pierre!");
+        assertThat(evaluate("test[8].message")).isEqualTo("Hello Adrien and Kavi!");
+    }
+
+    private String evaluate(String path) {
+        return macroProcessor.evaluate(config, (ValueNode) config.get(path).get()).value();
     }
 }

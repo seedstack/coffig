@@ -7,53 +7,25 @@
  */
 package org.seedstack.coffig.processor;
 
+import org.seedstack.coffig.utils.AbstractComposite;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-public class CompositeProcessor implements ConfigurationProcessor {
-    private final List<ConfigurationProcessor> processors = new CopyOnWriteArrayList<>();
-
-    public CompositeProcessor(ConfigurationProcessor... configurationProcessors) {
-        processors.addAll(Arrays.asList(configurationProcessors));
+public class CompositeProcessor extends AbstractComposite<ConfigurationProcessor> implements ConfigurationProcessor {
+    public CompositeProcessor(ConfigurationProcessor... items) {
+        super(items);
     }
 
     @Override
     public void process(MutableMapNode configuration) {
-        for (ConfigurationProcessor processor : processors) {
+        for (ConfigurationProcessor processor : items.values()) {
             processor.process(configuration);
         }
+        dirty = false;
     }
 
     @Override
-    public ConfigurationProcessor fork() {
-        CompositeProcessor fork = new CompositeProcessor();
-        processors.stream().map(ConfigurationProcessor::fork).forEachOrdered(fork.processors::add);
-        return fork;
+    protected ConfigurationProcessor doFork() {
+        return new CompositeProcessor();
     }
-
-    public void clear() {
-        processors.clear();
-    }
-
-    public void add(ConfigurationProcessor configurationProcessor) {
-        processors.add(configurationProcessor);
-    }
-
-    public void add(int index, ConfigurationProcessor configurationProcessor) {
-        processors.add(index, configurationProcessor);
-    }
-
-    public void remove(int index) {
-        processors.remove(index);
-    }
-
-    public void remove(ConfigurationProcessor configurationProcessor) {
-        processors.remove(configurationProcessor);
-    }
-
-
 }

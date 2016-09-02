@@ -14,6 +14,7 @@ import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -28,14 +29,14 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.toList;
 
 class ObjectConfigurationMapper<T> {
-    private final MapperFactory mapperFactory;
+    private final ConfigurationMapper mapper;
     private final Class<T> aClass;
     private final List<FieldInfo> fieldInfo;
     private final FieldInfo valueFieldInfo;
     private final T holder;
 
-    ObjectConfigurationMapper(MapperFactory mapperFactory, Class<T> aClass) {
-        this.mapperFactory = mapperFactory;
+    ObjectConfigurationMapper(ConfigurationMapper mapper, Class<T> aClass) {
+        this.mapper = mapper;
         this.aClass = aClass;
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
@@ -43,8 +44,8 @@ class ObjectConfigurationMapper<T> {
     }
 
     @SuppressWarnings("unchecked")
-    ObjectConfigurationMapper(MapperFactory mapperFactory, T object) {
-        this.mapperFactory = mapperFactory;
+    ObjectConfigurationMapper(ConfigurationMapper mapper, T object) {
+        this.mapper = mapper;
         this.aClass = (Class<T>) object.getClass();
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
@@ -79,7 +80,7 @@ class ObjectConfigurationMapper<T> {
     T map(TreeNode rootNode) {
         if (rootNode instanceof ValueNode && valueFieldInfo != null) {
             try {
-                Object fieldValue = mapperFactory.map(rootNode, valueFieldInfo.type);
+                Object fieldValue = mapper.map(rootNode, valueFieldInfo.type);
                 if (fieldValue != null) {
                     valueFieldInfo.consumer.accept(fieldValue);
                 }
@@ -89,7 +90,7 @@ class ObjectConfigurationMapper<T> {
         } else if (rootNode instanceof MapNode) {
             fieldInfo.forEach(fieldInfo -> {
                 try {
-                    Object fieldValue = mapperFactory.map(
+                    Object fieldValue = mapper.map(
                             rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
                             fieldInfo.type
                     );
@@ -109,7 +110,7 @@ class ObjectConfigurationMapper<T> {
         MutableMapNode rootNode = new MutableMapNode();
         fieldInfo.forEach(fieldInfo -> {
             try {
-                TreeNode unmapped = mapperFactory.unmap(fieldInfo.supplier.get(), fieldInfo.type);
+                TreeNode unmapped = mapper.unmap(fieldInfo.supplier.get(), fieldInfo.type);
                 if (unmapped != null) {
                     rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
                 }

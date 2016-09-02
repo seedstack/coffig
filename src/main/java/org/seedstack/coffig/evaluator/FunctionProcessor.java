@@ -5,40 +5,48 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.processor;
+package org.seedstack.coffig.evaluator;
 
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.LRUCache;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.mapper.MapperFactory;
-import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.node.MutableValueNode;
 import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationProcessor;
+import org.seedstack.coffig.spi.ConfigFunction;
+import org.seedstack.coffig.spi.ConfigFunctionHolder;
+import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.coffig.spi.ConfigurationMapper;
+import org.seedstack.coffig.utils.LRUCache;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FunctionProcessor implements ConfigurationProcessor {
+public class FunctionProcessor implements ConfigurationEvaluator {
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\$([_a-zA-Z]\\w*)\\(|\\)");
     private final ConcurrentMap<String, FunctionRegistration> functions = new ConcurrentHashMap<>();
     private final LRUCache<String, String> cache = new LRUCache<>(10000);
-    private final MapperFactory mapperFactory;
+    private final ConfigurationMapper mapper;
 
-    public FunctionProcessor(MapperFactory mapperFactory) {
-        this.mapperFactory = mapperFactory;
+    public FunctionProcessor(Coffig coffig) {
+        this.mapper = coffig.getMapper();
+        for (ConfigFunctionHolder configFunctionHolder : ServiceLoader.load(ConfigFunctionHolder.class)) {
+            detectFunctions(configFunctionHolder);
+            configFunctionHolder.initialize(coffig);
+        }
     }
 
-    @Override
-    public void process(MutableMapNode configuration) {
-        configuration.stream()
-                .filter(node -> node instanceof MutableValueNode)
-                .forEach((valueNode) -> ((MutableValueNode) valueNode).value(processValue(configuration, valueNode.value())));
+    private void detectFunctions(ConfigFunctionHolder configFunctionHolder) {
+        for (Method method : configFunctionHolder.getClass().getDeclaredMethods()) {
+            ConfigFunction annotation = method.getAnnotation(ConfigFunction.class);
+            if (annotation != null) {
+                registerFunction(annotation.value().isEmpty() ? method.getName() : annotation.value(), method, configFunctionHolder);
+            }
+        }
     }
 
     public void registerFunction(String name, Method method, Object instance) {
@@ -49,7 +57,13 @@ public class FunctionProcessor implements ConfigurationProcessor {
         }
     }
 
-    private String processValue(TreeNode tree, String value) {
+    @Override
+    public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
+        return new ValueNode(processValue(rootNode, valueNode.value()));
+
+    }
+
+    private String processValue(TreeNode rootNode, String value) {
         // Try the cache before doing any processing
         String cachedResult = cache.get(value);
         if (cachedResult != null) {
@@ -65,7 +79,7 @@ public class FunctionProcessor implements ConfigurationProcessor {
             result.append(value.substring(currentPos, callSiteInfo.start));
             result.append(invokeFunction(
                     callSiteInfo.name,
-                    Arrays.stream(callSiteInfo.arguments).map(arg -> processArgument(tree, arg)).toArray(TreeNode[]::new)
+                    Arrays.stream(callSiteInfo.arguments).map(arg -> processArgument(rootNode, arg)).toArray(TreeNode[]::new)
             ));
             currentPos = callSiteInfo.end;
         }
@@ -108,7 +122,7 @@ public class FunctionProcessor implements ConfigurationProcessor {
             // Map arguments according to the function parameter types
             Object[] mappedArguments = new Object[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                mappedArguments[i] = mapperFactory.map(arguments[i], functionRegistration.argTypes[i]);
+                mappedArguments[i] = mapper.map(arguments[i], functionRegistration.argTypes[i]);
             }
 
             // Invoke the function

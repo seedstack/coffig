@@ -12,19 +12,11 @@ import org.seedstack.coffig.node.MapNode;
 import java.util.concurrent.Callable;
 
 @FunctionalInterface
-public interface ConfigurationProvider extends Callable<MapNode> {
+public interface ConfigurationProvider extends Callable<MapNode>, ChangeDetectable, Forkable {
     MapNode provide();
 
     @Override
     default MapNode call() throws Exception {
         return provide();
-    }
-
-    default ConfigurationProvider fork() {
-        return this;
-    }
-
-    default boolean isDirty() {
-        return true;
     }
 }

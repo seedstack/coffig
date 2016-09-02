@@ -5,21 +5,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.processor;
+package org.seedstack.coffig.evaluator;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.seedstack.coffig.mapper.MapperFactory;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.mapper.DefaultMapper;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.node.ValueNode;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class FunctionProcessorTest {
-    private FunctionProcessor functionProcessor = new FunctionProcessor(new MapperFactory());
+    private FunctionProcessor functionProcessor = new FunctionProcessor(new Coffig().setMapper(new DefaultMapper()));
     private MutableMapNode config;
 
     @Before
@@ -43,7 +45,6 @@ public class FunctionProcessorTest {
         functionProcessor.registerFunction("greetSeveralTimes", FunctionProcessorTest.class.getDeclaredMethod("greetSeveralTimes", String.class, int.class, String.class), null);
         functionProcessor.registerFunction("prefix", FunctionProcessorTest.class.getDeclaredMethod("prefix"), null);
         functionProcessor.registerFunction("verifyObject", FunctionProcessorTest.class.getDeclaredMethod("verifyObject", MappedClass.class), null);
-        functionProcessor.process(config);
     }
 
     private static class MappedClass {
@@ -51,39 +52,43 @@ public class FunctionProcessorTest {
         private List<String> field2;
     }
 
+    private String evaluate(String path) {
+        return functionProcessor.evaluate(config, (ValueNode) config.get(path).get()).value();
+    }
+
     @Test
     public void testNoArgument() throws Exception {
-        assertThat(config.get("test.noArg").get().value()).isEqualTo("!");
+        assertThat(evaluate("test.noArg")).isEqualTo("!");
     }
 
     @Test
     public void tesLiteralArgument() throws Exception {
-        assertThat(config.get("test.literal").get().value()).isEqualTo("Hello World?");
+        assertThat(evaluate("test.literal")).isEqualTo("Hello World?");
     }
 
     @Test
     public void testNestedFunctions() throws Exception {
-        assertThat(config.get("test.nestedCall").get().value()).isEqualTo("Hello World!");
+        assertThat(evaluate("test.nestedCall")).isEqualTo("Hello World!");
     }
 
     @Test
     public void testNestedReference() throws Exception {
-        assertThat(config.get("test.nestedRef").get().value()).isEqualTo("Hello World!");
+        assertThat(evaluate("test.nestedRef")).isEqualTo("Hello World!");
     }
 
     @Test
     public void testUnresolvedReference() throws Exception {
-        assertThat(config.get("test.unresolvedRef").get().value()).isEqualTo("Hello World");
+        assertThat(evaluate("test.unresolvedRef")).isEqualTo("Hello World");
     }
 
     @Test
     public void testMappedLiteral() throws Exception {
-        assertThat(config.get("test.mappedArg1").get().value()).isEqualTo("Hello World World World World World!");
+        assertThat(evaluate("test.mappedArg1")).isEqualTo("Hello World World World World World!");
     }
 
     @Test
     public void testMappedReference() throws Exception {
-        assertThat(config.get("test.mappedArg2").get().value()).isEqualTo("true");
+        assertThat(evaluate("test.mappedArg2")).isEqualTo("true");
     }
 
     private static String greet(String name, String suffix) {

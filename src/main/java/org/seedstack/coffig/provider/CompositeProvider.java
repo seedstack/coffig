@@ -7,29 +7,24 @@
  */
 package org.seedstack.coffig.provider;
 
+import org.seedstack.coffig.utils.AbstractComposite;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
-public class CompositeProvider implements ConfigurationProvider {
-    private final List<ConfigurationProvider> providers = new CopyOnWriteArrayList<>();
-    private volatile boolean dirty = true;
-
-    public CompositeProvider(ConfigurationProvider... configurationProviders) {
-        providers.addAll(Arrays.asList(configurationProviders));
+public class CompositeProvider extends AbstractComposite<ConfigurationProvider> implements ConfigurationProvider {
+    public CompositeProvider(ConfigurationProvider... items) {
+        super(items);
     }
 
     @Override
     public MapNode provide() {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
         try {
-            MapNode mapNode = forkJoinPool.submit(() -> providers.parallelStream()
+            MapNode mapNode = forkJoinPool.submit(() -> items.values().parallelStream()
                     .map(ConfigurationProvider::provide)
                     .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                     .orElse(new MapNode())
@@ -44,39 +39,7 @@ public class CompositeProvider implements ConfigurationProvider {
     }
 
     @Override
-    public boolean isDirty() {
-        return dirty || providers.stream().filter(ConfigurationProvider::isDirty).count() > 0;
-    }
-
-    @Override
-    public ConfigurationProvider fork() {
-        CompositeProvider fork = new CompositeProvider();
-        providers.stream().map(ConfigurationProvider::fork).forEachOrdered(fork.providers::add);
-        return fork;
-    }
-
-    public void clear() {
-        providers.clear();
-        dirty = true;
-    }
-
-    public void add(int index, ConfigurationProvider configurationProvider) {
-        providers.add(index, configurationProvider);
-        dirty = true;
-    }
-
-    public void add(ConfigurationProvider configurationProvider) {
-        providers.add(configurationProvider);
-        dirty = true;
-    }
-
-    public void remove(int index) {
-        providers.remove(index);
-        dirty = true;
-    }
-
-    public void remove(ConfigurationProvider configurationProvider) {
-        providers.remove(configurationProvider);
-        dirty = true;
+    protected ConfigurationProvider doFork() {
+        return new CompositeProvider();
     }
 }

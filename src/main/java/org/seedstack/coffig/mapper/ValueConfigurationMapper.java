@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-class ValueConfigurationMapper implements ConfigurationMapper {
+public class ValueConfigurationMapper implements ConfigurationMapper {
     private final Map<Type, Function<String, ?>> converters = new HashMap<>();
 
-    ValueConfigurationMapper() {
+    public ValueConfigurationMapper() {
         converters.put(Boolean.class, Boolean::valueOf);
         converters.put(boolean.class, Boolean::valueOf);
         converters.put(Byte.class, Byte::valueOf);

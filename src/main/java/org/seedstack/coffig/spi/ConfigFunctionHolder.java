@@ -7,9 +7,8 @@
  */
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.Coffig;
 
-@FunctionalInterface
-public interface ConfigurationProcessor extends ChangeDetectable, Forkable {
-    void process(MutableMapNode configuration);
+public interface ConfigFunctionHolder {
+    void initialize(Coffig coffig);
 }

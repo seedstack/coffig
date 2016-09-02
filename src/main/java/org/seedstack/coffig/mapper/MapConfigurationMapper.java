@@ -21,11 +21,11 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
 
-class MapConfigurationMapper implements ConfigurationMapper {
-    private final MapperFactory mapperFactory;
+public class MapConfigurationMapper implements ConfigurationMapper {
+    private final ConfigurationMapper mapper;
 
-    MapConfigurationMapper(MapperFactory mapperFactory) {
-        this.mapperFactory = mapperFactory;
+    public MapConfigurationMapper(ConfigurationMapper mapper) {
+        this.mapper = mapper;
     }
 
     @Override
@@ -47,13 +47,13 @@ class MapConfigurationMapper implements ConfigurationMapper {
         if (treeNode instanceof MapNode) {
             return ((MapNode) treeNode).keys().stream()
                     .collect(toMap(
-                            key -> mapperFactory.map(new ValueNode(key), keyType),
-                            key -> mapperFactory.map(treeNode.item(key), valueType)
+                            key -> mapper.map(new ValueNode(key), keyType),
+                            key -> mapper.map(treeNode.item(key), valueType)
                     ));
         } else {
             return Arrays.stream(treeNode.items())
                     .collect(toMap(
-                            node -> mapperFactory.map(node, keyType),
+                            node -> mapper.map(node, keyType),
                             node -> Coffig.instantiateDefault((Class<?>) valueType))
                     );
         }
@@ -65,7 +65,7 @@ class MapConfigurationMapper implements ConfigurationMapper {
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
         ((Map<?, ?>) object).forEach(((key, value) -> {
             if (key != null) {
-                mapNode.put(String.valueOf(key), mapperFactory.unmap(value, valueType));
+                mapNode.put(String.valueOf(key), mapper.unmap(value, valueType));
             }
         }));
         return mapNode;

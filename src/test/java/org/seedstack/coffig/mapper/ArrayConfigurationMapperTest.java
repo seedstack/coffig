@@ -13,7 +13,7 @@ import org.seedstack.coffig.node.ArrayNode;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ArrayConfigurationMapperTest {
-    private ArrayConfigurationMapper arrayConfigurationMapper = new ArrayConfigurationMapper(new MapperFactory());
+    private ArrayConfigurationMapper arrayConfigurationMapper = new ArrayConfigurationMapper(new DefaultMapper());
 
     @Test
     public void testMapArrays() {

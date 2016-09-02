@@ -8,8 +8,10 @@
 package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.fixture.SomeEnum;
+import org.seedstack.coffig.mapper.DefaultMapper;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
@@ -39,16 +41,22 @@ public class CoffigTest {
         String[] elements;
     }
 
+    private Coffig coffig;
+
+    @Before
+    public void setUp() throws Exception {
+        coffig = new Coffig();
+        coffig.setMapper(new DefaultMapper());
+    }
+
     @Test
     public void testConfigurationNotNull() {
-        Coffig coffig = new Coffig();
         coffig.setProvider(new EmptyProvider());
         Assertions.assertThat(coffig.get(App.class)).isNotNull();
     }
 
     @Test
     public void testWithSimpleProvider() {
-        Coffig coffig = new Coffig();
         coffig.setProvider(appConfigProvider);
         App app = coffig.get(App.class);
         Assertions.assertThat(app.id).isEqualTo("foo");
@@ -57,7 +65,6 @@ public class CoffigTest {
 
     @Test
     public void testWithMergedConfiguration() {
-        Coffig coffig = new Coffig();
         coffig.setProvider(new CompositeProvider(appConfigProvider, usersConfigProvider));
         App app = coffig.get(App.class);
 
@@ -71,7 +78,6 @@ public class CoffigTest {
 
     @Test
     public void testGetWithPath() throws Exception {
-        Coffig coffig = new Coffig();
         coffig.setProvider(() -> new MapNode(
                 new NamedNode("app",
                         new MapNode(new NamedNode("server",
@@ -84,28 +90,24 @@ public class CoffigTest {
 
     @Test
     public void testGetOptionalWithPathAndDefaultValue() throws Exception {
-        Coffig coffig = new Coffig();
         coffig.setProvider(appConfigProvider);
         Assertions.assertThat(coffig.getOptional(String.class, "unknown").orElse("defaultValue")).isEqualTo("defaultValue");
     }
 
     @Test
     public void testGetWithPathAndDefaultValue() throws Exception {
-        Coffig coffig = new Coffig();
         coffig.setProvider(appConfigProvider);
         Assertions.assertThat(coffig.get(String.class, "unknown")).isEqualTo("");
     }
 
     @Test
     public void testGetSingleValueAsArray() throws Exception {
-        Coffig coffig = new Coffig();
         coffig.setProvider(usersConfigProvider);
         Assertions.assertThat(coffig.get(App.class).items).containsExactly("one");
     }
 
     @Test
     public void testGetMapAsArray() throws Exception {
-        Coffig coffig = new Coffig();
         coffig.setProvider(usersConfigProvider);
         Assertions.assertThat(coffig.get(App.class).elements).containsOnly("val1", "val2");
     }

@@ -32,7 +32,7 @@ public class PrioritizedProvider implements ConfigurationProvider {
     public ConfigurationProvider fork() {
         PrioritizedProvider fork = new PrioritizedProvider();
         for (Map.Entry<String, PrioritizedConfigurationProvider> providerEntry : providers.entrySet()) {
-            fork.registerProvider(providerEntry.getKey(), providerEntry.getValue().getConfigurationProvider().fork(), providerEntry.getValue().getPriority());
+            fork.registerProvider(providerEntry.getKey(), (ConfigurationProvider) providerEntry.getValue().getConfigurationProvider().fork(), providerEntry.getValue().getPriority());
         }
         return fork;
     }

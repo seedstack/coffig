@@ -18,7 +18,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MapConfigurationMapperTest {
-    private MapConfigurationMapper mapConfigurationMapper = new MapConfigurationMapper(new MapperFactory());
+    private MapConfigurationMapper mapConfigurationMapper = new MapConfigurationMapper(new DefaultMapper());
     private Map<String, Integer> map1 = new HashMap<String, Integer>() {{
         put("key1", 1);
         put("key2", 2);

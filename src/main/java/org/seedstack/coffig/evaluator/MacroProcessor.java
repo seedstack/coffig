@@ -5,31 +5,27 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.processor;
+package org.seedstack.coffig.evaluator;
 
-import org.seedstack.coffig.LRUCache;
-import org.seedstack.coffig.MutableTreeNode;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.node.MutableValueNode;
-import org.seedstack.coffig.spi.ConfigurationProcessor;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.coffig.utils.LRUCache;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MacroProcessor implements ConfigurationProcessor {
+public class MacroProcessor implements ConfigurationEvaluator {
     private static final Pattern MACRO_PATTERN = Pattern.compile("\\$\\{|\\}");
     private final LRUCache<String, String> cache = new LRUCache<>(10000);
 
     @Override
-    public void process(MutableMapNode configuration) {
-        configuration.stream()
-                .filter(node -> node instanceof MutableValueNode)
-                .forEach((valueNode) -> ((MutableValueNode) valueNode).value(processValue(configuration, valueNode.value())));
+    public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
+        return new ValueNode(processValue(rootNode, valueNode.value()));
     }
 
-    private String processValue(MutableTreeNode tree, String value) {
+    private String processValue(TreeNode rootNode, String value) {
         String cachedResult = cache.get(value);
         if (cachedResult != null) {
             return cachedResult;
@@ -50,7 +46,7 @@ public class MacroProcessor implements ConfigurationProcessor {
                     result.append(part.substring(1, part.length() - 1));
                     break;
                 } else {
-                    Optional<TreeNode> node = tree.get(processValue(tree, part));
+                    Optional<TreeNode> node = rootNode.get(processValue(rootNode, part));
                     if (node.isPresent()) {
                         result.append(node.get().value());
                         break;

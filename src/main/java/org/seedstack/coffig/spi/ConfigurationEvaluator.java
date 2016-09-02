@@ -7,9 +7,10 @@
  */
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.ValueNode;
 
 @FunctionalInterface
-public interface ConfigurationProcessor extends ChangeDetectable, Forkable {
-    void process(MutableMapNode configuration);
+public interface ConfigurationEvaluator extends ChangeDetectable, Forkable {
+    ValueNode evaluate(TreeNode rootNode, ValueNode valueNode);
 }

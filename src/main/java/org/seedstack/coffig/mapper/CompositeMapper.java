@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.utils.AbstractComposite;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
@@ -15,22 +16,11 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MapperFactory {
-    private List<ConfigurationMapper> configurationMappers = new CopyOnWriteArrayList<>();
-
-    public MapperFactory() {
-        addMapper(new EnumConfigurationMapper());
-        addMapper(new ValueConfigurationMapper());
-        addMapper(new ArrayConfigurationMapper(this));
-        addMapper(new CollectionConfigurationMapper(this));
-        addMapper(new MapConfigurationMapper(this));
-    }
-
-    public void addMapper(ConfigurationMapper configurationMapper) {
-        configurationMappers.add(configurationMapper);
+public class CompositeMapper extends AbstractComposite<ConfigurationMapper> implements ConfigurationMapper {
+    @Override
+    public boolean canHandle(Type type) {
+        return items.values().stream().anyMatch(item -> item.canHandle(type));
     }
 
     public Object map(TreeNode treeNode, Type type) {
@@ -38,7 +28,7 @@ public class MapperFactory {
             return null;
         }
 
-        for (ConfigurationMapper configurationMapper : configurationMappers) {
+        for (ConfigurationMapper configurationMapper : items.values()) {
             if (configurationMapper.canHandle(type)) {
                 return configurationMapper.map(treeNode, type);
             }
@@ -52,13 +42,18 @@ public class MapperFactory {
             return null;
         }
 
-        for (ConfigurationMapper configurationMapper : configurationMappers) {
+        for (ConfigurationMapper configurationMapper : items.values()) {
             if (configurationMapper.canHandle(type)) {
                 return configurationMapper.unmap(object, type).freeze();
             }
         }
 
         return new ObjectConfigurationMapper<>(this, object).unmap().freeze();
+    }
+
+    @Override
+    protected ConfigurationMapper doFork() {
+        return new CompositeMapper();
     }
 
     public static Class<?> getRawClass(Type type) {

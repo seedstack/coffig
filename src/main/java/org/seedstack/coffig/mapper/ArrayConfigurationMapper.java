@@ -16,11 +16,11 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ArrayConfigurationMapper implements ConfigurationMapper {
-    private final MapperFactory mapperFactory;
+public class ArrayConfigurationMapper implements ConfigurationMapper {
+    private final ConfigurationMapper mapper;
 
-    ArrayConfigurationMapper(MapperFactory mapperFactory) {
-        this.mapperFactory = mapperFactory;
+    public ArrayConfigurationMapper(ConfigurationMapper mapper) {
+        this.mapper = mapper;
     }
 
     @Override
@@ -34,7 +34,7 @@ class ArrayConfigurationMapper implements ConfigurationMapper {
         TreeNode[] values = treeNode.items();
         Object array = Array.newInstance(componentType, values.length);
         AtomicInteger index = new AtomicInteger();
-        Arrays.stream(values).map(childNode -> mapperFactory.map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));
+        Arrays.stream(values).map(childNode -> mapper.map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));
         return array;
     }
 
@@ -44,7 +44,7 @@ class ArrayConfigurationMapper implements ConfigurationMapper {
         Class componentType = ((Class) type).getComponentType();
         int length = Array.getLength(object);
         for (int i = 0; i < length; i++) {
-            TreeNode treeNode = mapperFactory.unmap(Array.get(object, i), componentType);
+            TreeNode treeNode = mapper.unmap(Array.get(object, i), componentType);
             if (treeNode != null) {
                 mutableArrayNode.add(treeNode);
             }
