@@ -7,16 +7,17 @@
  */
 package org.seedstack.coffig.utils;
 
-import org.seedstack.coffig.spi.ChangeDetectable;
-import org.seedstack.coffig.spi.Forkable;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.spi.ConfigurationComponent;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class AbstractComposite<T extends ChangeDetectable & Forkable> implements ChangeDetectable, Forkable {
+public abstract class AbstractComposite<T extends ConfigurationComponent> implements ConfigurationComponent {
     protected final Map<Class<?>, T> items = new LinkedHashMap<>();
-    protected volatile boolean dirty = true;
+    protected Coffig coffig;
+    protected boolean dirty = true;
 
     @SafeVarargs
     public AbstractComposite(T... items) {
@@ -24,17 +25,26 @@ public abstract class AbstractComposite<T extends ChangeDetectable & Forkable> i
     }
 
     @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
+        items.values().forEach(item -> item.initialize(coffig));
+    }
+
+    @Override
+    public void invalidate() {
+        items.values().forEach(ConfigurationComponent::invalidate);
+    }
+
+    @Override
     public boolean isDirty() {
-        return dirty || items.values().stream().filter(ChangeDetectable::isDirty).count() > 0;
+        return dirty || items.values().stream().filter(ConfigurationComponent::isDirty).count() > 0;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public T fork() {
         AbstractComposite fork = (AbstractComposite) doFork();
-        for (T item : items.values()) {
-            fork.add((T) item.fork());
-        }
+        items.values().stream().map(ConfigurationComponent::fork).forEach(fork::add);
         return (T) fork;
     }
 
@@ -58,7 +68,8 @@ public abstract class AbstractComposite<T extends ChangeDetectable & Forkable> i
         return removed;
     }
 
-    public T get(Class<T> item) {
-        return items.get(item);
+    @SuppressWarnings("unchecked")
+    public <U extends T> U get(Class<U> item) {
+        return (U) items.get(item);
     }
 }

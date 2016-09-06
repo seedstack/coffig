@@ -29,7 +29,12 @@ public class PrioritizedProvider implements ConfigurationProvider {
     }
 
     @Override
-    public ConfigurationProvider fork() {
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    @Override
+    public PrioritizedProvider fork() {
         PrioritizedProvider fork = new PrioritizedProvider();
         for (Map.Entry<String, PrioritizedConfigurationProvider> providerEntry : providers.entrySet()) {
             fork.registerProvider(providerEntry.getKey(), (ConfigurationProvider) providerEntry.getValue().getConfigurationProvider().fork(), providerEntry.getValue().getPriority());
@@ -37,27 +42,24 @@ public class PrioritizedProvider implements ConfigurationProvider {
         return fork;
     }
 
-    @Override
-    public boolean isDirty() {
-        return dirty;
+    public PrioritizedProvider registerProvider(String name, ConfigurationProvider configurationProvider) {
+        return registerProvider(name, configurationProvider, 0);
     }
 
-    public void registerProvider(String name, ConfigurationProvider configurationProvider) {
-        registerProvider(name, configurationProvider, 0);
-    }
-
-    public void registerProvider(String name, ConfigurationProvider configurationProvider, int priority) {
+    public PrioritizedProvider registerProvider(String name, ConfigurationProvider configurationProvider, int priority) {
         if (providers.putIfAbsent(name, new PrioritizedConfigurationProvider(priority, configurationProvider)) != null) {
             throw new IllegalStateException("A provider already exists with name " + name);
         } else {
             dirty = true;
         }
+        return this;
     }
 
-    public void unregisterProvider(String name) {
+    public PrioritizedProvider unregisterProvider(String name) {
         if (providers.remove(name) == null) {
             throw new IllegalStateException("No provider exists with name " + name);
         }
+        return this;
     }
 
     public ConfigurationProvider getProvider(String name) {

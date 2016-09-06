@@ -12,7 +12,7 @@ import org.seedstack.coffig.node.MapNode;
 import java.util.concurrent.Callable;
 
 @FunctionalInterface
-public interface ConfigurationProvider extends Callable<MapNode>, ChangeDetectable, Forkable {
+public interface ConfigurationProvider extends Callable<MapNode>, ConfigurationComponent {
     MapNode provide();
 
     @Override

@@ -9,8 +9,6 @@ package org.seedstack.coffig.evaluator;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.mapper.DefaultMapper;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.NamedNode;
@@ -19,32 +17,32 @@ import org.seedstack.coffig.node.ValueNode;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.seedstack.coffig.fixture.Initializer.initialize;
 
-public class FunctionProcessorTest {
-    private FunctionProcessor functionProcessor = new FunctionProcessor(new Coffig().setMapper(new DefaultMapper()));
-    private MutableMapNode config;
+public class FunctionEvaluatorTest {
+    private FunctionEvaluator functionEvaluator = initialize(new FunctionEvaluator());
+    private MutableMapNode config = new MutableMapNode(
+            new NamedNode("object", new MutableMapNode(
+                    new NamedNode("field1", "hello"),
+                    new NamedNode("field2", new ArrayNode("item1", "item2", "item3"))
+            )),
+            new NamedNode("test", new MutableMapNode(
+                    new NamedNode("noArg", "$prefix()"),
+                    new NamedNode("literal", "$greet('World', '?')"),
+                    new NamedNode("nestedCall", "$greet('World', $prefix())"),
+                    new NamedNode("nestedRef", "$greet('World', test.noArg)"),
+                    new NamedNode("unresolvedRef", "$greet('World', test.unknown)"),
+                    new NamedNode("mappedArg1", "$greetSeveralTimes('World', '5', '!')"),
+                    new NamedNode("mappedArg2", "$verifyObject(object)")
+            ))
+    );
 
     @Before
     public void setUp() throws Exception {
-        config = new MutableMapNode(
-                new NamedNode("object", new MutableMapNode(
-                        new NamedNode("field1", "hello"),
-                        new NamedNode("field2", new ArrayNode("item1", "item2", "item3"))
-                )),
-                new NamedNode("test", new MutableMapNode(
-                        new NamedNode("noArg", "$prefix()"),
-                        new NamedNode("literal", "$greet('World', '?')"),
-                        new NamedNode("nestedCall", "$greet('World', $prefix())"),
-                        new NamedNode("nestedRef", "$greet('World', test.noArg)"),
-                        new NamedNode("unresolvedRef", "$greet('World', test.unknown)"),
-                        new NamedNode("mappedArg1", "$greetSeveralTimes('World', '5', '!')"),
-                        new NamedNode("mappedArg2", "$verifyObject(object)")
-                ))
-        );
-        functionProcessor.registerFunction("greet", FunctionProcessorTest.class.getDeclaredMethod("greet", String.class, String.class), null);
-        functionProcessor.registerFunction("greetSeveralTimes", FunctionProcessorTest.class.getDeclaredMethod("greetSeveralTimes", String.class, int.class, String.class), null);
-        functionProcessor.registerFunction("prefix", FunctionProcessorTest.class.getDeclaredMethod("prefix"), null);
-        functionProcessor.registerFunction("verifyObject", FunctionProcessorTest.class.getDeclaredMethod("verifyObject", MappedClass.class), null);
+        functionEvaluator.registerFunction("greet", FunctionEvaluatorTest.class.getDeclaredMethod("greet", String.class, String.class), null);
+        functionEvaluator.registerFunction("greetSeveralTimes", FunctionEvaluatorTest.class.getDeclaredMethod("greetSeveralTimes", String.class, int.class, String.class), null);
+        functionEvaluator.registerFunction("prefix", FunctionEvaluatorTest.class.getDeclaredMethod("prefix"), null);
+        functionEvaluator.registerFunction("verifyObject", FunctionEvaluatorTest.class.getDeclaredMethod("verifyObject", MappedClass.class), null);
     }
 
     private static class MappedClass {
@@ -53,7 +51,7 @@ public class FunctionProcessorTest {
     }
 
     private String evaluate(String path) {
-        return functionProcessor.evaluate(config, (ValueNode) config.get(path).get()).value();
+        return functionEvaluator.evaluate(config, (ValueNode) config.get(path).get()).value();
     }
 
     @Test

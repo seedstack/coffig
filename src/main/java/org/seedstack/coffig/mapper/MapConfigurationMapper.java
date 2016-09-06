@@ -12,6 +12,7 @@ import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.ParameterizedType;
@@ -20,12 +21,19 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
+import static org.seedstack.coffig.utils.Utils.instantiateDefault;
 
 public class MapConfigurationMapper implements ConfigurationMapper {
-    private final ConfigurationMapper mapper;
+    private Coffig coffig;
 
-    public MapConfigurationMapper(ConfigurationMapper mapper) {
-        this.mapper = mapper;
+    @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
+    }
+
+    @Override
+    public ConfigurationComponent fork() {
+        return new MapConfigurationMapper();
     }
 
     @Override
@@ -47,14 +55,14 @@ public class MapConfigurationMapper implements ConfigurationMapper {
         if (treeNode instanceof MapNode) {
             return ((MapNode) treeNode).keys().stream()
                     .collect(toMap(
-                            key -> mapper.map(new ValueNode(key), keyType),
-                            key -> mapper.map(treeNode.item(key), valueType)
+                            key -> coffig.getMapper().map(new ValueNode(key), keyType),
+                            key -> coffig.getMapper().map(treeNode.item(key), valueType)
                     ));
         } else {
             return Arrays.stream(treeNode.items())
                     .collect(toMap(
-                            node -> mapper.map(node, keyType),
-                            node -> Coffig.instantiateDefault((Class<?>) valueType))
+                            node -> coffig.getMapper().map(node, keyType),
+                            node -> instantiateDefault((Class<?>) valueType))
                     );
         }
     }
@@ -65,7 +73,7 @@ public class MapConfigurationMapper implements ConfigurationMapper {
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
         ((Map<?, ?>) object).forEach(((key, value) -> {
             if (key != null) {
-                mapNode.put(String.valueOf(key), mapper.unmap(value, valueType));
+                mapNode.put(String.valueOf(key), coffig.getMapper().unmap(value, valueType));
             }
         }));
         return mapNode;

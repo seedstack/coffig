@@ -11,9 +11,10 @@ import org.junit.Test;
 import org.seedstack.coffig.node.ArrayNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.seedstack.coffig.fixture.Initializer.initialize;
 
 public class ArrayConfigurationMapperTest {
-    private ArrayConfigurationMapper arrayConfigurationMapper = new ArrayConfigurationMapper(new DefaultMapper());
+    private ArrayConfigurationMapper arrayConfigurationMapper = initialize(new ArrayConfigurationMapper());
 
     @Test
     public void testMapArrays() {

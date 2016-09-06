@@ -9,10 +9,16 @@ package org.seedstack.coffig.mapper;
 
 public class DefaultMapper extends CompositeMapper {
     public DefaultMapper() {
+        super();
         add(new EnumConfigurationMapper());
         add(new ValueConfigurationMapper());
-        add(new ArrayConfigurationMapper(this));
-        add(new CollectionConfigurationMapper(this));
-        add(new MapConfigurationMapper(this));
+        add(new ArrayConfigurationMapper());
+        add(new CollectionConfigurationMapper());
+        add(new MapConfigurationMapper());
+    }
+
+    @Override
+    protected DefaultMapper doFork() {
+        return new DefaultMapper();
     }
 }

@@ -27,8 +27,8 @@ import java.util.Map;
 
 public class JacksonProvider implements ConfigurationProvider {
     private final List<URL> sources = new ArrayList<>();
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    private volatile boolean dirty = true;
+    private final ObjectMapper jacksonMapper = new ObjectMapper(new YAMLFactory());
+    private boolean dirty = true;
 
     @Override
     public MapNode provide() {
@@ -42,7 +42,7 @@ public class JacksonProvider implements ConfigurationProvider {
     }
 
     @Override
-    public ConfigurationProvider fork() {
+    public JacksonProvider fork() {
         JacksonProvider fork = new JacksonProvider();
         fork.sources.addAll(sources);
         return fork;
@@ -65,7 +65,7 @@ public class JacksonProvider implements ConfigurationProvider {
 
     private MapNode buildTreeFromSource(URL url) {
         try {
-            return buildTreeFromFields(mapper.readTree(url));
+            return buildTreeFromFields(jacksonMapper.readTree(url));
         } catch (IOException e) {
             throw new ConfigurationException("Failed to read configuration from " + url.toExternalForm(), e);
         }

@@ -18,7 +18,7 @@ import org.seedstack.coffig.node.ValueNode;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MacroEvaluatorTest {
-    private MacroProcessor macroProcessor = new MacroProcessor();
+    private MacroEvaluator macroEvaluator = new MacroEvaluator();
     private MutableMapNode config;
 
     @Before
@@ -84,6 +84,6 @@ public class MacroEvaluatorTest {
     }
 
     private String evaluate(String path) {
-        return macroProcessor.evaluate(config, (ValueNode) config.get(path).get()).value();
+        return macroEvaluator.evaluate(config, (ValueNode) config.get(path).get()).value();
     }
 }

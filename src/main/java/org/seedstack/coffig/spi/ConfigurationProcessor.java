@@ -10,6 +10,6 @@ package org.seedstack.coffig.spi;
 import org.seedstack.coffig.node.MutableMapNode;
 
 @FunctionalInterface
-public interface ConfigurationProcessor extends ChangeDetectable, Forkable {
+public interface ConfigurationProcessor extends ConfigurationComponent {
     void process(MutableMapNode configuration);
 }

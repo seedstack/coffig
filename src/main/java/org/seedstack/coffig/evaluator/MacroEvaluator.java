@@ -16,9 +16,19 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MacroProcessor implements ConfigurationEvaluator {
+public class MacroEvaluator implements ConfigurationEvaluator {
     private static final Pattern MACRO_PATTERN = Pattern.compile("\\$\\{|\\}");
     private final LRUCache<String, String> cache = new LRUCache<>(10000);
+
+    @Override
+    public void invalidate() {
+        cache.clear();
+    }
+
+    @Override
+    public MacroEvaluator fork() {
+        return new MacroEvaluator();
+    }
 
     @Override
     public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {

@@ -14,7 +14,6 @@ import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigFunction;
 import org.seedstack.coffig.spi.ConfigFunctionHolder;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
-import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.utils.LRUCache;
 
 import java.lang.reflect.Method;
@@ -26,21 +25,39 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FunctionProcessor implements ConfigurationEvaluator {
+public class FunctionEvaluator implements ConfigurationEvaluator {
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\$([_a-zA-Z]\\w*)\\(|\\)");
     private final ConcurrentMap<String, FunctionRegistration> functions = new ConcurrentHashMap<>();
     private final LRUCache<String, String> cache = new LRUCache<>(10000);
-    private final ConfigurationMapper mapper;
+    private Coffig coffig;
 
-    public FunctionProcessor(Coffig coffig) {
-        this.mapper = coffig.getMapper();
+    @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
         for (ConfigFunctionHolder configFunctionHolder : ServiceLoader.load(ConfigFunctionHolder.class)) {
-            detectFunctions(configFunctionHolder);
+            detectFunctionsOfHolder(configFunctionHolder);
             configFunctionHolder.initialize(coffig);
         }
     }
 
-    private void detectFunctions(ConfigFunctionHolder configFunctionHolder) {
+    @Override
+    public void invalidate() {
+        cache.clear();
+    }
+
+    @Override
+    public FunctionEvaluator fork() {
+        FunctionEvaluator fork = new FunctionEvaluator();
+        fork.functions.putAll(functions);
+        return fork;
+    }
+
+    @Override
+    public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
+        return new ValueNode(processValue(rootNode, valueNode.value()));
+    }
+
+    private void detectFunctionsOfHolder(ConfigFunctionHolder configFunctionHolder) {
         for (Method method : configFunctionHolder.getClass().getDeclaredMethods()) {
             ConfigFunction annotation = method.getAnnotation(ConfigFunction.class);
             if (annotation != null) {
@@ -55,12 +72,6 @@ public class FunctionProcessor implements ConfigurationEvaluator {
         } else {
             method.setAccessible(true);
         }
-    }
-
-    @Override
-    public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
-        return new ValueNode(processValue(rootNode, valueNode.value()));
-
     }
 
     private String processValue(TreeNode rootNode, String value) {
@@ -122,7 +133,7 @@ public class FunctionProcessor implements ConfigurationEvaluator {
             // Map arguments according to the function parameter types
             Object[] mappedArguments = new Object[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                mappedArguments[i] = mapper.map(arguments[i], functionRegistration.argTypes[i]);
+                mappedArguments[i] = coffig.getMapper().map(arguments[i], functionRegistration.argTypes[i]);
             }
 
             // Invoke the function

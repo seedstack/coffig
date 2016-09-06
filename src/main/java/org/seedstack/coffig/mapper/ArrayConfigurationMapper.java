@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MutableArrayNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
@@ -17,10 +18,11 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArrayConfigurationMapper implements ConfigurationMapper {
-    private final ConfigurationMapper mapper;
+    private Coffig coffig;
 
-    public ArrayConfigurationMapper(ConfigurationMapper mapper) {
-        this.mapper = mapper;
+    @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
     }
 
     @Override
@@ -34,7 +36,7 @@ public class ArrayConfigurationMapper implements ConfigurationMapper {
         TreeNode[] values = treeNode.items();
         Object array = Array.newInstance(componentType, values.length);
         AtomicInteger index = new AtomicInteger();
-        Arrays.stream(values).map(childNode -> mapper.map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));
+        Arrays.stream(values).map(childNode -> coffig.getMapper().map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));
         return array;
     }
 
@@ -44,7 +46,7 @@ public class ArrayConfigurationMapper implements ConfigurationMapper {
         Class componentType = ((Class) type).getComponentType();
         int length = Array.getLength(object);
         for (int i = 0; i < length; i++) {
-            TreeNode treeNode = mapper.unmap(Array.get(object, i), componentType);
+            TreeNode treeNode = coffig.getMapper().unmap(Array.get(object, i), componentType);
             if (treeNode != null) {
                 mutableArrayNode.add(treeNode);
             }

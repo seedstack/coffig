@@ -7,13 +7,18 @@
  */
 package org.seedstack.coffig.processor;
 
-import org.seedstack.coffig.utils.AbstractComposite;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
+import org.seedstack.coffig.utils.AbstractComposite;
 
 public class CompositeProcessor extends AbstractComposite<ConfigurationProcessor> implements ConfigurationProcessor {
     public CompositeProcessor(ConfigurationProcessor... items) {
         super(items);
+    }
+
+    @Override
+    protected CompositeProcessor doFork() {
+        return new CompositeProcessor();
     }
 
     @Override
@@ -22,10 +27,5 @@ public class CompositeProcessor extends AbstractComposite<ConfigurationProcessor
             processor.process(configuration);
         }
         dirty = false;
-    }
-
-    @Override
-    protected ConfigurationProcessor doFork() {
-        return new CompositeProcessor();
     }
 }

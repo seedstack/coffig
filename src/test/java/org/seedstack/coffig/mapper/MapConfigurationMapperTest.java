@@ -16,9 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.seedstack.coffig.fixture.Initializer.initialize;
 
 public class MapConfigurationMapperTest {
-    private MapConfigurationMapper mapConfigurationMapper = new MapConfigurationMapper(new DefaultMapper());
+    private MapConfigurationMapper mapConfigurationMapper = initialize(new MapConfigurationMapper());
     private Map<String, Integer> map1 = new HashMap<String, Integer>() {{
         put("key1", 1);
         put("key2", 2);

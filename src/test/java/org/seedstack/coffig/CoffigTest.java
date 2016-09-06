@@ -11,7 +11,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.fixture.SomeEnum;
-import org.seedstack.coffig.mapper.DefaultMapper;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
@@ -45,8 +44,7 @@ public class CoffigTest {
 
     @Before
     public void setUp() throws Exception {
-        coffig = new Coffig();
-        coffig.setMapper(new DefaultMapper());
+        coffig = Coffig.builder().withDefaultMapper().build();
     }
 
     @Test

@@ -14,9 +14,7 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 import java.util.Map;
 
 public class EnvironmentVariableProvider implements ConfigurationProvider {
-    private static final int MINIMUM_POLL_INTERVAL = 2000;
     private Map<String, String> latestEnv;
-    private long latestPollTime = Long.MAX_VALUE;
 
     @Override
     public MapNode provide() {
@@ -28,18 +26,12 @@ public class EnvironmentVariableProvider implements ConfigurationProvider {
 
     @Override
     public boolean isDirty() {
-        long pollTime = System.currentTimeMillis();
-        if (pollTime - latestPollTime > MINIMUM_POLL_INTERVAL) {
-            Map<String, String> previousEnv = latestEnv;
-            fetchEnvironment();
-            return !latestEnv.equals(previousEnv);
-        } else {
-            return false;
-        }
+        Map<String, String> previousEnv = latestEnv;
+        fetchEnvironment();
+        return !latestEnv.equals(previousEnv);
     }
 
     private void fetchEnvironment() {
         latestEnv = System.getenv();
-        latestPollTime = System.currentTimeMillis();
     }
 }

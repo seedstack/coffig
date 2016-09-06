@@ -14,9 +14,7 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 import java.util.Properties;
 
 public class SystemPropertyProvider implements ConfigurationProvider {
-    private static final int MINIMUM_POLL_INTERVAL = 2000;
     private Properties latestSystemProperties;
-    private long latestPollTime = Long.MAX_VALUE;
 
     @Override
     public MapNode provide() {
@@ -28,18 +26,12 @@ public class SystemPropertyProvider implements ConfigurationProvider {
 
     @Override
     public boolean isDirty() {
-        long pollTime = System.currentTimeMillis();
-        if (pollTime - latestPollTime > MINIMUM_POLL_INTERVAL) {
-            Properties previousSystemProperties = latestSystemProperties;
-            fetchSystemProperties();
-            return !latestSystemProperties.equals(previousSystemProperties);
-        } else {
-            return false;
-        }
+        Properties previousSystemProperties = latestSystemProperties;
+        fetchSystemProperties();
+        return !latestSystemProperties.equals(previousSystemProperties);
     }
 
     private void fetchSystemProperties() {
         latestSystemProperties = System.getProperties();
-        latestPollTime = System.currentTimeMillis();
     }
 }

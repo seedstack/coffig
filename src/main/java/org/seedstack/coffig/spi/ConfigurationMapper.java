@@ -11,7 +11,7 @@ import org.seedstack.coffig.TreeNode;
 
 import java.lang.reflect.Type;
 
-public interface ConfigurationMapper extends ChangeDetectable, Forkable {
+public interface ConfigurationMapper extends ConfigurationComponent {
 
     boolean canHandle(Type type);
 

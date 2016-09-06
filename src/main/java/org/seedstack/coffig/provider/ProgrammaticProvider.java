@@ -13,21 +13,36 @@ import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.spi.ConfigurationComponent;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class ProgrammaticProvider implements ConfigurationProvider {
-    private final ConfigurationMapper mapper;
-    private final Map<Supplier<Object>, String> suppliers = new HashMap<>();
-    private volatile boolean dirty = true;
+import static org.seedstack.coffig.utils.Utils.resolvePath;
 
-    public ProgrammaticProvider(ConfigurationMapper mapper) {
-        this.mapper = mapper;
+public class ProgrammaticProvider implements ConfigurationProvider, ConfigurationComponent {
+    private final Map<Supplier<Object>, String> suppliers = new HashMap<>();
+    private Coffig coffig;
+    private boolean dirty = true;
+
+    @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
+    }
+
+    @Override
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    @Override
+    public ConfigurationProvider fork() {
+        ProgrammaticProvider fork = new ProgrammaticProvider();
+        fork.suppliers.putAll(suppliers);
+        return fork;
     }
 
     @Override
@@ -42,18 +57,6 @@ public class ProgrammaticProvider implements ConfigurationProvider {
         return mapNode;
     }
 
-    @Override
-    public ConfigurationProvider fork() {
-        ProgrammaticProvider fork = new ProgrammaticProvider(mapper);
-        fork.suppliers.putAll(suppliers);
-        return fork;
-    }
-
-    @Override
-    public boolean isDirty() {
-        return dirty;
-    }
-
     public void addObject(Object object) {
         Arrays.stream(object.getClass().getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(Config.class))
@@ -64,7 +67,7 @@ public class ProgrammaticProvider implements ConfigurationProvider {
                     } catch (Exception e) {
                         throw new ConfigurationException("Cannot supply configuration object from " + method.toString());
                     }
-                }, Coffig.resolvePath(method)));
+                }, resolvePath(method)));
     }
 
     public void addSupplier(Supplier<Object> supplier) {
@@ -79,10 +82,10 @@ public class ProgrammaticProvider implements ConfigurationProvider {
 
     private TreeNode retrieveTreeNode(Supplier<Object> supplier) {
         Object o = supplier.get();
-        TreeNode treeNode = mapper.unmap(o, o.getClass());
+        TreeNode treeNode = coffig.getMapper().unmap(o, o.getClass());
         String prefix = suppliers.get(supplier);
         if (prefix == null || prefix.isEmpty()) {
-            prefix = Coffig.resolvePath(o.getClass());
+            prefix = resolvePath(o.getClass());
         }
         if (prefix != null && !prefix.isEmpty()) {
             MutableMapNode mapNode = new MutableMapNode();

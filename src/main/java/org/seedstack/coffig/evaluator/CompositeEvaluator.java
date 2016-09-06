@@ -7,14 +7,19 @@
  */
 package org.seedstack.coffig.evaluator;
 
-import org.seedstack.coffig.utils.AbstractComposite;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.coffig.utils.AbstractComposite;
 
 public class CompositeEvaluator extends AbstractComposite<ConfigurationEvaluator> implements ConfigurationEvaluator {
     public CompositeEvaluator(ConfigurationEvaluator... items) {
         super(items);
+    }
+
+    @Override
+    protected ConfigurationEvaluator doFork() {
+        return new CompositeEvaluator();
     }
 
     @Override
@@ -24,10 +29,5 @@ public class CompositeEvaluator extends AbstractComposite<ConfigurationEvaluator
             result = evaluator.evaluate(rootNode, result);
         }
         return result;
-    }
-
-    @Override
-    protected ConfigurationEvaluator doFork() {
-        return new CompositeEvaluator();
     }
 }

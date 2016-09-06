@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.fixture.AccessorFixture;
 import org.seedstack.coffig.fixture.EmptyPrefixFixture;
+import org.seedstack.coffig.fixture.Initializer;
 import org.seedstack.coffig.fixture.MultiTypesFixture;
 import org.seedstack.coffig.fixture.PrefixFixture;
 import org.seedstack.coffig.fixture.SingleValueFixture;
@@ -20,6 +21,7 @@ import org.seedstack.coffig.node.NamedNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.seedstack.coffig.fixture.Initializer.initialize;
 
 public class ObjectConfigurationMapperTest {
     private final MapNode accessorFixture = new MapNode(new NamedNode("field1", "field1"), new NamedNode("field2", "field2"));
@@ -71,19 +73,18 @@ public class ObjectConfigurationMapperTest {
             ))
     );
 
-    private DefaultMapper defaultMapper = new DefaultMapper();
-    private ObjectConfigurationMapper<AccessorFixture> accessorMapper = new ObjectConfigurationMapper<>(defaultMapper, AccessorFixture.class);
-    private ObjectConfigurationMapper<MultiTypesFixture> multiTypesMapper = new ObjectConfigurationMapper<>(defaultMapper, MultiTypesFixture.class);
-    private ObjectConfigurationMapper<PrefixFixture> prefixMapper = new ObjectConfigurationMapper<>(defaultMapper, PrefixFixture.class);
-    private ObjectConfigurationMapper<EmptyPrefixFixture> emptyPrefixMapper = new ObjectConfigurationMapper<>(defaultMapper, EmptyPrefixFixture.class);
-    private ObjectConfigurationMapper<SingleValueFixture> singleValueMapper = new ObjectConfigurationMapper<>(defaultMapper, SingleValueFixture.class);
+    private ObjectConfigurationMapper<AccessorFixture> accessorMapper = initialize(new ObjectConfigurationMapper<>(AccessorFixture.class));
+    private ObjectConfigurationMapper<MultiTypesFixture> multiTypesMapper = initialize(new ObjectConfigurationMapper<>(MultiTypesFixture.class));
+    private ObjectConfigurationMapper<PrefixFixture> prefixMapper = initialize(new ObjectConfigurationMapper<>(PrefixFixture.class));
+    private ObjectConfigurationMapper<EmptyPrefixFixture> emptyPrefixMapper = initialize(new ObjectConfigurationMapper<>(EmptyPrefixFixture.class));
+    private ObjectConfigurationMapper<SingleValueFixture> singleValueMapper = initialize(new ObjectConfigurationMapper<>(SingleValueFixture.class));
 
     @Test
     public void testField() {
         AccessorFixture accessorFixture = accessorMapper.map(this.accessorFixture);
         assertThat(accessorFixture.getField1()).isEqualTo("field1");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, accessorFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(accessorFixture)).unmap();
         assertThat(treeNode.get("field1").get().value()).isEqualTo("field1");
     }
 
@@ -92,7 +93,7 @@ public class ObjectConfigurationMapperTest {
         AccessorFixture accessorFixture = accessorMapper.map(this.accessorFixture);
         assertThat(accessorFixture.getField2()).isEqualTo("field22");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, accessorFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(accessorFixture)).unmap();
         assertThat(treeNode.get("field2").get().value()).isEqualTo("field22");
     }
 
@@ -102,7 +103,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(accessorFixture).isNotNull();
         assertThat(accessorFixture.getField1()).isEqualTo("default");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, accessorFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(accessorFixture)).unmap();
         assertThat(treeNode.get("field1").get().value()).isEqualTo("default");
         assertThat(treeNode.get("field2").isPresent()).isFalse();
     }
@@ -120,7 +121,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(multiTypesFixture.aShort).isEqualTo((short) 24);
         assertThat(multiTypesFixture.aString).isEqualTo("aString");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("aBoolean").get().value()).isEqualTo("true");
         assertThat(treeNode.get("aByte").get().value()).isEqualTo("101");
         assertThat(treeNode.get("aChar").get().value()).isEqualTo("A");
@@ -145,7 +146,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(multiTypesFixture.someDouble).containsOnly(3.14d, 3.14d, 3.14d);
         assertThat(multiTypesFixture.someFloat).containsOnly(3.14f, 3.14f, 3.14f);
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("someBoolean").get()).isEqualTo(new ArrayNode("true", "true", "true"));
         assertThat(treeNode.get("someChar").get()).isEqualTo(new ArrayNode("A", "A", "A"));
         assertThat(treeNode.get("someInt").get()).isEqualTo(new ArrayNode("42", "42", "42"));
@@ -162,7 +163,7 @@ public class ObjectConfigurationMapperTest {
         MultiTypesFixture multiTypesFixture = multiTypesMapper.map(this.multiTypesFixture);
         assertThat(multiTypesFixture.stringList).containsOnly("aString", "aString", "aString");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("stringList").get()).isEqualTo(new ArrayNode("aString", "aString", "aString"));
     }
 
@@ -171,7 +172,7 @@ public class ObjectConfigurationMapperTest {
         MultiTypesFixture multiTypesFixture = multiTypesMapper.map(this.multiTypesFixture);
         assertThat(multiTypesFixture.stringSet).containsOnly("aString", "aString", "aString");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("stringList").get()).isEqualTo(new ArrayNode("aString", "aString", "aString"));
     }
 
@@ -181,7 +182,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(multiTypesFixture.accessorFixture.getField1()).isEqualTo("field1");
         assertThat(multiTypesFixture.accessorFixture.getField2()).isEqualTo("field22");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("accessorFixture.field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("accessorFixture.field2").get().value()).isEqualTo("field22");
     }
@@ -193,7 +194,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(multiTypesFixture.fixtureArray[0].getField1()).isEqualTo("field1");
         assertThat(multiTypesFixture.fixtureArray[1].getField2()).isEqualTo("field22");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("fixtureArray").get().items().length).isEqualTo(2);
         assertThat(treeNode.get("fixtureArray[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureArray[1].field2").get().value()).isEqualTo("field22");
@@ -206,7 +207,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(multiTypesFixture.fixtureList.get(0).getField1()).isEqualTo("field1");
         assertThat(multiTypesFixture.fixtureList.get(1).getField2()).isEqualTo("field22");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("fixtureList").get().items().length).isEqualTo(2);
         assertThat(treeNode.get("fixtureList[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureList[1].field2").get().value()).isEqualTo("field22");
@@ -219,7 +220,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(multiTypesFixture.fixtureSet.iterator().next().getField1()).isEqualTo("field1");
         assertThat(multiTypesFixture.fixtureSet.iterator().next().getField2()).isEqualTo("field22");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("fixtureSet").get().items().length).isEqualTo(2);
         assertThat(treeNode.get("fixtureSet[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureSet[1].field2").get().value()).isEqualTo("field22");
@@ -230,7 +231,7 @@ public class ObjectConfigurationMapperTest {
         MultiTypesFixture multiTypesFixture = multiTypesMapper.map(this.multiTypesFixture);
         assertThat(multiTypesFixture.aMap).containsOnly(entry(1, true), entry(2, false));
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, multiTypesFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(multiTypesFixture)).unmap();
         assertThat(treeNode.get("aMap.1").get().value()).isEqualTo("true");
         assertThat(treeNode.get("aMap.2").get().value()).isEqualTo("false");
     }
@@ -242,7 +243,7 @@ public class ObjectConfigurationMapperTest {
         assertThat(prefixFixture.accessorFixture.getField1()).isEqualTo("field1");
         assertThat(prefixFixture.accessorFixture.getField2()).isEqualTo("field22");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, prefixFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(prefixFixture)).unmap();
         assertThat(treeNode.get("aString").get().value()).isEqualTo("theValue");
         assertThat(treeNode.get("baz.field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("baz.field2").get().value()).isEqualTo("field22");
@@ -259,7 +260,7 @@ public class ObjectConfigurationMapperTest {
         EmptyPrefixFixture emptyPrefixFixture = emptyPrefixMapper.map(this.emptyPrefixFixture);
         assertThat(emptyPrefixFixture.aString).isEqualTo("theValue");
 
-        TreeNode treeNode = new ObjectConfigurationMapper<>(defaultMapper, emptyPrefixFixture).unmap();
+        TreeNode treeNode = Initializer.<ObjectConfigurationMapper>initialize(new ObjectConfigurationMapper<>(emptyPrefixFixture)).unmap();
         assertThat(treeNode.get("aString").get().value()).isEqualTo("theValue");
     }
 

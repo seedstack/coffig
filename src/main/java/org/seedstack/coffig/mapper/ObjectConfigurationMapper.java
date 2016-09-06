@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.SingleValue;
@@ -14,7 +15,7 @@ import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
+import org.seedstack.coffig.spi.ConfigurationComponent;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -28,15 +29,14 @@ import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 
-class ObjectConfigurationMapper<T> {
-    private final ConfigurationMapper mapper;
+class ObjectConfigurationMapper<T> implements ConfigurationComponent {
     private final Class<T> aClass;
     private final List<FieldInfo> fieldInfo;
     private final FieldInfo valueFieldInfo;
     private final T holder;
+    private Coffig coffig;
 
-    ObjectConfigurationMapper(ConfigurationMapper mapper, Class<T> aClass) {
-        this.mapper = mapper;
+    ObjectConfigurationMapper(Class<T> aClass) {
         this.aClass = aClass;
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
@@ -44,12 +44,60 @@ class ObjectConfigurationMapper<T> {
     }
 
     @SuppressWarnings("unchecked")
-    ObjectConfigurationMapper(ConfigurationMapper mapper, T object) {
-        this.mapper = mapper;
+    ObjectConfigurationMapper(T object) {
         this.aClass = (Class<T>) object.getClass();
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
         this.holder = object;
+    }
+
+    @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
+    }
+
+    T map(TreeNode rootNode) {
+        if (rootNode instanceof ValueNode && valueFieldInfo != null) {
+            try {
+                Object fieldValue = coffig.getMapper().map(rootNode, valueFieldInfo.type);
+                if (fieldValue != null) {
+                    valueFieldInfo.consumer.accept(fieldValue);
+                }
+            } catch (Exception e) {
+                throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", valueFieldInfo.name, aClass.getCanonicalName()), e);
+            }
+        } else if (rootNode instanceof MapNode) {
+            fieldInfo.forEach(fieldInfo -> {
+                try {
+                    Object fieldValue = coffig.getMapper().map(
+                            rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
+                            fieldInfo.type
+                    );
+                    if (fieldValue != null) {
+                        fieldInfo.consumer.accept(fieldValue);
+                    }
+                } catch (Exception e) {
+                    throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
+                }
+            });
+        }
+
+        return holder;
+    }
+
+    TreeNode unmap() {
+        MutableMapNode rootNode = new MutableMapNode();
+        fieldInfo.forEach(fieldInfo -> {
+            try {
+                TreeNode unmapped = coffig.getMapper().unmap(fieldInfo.supplier.get(), fieldInfo.type);
+                if (unmapped != null) {
+                    rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
+                }
+            } catch (Exception e) {
+                throw new ConfigurationException(String.format("Unable to extract value from field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
+            }
+        });
+        return rootNode;
     }
 
     private FieldInfo getValueFieldInfo() {
@@ -75,50 +123,6 @@ class ObjectConfigurationMapper<T> {
 
     private List<FieldInfo> getFieldInfo() {
         return Arrays.stream(aClass.getDeclaredFields()).map(FieldInfo::new).collect(toList());
-    }
-
-    T map(TreeNode rootNode) {
-        if (rootNode instanceof ValueNode && valueFieldInfo != null) {
-            try {
-                Object fieldValue = mapper.map(rootNode, valueFieldInfo.type);
-                if (fieldValue != null) {
-                    valueFieldInfo.consumer.accept(fieldValue);
-                }
-            } catch (Exception e) {
-                throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", valueFieldInfo.name, aClass.getCanonicalName()), e);
-            }
-        } else if (rootNode instanceof MapNode) {
-            fieldInfo.forEach(fieldInfo -> {
-                try {
-                    Object fieldValue = mapper.map(
-                            rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
-                            fieldInfo.type
-                    );
-                    if (fieldValue != null) {
-                        fieldInfo.consumer.accept(fieldValue);
-                    }
-                } catch (Exception e) {
-                    throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
-                }
-            });
-        }
-
-        return holder;
-    }
-
-    TreeNode unmap() {
-        MutableMapNode rootNode = new MutableMapNode();
-        fieldInfo.forEach(fieldInfo -> {
-            try {
-                TreeNode unmapped = mapper.unmap(fieldInfo.supplier.get(), fieldInfo.type);
-                if (unmapped != null) {
-                    rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
-                }
-            } catch (Exception e) {
-                throw new ConfigurationException(String.format("Unable to extract value from field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
-            }
-        });
-        return rootNode;
     }
 
     private class FieldInfo {

@@ -15,9 +15,4 @@ public class EmptyProvider implements ConfigurationProvider {
     public MapNode provide() {
         return new MapNode();
     }
-
-    @Override
-    public boolean isDirty() {
-        return false;
-    }
 }

@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class InMemoryProvider implements ConfigurationProvider {
     private final ConcurrentMap<String, String> data = new ConcurrentHashMap<>();
-    private volatile boolean dirty = true;
+    private boolean dirty = true;
 
     @Override
     public MapNode provide() {

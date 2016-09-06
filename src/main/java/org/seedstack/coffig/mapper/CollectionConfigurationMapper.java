@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ArrayNode;
@@ -24,10 +25,11 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public class CollectionConfigurationMapper implements ConfigurationMapper {
-    private final ConfigurationMapper mapper;
+    private Coffig coffig;
 
-    public CollectionConfigurationMapper(ConfigurationMapper mapper) {
-        this.mapper = mapper;
+    @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
     }
 
     @Override
@@ -47,11 +49,11 @@ public class CollectionConfigurationMapper implements ConfigurationMapper {
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
 
         if (List.class.isAssignableFrom(rawClass)) {
-            return Arrays.stream(treeNode.items()).map(childNode -> mapper.map(childNode, itemType)).collect(toList());
+            return Arrays.stream(treeNode.items()).map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toList());
         } else if (Set.class.isAssignableFrom(rawClass)) {
-            return Arrays.stream(treeNode.items()).map(childNode -> mapper.map(childNode, itemType)).collect(toSet());
+            return Arrays.stream(treeNode.items()).map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toSet());
         } else {
-            return Arrays.stream(treeNode.items()).map(childNode -> mapper.map(childNode, itemType)).collect(toCollection(() -> {
+            return Arrays.stream(treeNode.items()).map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toCollection(() -> {
                 try {
                     return (Collection<Object>) rawClass.newInstance();
                 } catch (Exception e) {
@@ -64,6 +66,6 @@ public class CollectionConfigurationMapper implements ConfigurationMapper {
     @Override
     public TreeNode unmap(Object object, Type type) {
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
-        return new ArrayNode(((Collection<?>) object).stream().map(item -> mapper.unmap(item, itemType)).collect(toList()));
+        return new ArrayNode(((Collection<?>) object).stream().map(item -> coffig.getMapper().unmap(item, itemType)).collect(toList()));
     }
 }

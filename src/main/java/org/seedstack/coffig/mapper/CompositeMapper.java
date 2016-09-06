@@ -7,17 +7,24 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.utils.AbstractComposite;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
+import org.seedstack.coffig.utils.AbstractComposite;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+
+import static org.seedstack.coffig.utils.Utils.getRawClass;
 
 public class CompositeMapper extends AbstractComposite<ConfigurationMapper> implements ConfigurationMapper {
+    public CompositeMapper(ConfigurationMapper... items) {
+        super(items);
+    }
+
+    @Override
+    protected CompositeMapper doFork() {
+        return new CompositeMapper();
+    }
+
     @Override
     public boolean canHandle(Type type) {
         return items.values().stream().anyMatch(item -> item.canHandle(type));
@@ -34,7 +41,9 @@ public class CompositeMapper extends AbstractComposite<ConfigurationMapper> impl
             }
         }
 
-        return new ObjectConfigurationMapper<>(this, getRawClass(type)).map(treeNode);
+        ObjectConfigurationMapper<?> objectConfigurationMapper = new ObjectConfigurationMapper<>(getRawClass(type));
+        objectConfigurationMapper.initialize(coffig);
+        return objectConfigurationMapper.map(treeNode);
     }
 
     public TreeNode unmap(Object object, Type type) {
@@ -48,28 +57,8 @@ public class CompositeMapper extends AbstractComposite<ConfigurationMapper> impl
             }
         }
 
-        return new ObjectConfigurationMapper<>(this, object).unmap().freeze();
-    }
-
-    @Override
-    protected ConfigurationMapper doFork() {
-        return new CompositeMapper();
-    }
-
-    public static Class<?> getRawClass(Type type) {
-        if (type instanceof Class<?>) {
-            return (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type rawType = parameterizedType.getRawType();
-            return (Class<?>) rawType;
-        } else if (type instanceof GenericArrayType) {
-            Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            return Array.newInstance(getRawClass(componentType), 0).getClass();
-        } else if (type instanceof TypeVariable) {
-            return Object.class;
-        } else {
-            throw new IllegalArgumentException("Unsupported type " + type.getTypeName());
-        }
+        ObjectConfigurationMapper<Object> objectConfigurationMapper = new ObjectConfigurationMapper<>(object);
+        objectConfigurationMapper.initialize(coffig);
+        return objectConfigurationMapper.unmap().freeze();
     }
 }
