@@ -29,14 +29,14 @@ import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 
-class ObjectConfigurationMapper<T> implements ConfigurationComponent {
+class ObjectMapper<T> implements ConfigurationComponent {
     private final Class<T> aClass;
     private final List<FieldInfo> fieldInfo;
     private final FieldInfo valueFieldInfo;
     private final T holder;
     private Coffig coffig;
 
-    ObjectConfigurationMapper(Class<T> aClass) {
+    ObjectMapper(Class<T> aClass) {
         this.aClass = aClass;
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
@@ -44,7 +44,7 @@ class ObjectConfigurationMapper<T> implements ConfigurationComponent {
     }
 
     @SuppressWarnings("unchecked")
-    ObjectConfigurationMapper(T object) {
+    ObjectMapper(T object) {
         this.aClass = (Class<T>) object.getClass();
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();

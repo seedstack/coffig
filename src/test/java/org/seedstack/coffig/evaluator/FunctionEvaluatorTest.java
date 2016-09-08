@@ -9,6 +9,8 @@ package org.seedstack.coffig.evaluator;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.mapper.EvaluatingMapper;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.NamedNode;
@@ -17,10 +19,10 @@ import org.seedstack.coffig.node.ValueNode;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.seedstack.coffig.fixture.Initializer.initialize;
 
 public class FunctionEvaluatorTest {
-    private FunctionEvaluator functionEvaluator = initialize(new FunctionEvaluator());
+    private FunctionEvaluator functionEvaluator = buildFunctionEvaluator();
+
     private MutableMapNode config = new MutableMapNode(
             new NamedNode("object", new MutableMapNode(
                     new NamedNode("field1", "hello"),
@@ -46,6 +48,7 @@ public class FunctionEvaluatorTest {
     }
 
     private static class MappedClass {
+
         private String field1;
         private List<String> field2;
     }
@@ -60,7 +63,7 @@ public class FunctionEvaluatorTest {
     }
 
     @Test
-    public void tesLiteralArgument() throws Exception {
+    public void testLiteralArgument() throws Exception {
         assertThat(evaluate("test.literal")).isEqualTo("Hello World?");
     }
 
@@ -112,5 +115,15 @@ public class FunctionEvaluatorTest {
 
     private static String prefix() {
         return "!";
+    }
+
+    private FunctionEvaluator buildFunctionEvaluator() {
+        return ((CompositeEvaluator) ((EvaluatingMapper) Coffig
+                .builder()
+                .withEvaluators(new FunctionEvaluator())
+                .build()
+                .getMapper())
+                .getEvaluator())
+                .get(FunctionEvaluator.class);
     }
 }

@@ -26,6 +26,7 @@ public class CoffigBuilder {
     private final CompositeProvider compositeProvider;
     private final CompositeProcessor compositeProcessor;
     private final CompositeEvaluator compositeEvaluator;
+    private boolean addDefaultMapper = true;
 
     CoffigBuilder(Coffig coffig) {
         this.coffig = coffig;
@@ -39,8 +40,8 @@ public class CoffigBuilder {
         coffig.setProcessor(compositeProcessor);
     }
 
-    public CoffigBuilder withDefaultMapper() {
-        compositeMapper.add(new DefaultMapper());
+    public CoffigBuilder withoutDefaultMapper() {
+        addDefaultMapper = false;
         return this;
     }
 
@@ -65,6 +66,9 @@ public class CoffigBuilder {
     }
 
     public Coffig build() {
+        if (addDefaultMapper) {
+            compositeMapper.add(new DefaultMapper());
+        }
         coffig.initialize();
         return coffig;
     }

@@ -8,7 +8,6 @@
 package org.seedstack.coffig.evaluator;
 
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigFunction;
@@ -22,6 +21,7 @@ import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,14 +29,17 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\$([_a-zA-Z]\\w*)\\(|\\)");
     private final ConcurrentMap<String, FunctionRegistration> functions = new ConcurrentHashMap<>();
     private final LRUCache<String, String> cache = new LRUCache<>(10000);
+    private final AtomicBoolean scanned = new AtomicBoolean();
     private Coffig coffig;
 
     @Override
     public void initialize(Coffig coffig) {
         this.coffig = coffig;
-        for (ConfigFunctionHolder configFunctionHolder : ServiceLoader.load(ConfigFunctionHolder.class)) {
-            detectFunctionsOfHolder(configFunctionHolder);
-            configFunctionHolder.initialize(coffig);
+        if (!scanned.getAndSet(true)) {
+            for (ConfigFunctionHolder configFunctionHolder : ServiceLoader.load(ConfigFunctionHolder.class)) {
+                detectFunctionsOfHolder(configFunctionHolder);
+                configFunctionHolder.initialize(coffig);
+            }
         }
     }
 
@@ -49,6 +52,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     public FunctionEvaluator fork() {
         FunctionEvaluator fork = new FunctionEvaluator();
         fork.functions.putAll(functions);
+        fork.scanned.getAndSet(scanned.get());
         return fork;
     }
 
@@ -126,7 +130,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     private String invokeFunction(String functionName, TreeNode[] arguments) {
         FunctionRegistration functionRegistration = functions.get(functionName);
         if (functionRegistration == null) {
-            throw new IllegalArgumentException("Unknown configuration function " + functionName);
+            return "";
         }
 
         try {
@@ -144,7 +148,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
                 return "";
             }
         } catch (Exception e) {
-            throw new ConfigurationException("Error when invoking function " + functionName, e);
+            return "";
         }
     }
 

@@ -41,9 +41,9 @@ public class CompositeMapper extends AbstractComposite<ConfigurationMapper> impl
             }
         }
 
-        ObjectConfigurationMapper<?> objectConfigurationMapper = new ObjectConfigurationMapper<>(getRawClass(type));
-        objectConfigurationMapper.initialize(coffig);
-        return objectConfigurationMapper.map(treeNode);
+        ObjectMapper<?> objectMapper = new ObjectMapper<>(getRawClass(type));
+        objectMapper.initialize(coffig);
+        return objectMapper.map(treeNode);
     }
 
     public TreeNode unmap(Object object, Type type) {
@@ -57,8 +57,8 @@ public class CompositeMapper extends AbstractComposite<ConfigurationMapper> impl
             }
         }
 
-        ObjectConfigurationMapper<Object> objectConfigurationMapper = new ObjectConfigurationMapper<>(object);
-        objectConfigurationMapper.initialize(coffig);
-        return objectConfigurationMapper.unmap().freeze();
+        ObjectMapper<Object> objectMapper = new ObjectMapper<>(object);
+        objectMapper.initialize(coffig);
+        return objectMapper.unmap().freeze();
     }
 }

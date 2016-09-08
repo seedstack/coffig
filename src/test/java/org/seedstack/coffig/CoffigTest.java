@@ -10,7 +10,7 @@ package org.seedstack.coffig;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
-import org.seedstack.coffig.fixture.SomeEnum;
+import org.seedstack.coffig.fixture.EnumFixture;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
@@ -34,7 +34,7 @@ public class CoffigTest {
     private static class App {
         String id;
         String name;
-        SomeEnum someEnum;
+        EnumFixture enumFixture;
         String[] users;
         String[] items;
         String[] elements;
@@ -44,7 +44,7 @@ public class CoffigTest {
 
     @Before
     public void setUp() throws Exception {
-        coffig = Coffig.builder().withDefaultMapper().build();
+        coffig = Coffig.builder().build();
     }
 
     @Test

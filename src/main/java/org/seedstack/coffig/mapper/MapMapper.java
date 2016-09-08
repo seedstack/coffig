@@ -23,7 +23,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 import static org.seedstack.coffig.utils.Utils.instantiateDefault;
 
-public class MapConfigurationMapper implements ConfigurationMapper {
+public class MapMapper implements ConfigurationMapper {
     private Coffig coffig;
 
     @Override
@@ -33,7 +33,7 @@ public class MapConfigurationMapper implements ConfigurationMapper {
 
     @Override
     public ConfigurationComponent fork() {
-        return new MapConfigurationMapper();
+        return new MapMapper();
     }
 
     @Override

@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class CollectionConfigurationMapper implements ConfigurationMapper {
+public class CollectionMapper implements ConfigurationMapper {
     private Coffig coffig;
 
     @Override

@@ -8,15 +8,18 @@
 package org.seedstack.coffig.provider;
 
 import org.junit.Test;
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.fixture.PrefixFixture;
 import org.seedstack.coffig.fixture.ProgrammaticFixture;
 import org.seedstack.coffig.node.MapNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.seedstack.coffig.fixture.Initializer.initialize;
 
 public class ProgrammaticProviderTest {
-    private ProgrammaticProvider programmaticProvider = initialize(new ProgrammaticProvider());
+    private ProgrammaticProvider programmaticProvider = ((CompositeProvider) Coffig
+            .builder()
+            .withProviders(new ProgrammaticProvider())
+            .build().getProvider()).get(ProgrammaticProvider.class);
 
     @Test
     public void testProvideEmpty() throws Exception {

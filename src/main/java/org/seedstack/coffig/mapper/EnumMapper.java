@@ -13,7 +13,7 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.Type;
 
-public class EnumConfigurationMapper implements ConfigurationMapper {
+public class EnumMapper implements ConfigurationMapper {
     @Override
     public boolean canHandle(Type type) {
         return type instanceof Class && ((Class<?>) type).isEnum();

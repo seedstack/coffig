@@ -7,7 +7,7 @@
  */
 package org.seedstack.coffig.fixture;
 
-public enum SomeEnum {
+public enum EnumFixture {
     FOO,
     BAR
 }
