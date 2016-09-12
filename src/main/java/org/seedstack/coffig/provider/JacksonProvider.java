@@ -24,11 +24,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class JacksonProvider implements ConfigurationProvider {
     private final List<URL> sources = new ArrayList<>();
     private final ObjectMapper jacksonMapper = new ObjectMapper(new YAMLFactory());
-    private boolean dirty = true;
+    private final AtomicBoolean dirty = new AtomicBoolean(true);
 
     @Override
     public MapNode provide() {
@@ -37,7 +38,7 @@ public class JacksonProvider implements ConfigurationProvider {
                 .map(this::buildTreeFromSource)
                 .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                 .orElse(new MapNode());
-        dirty = false;
+        dirty.set(false);
         return mapNode;
     }
 
@@ -50,7 +51,7 @@ public class JacksonProvider implements ConfigurationProvider {
 
     @Override
     public boolean isDirty() {
-        return dirty;
+        return dirty.get();
     }
 
     public JacksonProvider addSource(URL url) {
@@ -59,7 +60,7 @@ public class JacksonProvider implements ConfigurationProvider {
         }
 
         this.sources.add(url);
-        dirty = true;
+        dirty.set(true);
         return this;
     }
 

@@ -7,19 +7,22 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.spi.ConfigurationMapper;
+
 public class DefaultMapper extends CompositeMapper {
     public DefaultMapper() {
-        super();
-        add(new EnumMapper());
-        add(new ValueMapper());
-        add(new ArrayMapper());
-        add(new CollectionMapper());
-        add(new MapMapper());
-        add(new FileMapper());
+        super(
+                new EnumMapper(),
+                new ValueMapper(),
+                new ArrayMapper(),
+                new CollectionMapper(),
+                new MapMapper(),
+                new FileMapper()
+        );
     }
 
     @Override
-    protected DefaultMapper doFork() {
+    protected DefaultMapper doFork(ConfigurationMapper... items) {
         return new DefaultMapper();
     }
 }

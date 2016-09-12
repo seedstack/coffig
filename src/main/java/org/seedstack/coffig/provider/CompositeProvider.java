@@ -12,34 +12,33 @@ import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.seedstack.coffig.utils.AbstractComposite;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
 public class CompositeProvider extends AbstractComposite<ConfigurationProvider> implements ConfigurationProvider {
     public CompositeProvider(ConfigurationProvider... items) {
-        super(items);
+        super(ConfigurationProvider.class, items);
+    }
+
+    @Override
+    protected CompositeProvider doFork(ConfigurationProvider... items) {
+        return new CompositeProvider(items);
     }
 
     @Override
     public MapNode provide() {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
         try {
-            MapNode mapNode = forkJoinPool.submit(() -> items.values().parallelStream()
+            return forkJoinPool.submit(() -> Arrays.stream(items).parallel()
                     .map(ConfigurationProvider::provide)
                     .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                     .orElse(new MapNode())
             ).get();
-            dirty = false;
-            return mapNode;
         } catch (InterruptedException | ExecutionException e) {
             throw new ConfigurationException(e);
         } finally {
             forkJoinPool.shutdown();
         }
-    }
-
-    @Override
-    protected CompositeProvider doFork() {
-        return new CompositeProvider();
     }
 }

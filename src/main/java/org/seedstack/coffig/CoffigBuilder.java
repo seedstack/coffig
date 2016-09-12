@@ -18,26 +18,18 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class CoffigBuilder {
-    private final Coffig coffig;
-    private final CompositeMapper compositeMapper;
-    private final CompositeProvider compositeProvider;
-    private final CompositeProcessor compositeProcessor;
-    private final CompositeEvaluator compositeEvaluator;
+    private final List<ConfigurationMapper> mappers = new ArrayList<>();
+    private final List<ConfigurationProvider> providers = new ArrayList<>();
+    private final List<ConfigurationProcessor> processors = new ArrayList<>();
+    private final List<ConfigurationEvaluator> evaluators = new ArrayList<>();
     private boolean addDefaultMapper = true;
 
-    CoffigBuilder(Coffig coffig) {
-        this.coffig = coffig;
-        this.compositeMapper = new CompositeMapper();
-        this.compositeEvaluator = new CompositeEvaluator();
-        this.compositeProvider = new CompositeProvider();
-        this.compositeProcessor = new CompositeProcessor();
-
-        coffig.setMapper(new EvaluatingMapper().setMapper(compositeMapper).setEvaluator(compositeEvaluator));
-        coffig.setProvider(compositeProvider);
-        coffig.setProcessor(compositeProcessor);
+    CoffigBuilder() {
     }
 
     public CoffigBuilder withoutDefaultMapper() {
@@ -45,31 +37,38 @@ public class CoffigBuilder {
         return this;
     }
 
-    public CoffigBuilder withMappers(ConfigurationMapper... configurationMappers) {
-        Arrays.stream(configurationMappers).forEachOrdered(compositeMapper::add);
+    public CoffigBuilder withMappers(ConfigurationMapper... mappers) {
+        this.mappers.addAll(Arrays.asList(mappers));
         return this;
     }
 
-    public CoffigBuilder withProviders(ConfigurationProvider... configurationProviders) {
-        Arrays.stream(configurationProviders).forEachOrdered(compositeProvider::add);
+    public CoffigBuilder withProviders(ConfigurationProvider... providers) {
+        this.providers.addAll(Arrays.asList(providers));
         return this;
     }
 
-    public CoffigBuilder withProcessors(ConfigurationProcessor... configurationProcessors) {
-        Arrays.stream(configurationProcessors).forEachOrdered(compositeProcessor::add);
+    public CoffigBuilder withProcessors(ConfigurationProcessor... processors) {
+        this.processors.addAll(Arrays.asList(processors));
         return this;
     }
 
-    public CoffigBuilder withEvaluators(ConfigurationEvaluator... configurationEvaluators) {
-        Arrays.stream(configurationEvaluators).forEachOrdered(compositeEvaluator::add);
+    public CoffigBuilder withEvaluators(ConfigurationEvaluator... evaluators) {
+        this.evaluators.addAll(Arrays.asList(evaluators));
         return this;
     }
 
     public Coffig build() {
         if (addDefaultMapper) {
-            compositeMapper.add(new DefaultMapper());
+            mappers.add(0, new DefaultMapper());
         }
-        coffig.initialize();
-        return coffig;
+
+        return new Coffig(
+                new EvaluatingMapper(
+                        new CompositeMapper(mappers.toArray(new ConfigurationMapper[mappers.size()])),
+                        new CompositeEvaluator(evaluators.toArray(new ConfigurationEvaluator[evaluators.size()]))
+                ),
+                new CompositeProvider(providers.toArray(new ConfigurationProvider[providers.size()])),
+                new CompositeProcessor(processors.toArray(new ConfigurationProcessor[processors.size()]))
+        );
     }
 }

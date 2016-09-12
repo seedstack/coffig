@@ -14,28 +14,22 @@ import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.seedstack.coffig.utils.Utils.instantiateDefault;
 import static org.seedstack.coffig.utils.Utils.resolvePath;
 
 public class Coffig {
-    private static final int MINIMUM_DIRTY_POLL_INTERVAL = 2000;
+    private final ConfigurationMapper mapper;
+    private final ConfigurationProvider provider;
+    private final ConfigurationProcessor processor;
+    private final AtomicBoolean dirty = new AtomicBoolean(true);
+    private volatile MapNode configurationTree = new MapNode();
 
-    private boolean dirty = true;
-    private long latestPollTime = Long.MAX_VALUE;
-    private MapNode configurationTree = new MapNode();
-    private ConfigurationMapper mapper;
-    private ConfigurationProvider provider;
-    private ConfigurationProcessor processor;
-
-    protected Coffig() {
-    }
-
-    public static CoffigBuilder builder() {
-        return new CoffigBuilder(new Coffig());
-    }
-
-    public void initialize() {
+    Coffig(ConfigurationMapper mapper, ConfigurationProvider provider, ConfigurationProcessor processor) {
+        this.mapper = mapper;
+        this.provider = provider;
+        this.processor = processor;
         if (mapper != null) {
             mapper.initialize(this);
         }
@@ -47,20 +41,15 @@ public class Coffig {
         }
     }
 
-    public synchronized boolean isDirty() {
-        if (dirty) {
-            return true;
-        }
+    public static CoffigBuilder builder() {
+        return new CoffigBuilder();
+    }
 
-        long pollTime = System.currentTimeMillis();
-        if (latestPollTime - pollTime > MINIMUM_DIRTY_POLL_INTERVAL) {
-            latestPollTime = pollTime;
-            return mapper != null && mapper.isDirty() ||
-                    provider != null && provider.isDirty() ||
-                    processor != null && processor.isDirty();
-        } else {
-            return false;
-        }
+    public boolean isDirty() {
+        return dirty.get() ||
+                mapper != null && mapper.isDirty() ||
+                provider != null && provider.isDirty() ||
+                processor != null && processor.isDirty();
     }
 
     public void refresh() {
@@ -76,25 +65,16 @@ public class Coffig {
             processor.process((MutableMapNode) pendingConfigurationTree);
         }
 
-        synchronized (this) {
-            configurationTree = pendingConfigurationTree.freeze();
-            dirty = false;
-        }
+        configurationTree = pendingConfigurationTree.freeze();
+        dirty.set(false);
     }
 
     public Coffig fork() {
-        Coffig fork = new Coffig();
-        if (mapper != null) {
-            fork.setMapper((ConfigurationMapper) mapper.fork());
-        }
-        if (provider != null) {
-            fork.setProvider((ConfigurationProvider) provider.fork());
-        }
-        if (processor != null) {
-            fork.setProcessor((ConfigurationProcessor) processor.fork());
-        }
-        fork.initialize();
-        return fork;
+        return new Coffig(
+                mapper == null ? null : (ConfigurationMapper) mapper.fork(),
+                provider == null ? null : (ConfigurationProvider) provider.fork(),
+                processor == null ? null : (ConfigurationProcessor) processor.fork()
+        );
     }
 
     public <T> T get(Class<T> configurationClass, String... path) {
@@ -128,6 +108,10 @@ public class Coffig {
         }
     }
 
+    public TreeNode getTree() {
+        return configurationTree;
+    }
+
     @Override
     public String toString() {
         return configurationTree.toString();
@@ -137,33 +121,11 @@ public class Coffig {
         return mapper;
     }
 
-    public Coffig setMapper(ConfigurationMapper mapper) {
-        this.mapper = mapper;
-        dirty = true;
-        return this;
-    }
-
     public ConfigurationProvider getProvider() {
         return provider;
     }
 
-    public Coffig setProvider(ConfigurationProvider configurationProvider) {
-        this.provider = configurationProvider;
-        dirty = true;
-        return this;
-    }
-
     public ConfigurationProcessor getProcessor() {
         return processor;
-    }
-
-    public Coffig setProcessor(ConfigurationProcessor configurationProcessor) {
-        this.processor = configurationProcessor;
-        dirty = true;
-        return this;
-    }
-
-    public TreeNode getTree() {
-        return configurationTree;
     }
 }

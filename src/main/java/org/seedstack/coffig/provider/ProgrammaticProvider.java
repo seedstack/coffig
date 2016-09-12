@@ -13,20 +13,21 @@ import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.seedstack.coffig.spi.ConfigurationComponent;
+import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static org.seedstack.coffig.utils.Utils.resolvePath;
 
 public class ProgrammaticProvider implements ConfigurationProvider, ConfigurationComponent {
     private final Map<Supplier<Object>, String> suppliers = new HashMap<>();
+    private final AtomicBoolean dirty = new AtomicBoolean(true);
     private Coffig coffig;
-    private boolean dirty = true;
 
     @Override
     public void initialize(Coffig coffig) {
@@ -35,7 +36,7 @@ public class ProgrammaticProvider implements ConfigurationProvider, Configuratio
 
     @Override
     public boolean isDirty() {
-        return dirty;
+        return dirty.get();
     }
 
     @Override
@@ -53,7 +54,7 @@ public class ProgrammaticProvider implements ConfigurationProvider, Configuratio
                         .reduce(TreeNode::merge)
                         .orElse(new MapNode())
                 );
-        dirty = false;
+        dirty.set(false);
         return mapNode;
     }
 
@@ -72,12 +73,12 @@ public class ProgrammaticProvider implements ConfigurationProvider, Configuratio
 
     public void addSupplier(Supplier<Object> supplier) {
         suppliers.put(supplier, null);
-        dirty = true;
+        dirty.set(true);
     }
 
     public void addSupplier(Supplier<Object> supplier, String prefix) {
         suppliers.put(supplier, prefix);
-        dirty = true;
+        dirty.set(true);
     }
 
     private TreeNode retrieveTreeNode(Supplier<Object> supplier) {

@@ -8,14 +8,16 @@
 package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PrioritizedProvider implements ConfigurationProvider {
     private final Map<String, PrioritizedConfigurationProvider> providers = new ConcurrentHashMap<>();
-    private boolean dirty = true;
+    private final AtomicBoolean dirty = new AtomicBoolean(true);
 
     @Override
     public MapNode provide() {
@@ -30,7 +32,7 @@ public class PrioritizedProvider implements ConfigurationProvider {
 
     @Override
     public boolean isDirty() {
-        return dirty;
+        return dirty.get() || providers.values().stream().map(PrioritizedConfigurationProvider::getConfigurationProvider).filter(ConfigurationComponent::isDirty).count() > 0;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class PrioritizedProvider implements ConfigurationProvider {
         if (providers.putIfAbsent(name, new PrioritizedConfigurationProvider(priority, configurationProvider)) != null) {
             throw new IllegalStateException("A provider already exists with name " + name);
         } else {
-            dirty = true;
+            dirty.set(true);
         }
         return this;
     }

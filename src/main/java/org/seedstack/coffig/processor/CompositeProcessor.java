@@ -13,19 +13,18 @@ import org.seedstack.coffig.utils.AbstractComposite;
 
 public class CompositeProcessor extends AbstractComposite<ConfigurationProcessor> implements ConfigurationProcessor {
     public CompositeProcessor(ConfigurationProcessor... items) {
-        super(items);
+        super(ConfigurationProcessor.class, items);
     }
 
     @Override
-    protected CompositeProcessor doFork() {
-        return new CompositeProcessor();
+    protected CompositeProcessor doFork(ConfigurationProcessor... items) {
+        return new CompositeProcessor(items);
     }
 
     @Override
     public void process(MutableMapNode configuration) {
-        for (ConfigurationProcessor processor : items.values()) {
+        for (ConfigurationProcessor processor : items) {
             processor.process(configuration);
         }
-        dirty = false;
     }
 }

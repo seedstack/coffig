@@ -17,9 +17,14 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import java.lang.reflect.Type;
 
 public class EvaluatingMapper implements ConfigurationMapper {
-    private ConfigurationMapper mapper;
-    private ConfigurationEvaluator evaluator;
+    private final ConfigurationMapper mapper;
+    private final ConfigurationEvaluator evaluator;
     private Coffig coffig;
+
+    public EvaluatingMapper(ConfigurationMapper mapper, ConfigurationEvaluator evaluator) {
+        this.mapper = mapper;
+        this.evaluator = evaluator;
+    }
 
     @Override
     public void initialize(Coffig coffig) {
@@ -49,14 +54,9 @@ public class EvaluatingMapper implements ConfigurationMapper {
 
     @Override
     public EvaluatingMapper fork() {
-        EvaluatingMapper fork = new EvaluatingMapper();
-        if (mapper != null) {
-            fork.setMapper((ConfigurationMapper) mapper.fork());
-        }
-        if (evaluator != null) {
-            fork.setEvaluator((ConfigurationEvaluator) evaluator.fork());
-        }
-        return fork;
+        ConfigurationMapper forkedMapper = mapper == null ? null : (ConfigurationMapper) mapper.fork();
+        ConfigurationEvaluator forkedEvaluator = evaluator == null ? null : (ConfigurationEvaluator) evaluator.fork();
+        return new EvaluatingMapper(forkedMapper, forkedEvaluator);
     }
 
     @Override
@@ -84,17 +84,7 @@ public class EvaluatingMapper implements ConfigurationMapper {
         return mapper;
     }
 
-    public EvaluatingMapper setMapper(ConfigurationMapper mapper) {
-        this.mapper = mapper;
-        return this;
-    }
-
     public ConfigurationEvaluator getEvaluator() {
         return evaluator;
-    }
-
-    public EvaluatingMapper setEvaluator(ConfigurationEvaluator evaluator) {
-        this.evaluator = evaluator;
-        return this;
     }
 }

@@ -14,18 +14,18 @@ import org.seedstack.coffig.utils.AbstractComposite;
 
 public class CompositeEvaluator extends AbstractComposite<ConfigurationEvaluator> implements ConfigurationEvaluator {
     public CompositeEvaluator(ConfigurationEvaluator... items) {
-        super(items);
+        super(ConfigurationEvaluator.class, items);
     }
 
     @Override
-    protected ConfigurationEvaluator doFork() {
-        return new CompositeEvaluator();
+    protected ConfigurationEvaluator doFork(ConfigurationEvaluator... items) {
+        return new CompositeEvaluator(items);
     }
 
     @Override
     public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
         ValueNode result = valueNode;
-        for (ConfigurationEvaluator evaluator : items.values()) {
+        for (ConfigurationEvaluator evaluator : items) {
             result = evaluator.evaluate(rootNode, result);
         }
         return result;

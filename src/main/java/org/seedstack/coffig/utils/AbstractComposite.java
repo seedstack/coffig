@@ -8,68 +8,57 @@
 package org.seedstack.coffig.utils;
 
 import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public abstract class AbstractComposite<T extends ConfigurationComponent> implements ConfigurationComponent {
-    protected final Map<Class<?>, T> items = new LinkedHashMap<>();
-    protected Coffig coffig;
-    protected boolean dirty = true;
+    private final Class<T> itemClass;
+    protected final T[] items;
 
-    @SafeVarargs
-    public AbstractComposite(T... items) {
-        Arrays.stream(items).forEachOrdered(this::add);
+    public AbstractComposite(Class<T> itemClass, T... items) {
+        this.itemClass = itemClass;
+        this.items = createArray(items.length);
+        System.arraycopy(items, 0, this.items, 0, this.items.length);
     }
 
     @Override
     public void initialize(Coffig coffig) {
-        this.coffig = coffig;
-        items.values().forEach(item -> item.initialize(coffig));
+        Arrays.stream(items).forEach(item -> item.initialize(coffig));
     }
 
     @Override
     public void invalidate() {
-        items.values().forEach(ConfigurationComponent::invalidate);
+        Arrays.stream(items).forEach(ConfigurationComponent::invalidate);
     }
 
     @Override
     public boolean isDirty() {
-        return dirty || items.values().stream().filter(ConfigurationComponent::isDirty).count() > 0;
+        return Arrays.stream(items).filter(ConfigurationComponent::isDirty).count() > 0;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public T fork() {
-        AbstractComposite fork = (AbstractComposite) doFork();
-        items.values().stream().map(ConfigurationComponent::fork).forEach(fork::add);
-        return (T) fork;
+        return doFork(Arrays.stream(items).map(ConfigurationComponent::fork).toArray(this::createArray));
     }
 
-    protected abstract T doFork();
+    protected abstract T doFork(T[] items);
 
-    public void clear() {
-        items.clear();
-        dirty = true;
-    }
-
-    public void add(T item) {
-        items.put(item.getClass(), item);
-        dirty = true;
-    }
-
-    public T remove(Class<T> item) {
-        T removed = items.remove(item);
-        if (removed != null) {
-            dirty = true;
+    @SuppressWarnings("unchecked")
+    public <U extends T> U get(Class<U> itemClass) {
+        for (T item : items) {
+            if (itemClass.isAssignableFrom(item.getClass())) {
+                return (U) item;
+            }
         }
-        return removed;
+        throw new ConfigurationException("Composite doesn't contain an item of class " + itemClass.getCanonicalName());
     }
 
     @SuppressWarnings("unchecked")
-    public <U extends T> U get(Class<U> item) {
-        return (U) items.get(item);
+    private T[] createArray(int length) {
+        return (T[]) Array.newInstance(itemClass, length);
     }
 }

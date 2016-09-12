@@ -8,13 +8,11 @@
 package org.seedstack.coffig;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.fixture.EnumFixture;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
-import org.seedstack.coffig.provider.CompositeProvider;
 import org.seedstack.coffig.provider.EmptyProvider;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
@@ -40,22 +38,15 @@ public class CoffigTest {
         String[] elements;
     }
 
-    private Coffig coffig;
-
-    @Before
-    public void setUp() throws Exception {
-        coffig = Coffig.builder().build();
-    }
-
     @Test
     public void testConfigurationNotNull() {
-        coffig.setProvider(new EmptyProvider());
+        Coffig coffig = Coffig.builder().withProviders(new EmptyProvider()).build();
         Assertions.assertThat(coffig.get(App.class)).isNotNull();
     }
 
     @Test
     public void testWithSimpleProvider() {
-        coffig.setProvider(appConfigProvider);
+        Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
         App app = coffig.get(App.class);
         Assertions.assertThat(app.id).isEqualTo("foo");
         Assertions.assertThat(app.name).isEqualTo("The Foo app");
@@ -63,7 +54,7 @@ public class CoffigTest {
 
     @Test
     public void testWithMergedConfiguration() {
-        coffig.setProvider(new CompositeProvider(appConfigProvider, usersConfigProvider));
+        Coffig coffig = Coffig.builder().withProviders(appConfigProvider, usersConfigProvider).build();
         App app = coffig.get(App.class);
 
         Assertions.assertThat(app.id).isEqualTo("bar");
@@ -76,37 +67,37 @@ public class CoffigTest {
 
     @Test
     public void testGetWithPath() throws Exception {
-        coffig.setProvider(() -> new MapNode(
+        Coffig coffig = Coffig.builder().withProviders(() -> new MapNode(
                 new NamedNode("app",
                         new MapNode(new NamedNode("server",
                                 new MapNode(new NamedNode("port", "8080"))))
                 )
-        ));
+        )).build();
         Integer appServerPort = coffig.get(Integer.class, "app.server.port");
         Assertions.assertThat(appServerPort).isEqualTo(8080);
     }
 
     @Test
     public void testGetOptionalWithPathAndDefaultValue() throws Exception {
-        coffig.setProvider(appConfigProvider);
+        Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
         Assertions.assertThat(coffig.getOptional(String.class, "unknown").orElse("defaultValue")).isEqualTo("defaultValue");
     }
 
     @Test
     public void testGetWithPathAndDefaultValue() throws Exception {
-        coffig.setProvider(appConfigProvider);
+        Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
         Assertions.assertThat(coffig.get(String.class, "unknown")).isEqualTo("");
     }
 
     @Test
     public void testGetSingleValueAsArray() throws Exception {
-        coffig.setProvider(usersConfigProvider);
+        Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
         Assertions.assertThat(coffig.get(App.class).items).containsExactly("one");
     }
 
     @Test
     public void testGetMapAsArray() throws Exception {
-        coffig.setProvider(usersConfigProvider);
+        Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
         Assertions.assertThat(coffig.get(App.class).elements).containsOnly("val1", "val2");
     }
 }

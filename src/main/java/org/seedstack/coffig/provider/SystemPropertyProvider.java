@@ -11,27 +11,11 @@ import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
-import java.util.Properties;
-
 public class SystemPropertyProvider implements ConfigurationProvider {
-    private Properties latestSystemProperties;
-
     @Override
     public MapNode provide() {
-        fetchSystemProperties();
-        return new MapNode(new NamedNode("sys", new MapNode(latestSystemProperties.entrySet().stream()
+        return new MapNode(new NamedNode("sys", new MapNode(System.getProperties().entrySet().stream()
                 .map(e -> new NamedNode((String) e.getKey(), (String) e.getValue()))
                 .toArray(NamedNode[]::new))));
-    }
-
-    @Override
-    public boolean isDirty() {
-        Properties previousSystemProperties = latestSystemProperties;
-        fetchSystemProperties();
-        return !latestSystemProperties.equals(previousSystemProperties);
-    }
-
-    private void fetchSystemProperties() {
-        latestSystemProperties = System.getProperties();
     }
 }

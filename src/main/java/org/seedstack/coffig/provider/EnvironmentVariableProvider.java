@@ -11,27 +11,11 @@ import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
-import java.util.Map;
-
 public class EnvironmentVariableProvider implements ConfigurationProvider {
-    private Map<String, String> latestEnv;
-
     @Override
     public MapNode provide() {
-        fetchEnvironment();
-        return new MapNode(new NamedNode("env", new MapNode(latestEnv.entrySet().stream()
+        return new MapNode(new NamedNode("env", new MapNode(System.getenv().entrySet().stream()
                 .map(e -> new NamedNode(e.getKey(), e.getValue()))
                 .toArray(NamedNode[]::new))));
-    }
-
-    @Override
-    public boolean isDirty() {
-        Map<String, String> previousEnv = latestEnv;
-        fetchEnvironment();
-        return !latestEnv.equals(previousEnv);
-    }
-
-    private void fetchEnvironment() {
-        latestEnv = System.getenv();
     }
 }
