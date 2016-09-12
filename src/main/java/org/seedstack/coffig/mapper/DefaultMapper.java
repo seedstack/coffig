@@ -15,6 +15,7 @@ public class DefaultMapper extends CompositeMapper {
         add(new ArrayMapper());
         add(new CollectionMapper());
         add(new MapMapper());
+        add(new FileMapper());
     }
 
     @Override
