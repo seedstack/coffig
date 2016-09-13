@@ -11,6 +11,7 @@ import org.seedstack.coffig.evaluator.CompositeEvaluator;
 import org.seedstack.coffig.mapper.CompositeMapper;
 import org.seedstack.coffig.mapper.DefaultMapper;
 import org.seedstack.coffig.mapper.EvaluatingMapper;
+import org.seedstack.coffig.mapper.ValidatingMapper;
 import org.seedstack.coffig.processor.CompositeProcessor;
 import org.seedstack.coffig.provider.CompositeProvider;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
@@ -28,12 +29,18 @@ public class CoffigBuilder {
     private final List<ConfigurationProcessor> processors = new ArrayList<>();
     private final List<ConfigurationEvaluator> evaluators = new ArrayList<>();
     private boolean addDefaultMapper = true;
+    private boolean validation = false;
 
     CoffigBuilder() {
     }
 
     public CoffigBuilder withoutDefaultMapper() {
         addDefaultMapper = false;
+        return this;
+    }
+
+    public CoffigBuilder enableValidation() {
+        validation = true;
         return this;
     }
 
@@ -63,12 +70,20 @@ public class CoffigBuilder {
         }
 
         return new Coffig(
-                new EvaluatingMapper(
+                wrap(new EvaluatingMapper(
                         new CompositeMapper(mappers.toArray(new ConfigurationMapper[mappers.size()])),
                         new CompositeEvaluator(evaluators.toArray(new ConfigurationEvaluator[evaluators.size()]))
-                ),
+                )),
                 new CompositeProvider(providers.toArray(new ConfigurationProvider[providers.size()])),
                 new CompositeProcessor(processors.toArray(new ConfigurationProcessor[processors.size()]))
         );
+    }
+
+    private ConfigurationMapper wrap(ConfigurationMapper mapper) {
+        if (validation) {
+            return new ValidatingMapper(mapper);
+        } else {
+            return mapper;
+        }
     }
 }
