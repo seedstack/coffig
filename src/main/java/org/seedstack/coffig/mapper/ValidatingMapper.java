@@ -24,14 +24,22 @@ public class ValidatingMapper implements ConfigurationMapper {
     private final ConfigurationMapper mapper;
     private final Validator validator;
 
-    public ValidatingMapper(ConfigurationMapper mapper) {
+    public ValidatingMapper(ConfigurationMapper mapper, Validator validator) {
         this.mapper = mapper;
-        this.validator = Validation
-                .byDefaultProvider()
-                .configure()
-                .messageInterpolator(new ParameterMessageInterpolator())
-                .buildValidatorFactory()
-                .getValidator();
+        if (validator != null) {
+            this.validator = validator;
+        } else {
+            this.validator = Validation
+                    .byDefaultProvider()
+                    .configure()
+                    .messageInterpolator(new ParameterMessageInterpolator())
+                    .buildValidatorFactory()
+                    .getValidator();
+        }
+    }
+
+    public ValidatingMapper(ConfigurationMapper mapper) {
+        this(mapper, null);
     }
 
     @Override
