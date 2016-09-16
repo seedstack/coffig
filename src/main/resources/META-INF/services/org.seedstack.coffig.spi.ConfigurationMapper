@@ -6,3 +6,5 @@ org.seedstack.coffig.mapper.MapMapper
 org.seedstack.coffig.mapper.OptionalMapper
 org.seedstack.coffig.mapper.FileMapper
 org.seedstack.coffig.mapper.ClassMapper
+org.seedstack.coffig.mapper.URLMapper
+org.seedstack.coffig.mapper.URIMapper
