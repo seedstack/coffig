@@ -10,7 +10,7 @@ package org.seedstack.coffig.provider;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
-public class EmptyProvider implements ConfigurationProvider {
+public class VoidProvider implements ConfigurationProvider {
     @Override
     public MapNode provide() {
         return new MapNode();

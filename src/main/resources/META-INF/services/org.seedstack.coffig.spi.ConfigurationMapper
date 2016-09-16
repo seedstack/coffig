@@ -1,0 +1,8 @@
+org.seedstack.coffig.mapper.ValueMapper
+org.seedstack.coffig.mapper.EnumMapper
+org.seedstack.coffig.mapper.ArrayMapper
+org.seedstack.coffig.mapper.CollectionMapper
+org.seedstack.coffig.mapper.MapMapper
+org.seedstack.coffig.mapper.OptionalMapper
+org.seedstack.coffig.mapper.FileMapper
+org.seedstack.coffig.mapper.ClassMapper

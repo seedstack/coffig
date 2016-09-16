@@ -20,7 +20,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MapMapperTest {
-    private ConfigurationMapper mapper = Coffig.builder().withMappers(new MapMapper(), new ValueMapper(), new EnumMapper()).build().getMapper();
+    private ConfigurationMapper mapper = Coffig.basic().getMapper();
     private Map<String, Integer> map1 = new HashMap<String, Integer>() {{
         put("key1", 1);
         put("key2", 2);

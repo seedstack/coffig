@@ -9,7 +9,6 @@ package org.seedstack.coffig;
 
 import org.seedstack.coffig.evaluator.CompositeEvaluator;
 import org.seedstack.coffig.mapper.CompositeMapper;
-import org.seedstack.coffig.mapper.DefaultMapper;
 import org.seedstack.coffig.mapper.EvaluatingMapper;
 import org.seedstack.coffig.mapper.ValidatingMapper;
 import org.seedstack.coffig.processor.CompositeProcessor;
@@ -21,26 +20,54 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
 
 public class CoffigBuilder {
     private final List<ConfigurationMapper> mappers = new ArrayList<>();
     private final List<ConfigurationProvider> providers = new ArrayList<>();
     private final List<ConfigurationProcessor> processors = new ArrayList<>();
     private final List<ConfigurationEvaluator> evaluators = new ArrayList<>();
-    private boolean addDefaultMapper = true;
-    private boolean validation = false;
+    private boolean detection = true;
+    private boolean mapperDetection = true;
+    private boolean processorDetection = true;
+    private boolean evaluatorDetection = true;
+    private boolean providerDetection = true;
+    private Object validatorFactory;
 
     CoffigBuilder() {
     }
 
-    public CoffigBuilder withoutDefaultMapper() {
-        addDefaultMapper = false;
+    public CoffigBuilder disableAllDetection() {
+        detection = false;
         return this;
     }
 
-    public CoffigBuilder enableValidation() {
-        validation = true;
+    public CoffigBuilder disableMapperDetection() {
+        mapperDetection = false;
+        return this;
+    }
+
+    public CoffigBuilder disableProcessorDetection() {
+        processorDetection = false;
+        return this;
+    }
+
+    public CoffigBuilder disableEvaluatorDetection() {
+        evaluatorDetection = false;
+        return this;
+    }
+
+    public CoffigBuilder disableProviderDetection() {
+        providerDetection = false;
+        return this;
+    }
+
+    public CoffigBuilder enableValidation(Object validatorFactory) {
+        this.validatorFactory = validatorFactory;
         return this;
     }
 
@@ -65,8 +92,19 @@ public class CoffigBuilder {
     }
 
     public Coffig build() {
-        if (addDefaultMapper) {
-            mappers.add(0, new DefaultMapper());
+        if (detection) {
+            if (mapperDetection) {
+                mappers.addAll(loadMappers());
+            }
+            if (processorDetection) {
+                processors.addAll(loadProcessors());
+            }
+            if (evaluatorDetection) {
+                evaluators.addAll(loadEvaluators());
+            }
+            if (providerDetection) {
+                providers.addAll(loadProviders());
+            }
         }
 
         return new Coffig(
@@ -80,10 +118,34 @@ public class CoffigBuilder {
     }
 
     private ConfigurationMapper wrap(ConfigurationMapper mapper) {
-        if (validation) {
-            return new ValidatingMapper(mapper);
+        if (validatorFactory != null) {
+            return new ValidatingMapper(mapper, validatorFactory);
         } else {
             return mapper;
         }
+    }
+
+    private Collection<? extends ConfigurationMapper> loadMappers() {
+        Set<ConfigurationMapper> loadedMappers = new HashSet<>();
+        ServiceLoader.load(ConfigurationMapper.class).iterator().forEachRemaining(loadedMappers::add);
+        return loadedMappers;
+    }
+
+    private Collection<? extends ConfigurationProcessor> loadProcessors() {
+        Set<ConfigurationProcessor> loadedProcessors = new HashSet<>();
+        ServiceLoader.load(ConfigurationProcessor.class).iterator().forEachRemaining(loadedProcessors::add);
+        return loadedProcessors;
+    }
+
+    private Collection<? extends ConfigurationEvaluator> loadEvaluators() {
+        Set<ConfigurationEvaluator> loadedEvaluators = new HashSet<>();
+        ServiceLoader.load(ConfigurationEvaluator.class).iterator().forEachRemaining(loadedEvaluators::add);
+        return loadedEvaluators;
+    }
+
+    private Collection<? extends ConfigurationProvider> loadProviders() {
+        Set<ConfigurationProvider> loadedProviders = new HashSet<>();
+        ServiceLoader.load(ConfigurationProvider.class).iterator().forEachRemaining(loadedProviders::add);
+        return loadedProviders;
     }
 }

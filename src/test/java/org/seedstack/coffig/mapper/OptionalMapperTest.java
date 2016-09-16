@@ -18,7 +18,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class OptionalMapperTest {
-    private ConfigurationMapper mapper = Coffig.builder().withMappers(new OptionalMapper(), new ValueMapper()).build().getMapper();
+    private ConfigurationMapper mapper = Coffig.basic().getMapper();
 
     private static class Fixture {
         private Optional<String> optionalString = Optional.empty();
@@ -26,7 +26,7 @@ public class OptionalMapperTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testMapOptiona() throws NoSuchFieldException {
+    public void testMapOptional() throws NoSuchFieldException {
         Fixture result1 = (Fixture) mapper.map(new MapNode(new NamedNode("optionalString", "Hello")), Fixture.class);
         assertThat(result1).isNotNull();
         assertThat(result1.optionalString.isPresent()).isTrue();

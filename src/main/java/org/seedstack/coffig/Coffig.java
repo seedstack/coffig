@@ -16,8 +16,8 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.seedstack.coffig.utils.Utils.instantiateDefault;
-import static org.seedstack.coffig.utils.Utils.resolvePath;
+import static org.seedstack.coffig.util.Utils.instantiateDefault;
+import static org.seedstack.coffig.util.Utils.resolvePath;
 
 public class Coffig {
     private final ConfigurationMapper mapper;
@@ -43,6 +43,10 @@ public class Coffig {
 
     public static CoffigBuilder builder() {
         return new CoffigBuilder();
+    }
+
+    public static Coffig basic() {
+        return new CoffigBuilder().build();
     }
 
     public boolean isDirty() {

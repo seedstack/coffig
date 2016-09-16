@@ -13,7 +13,7 @@ import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigFunction;
 import org.seedstack.coffig.spi.ConfigFunctionHolder;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
-import org.seedstack.coffig.utils.LRUCache;
+import org.seedstack.coffig.util.LRUCache;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

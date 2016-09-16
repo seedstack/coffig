@@ -17,7 +17,7 @@ import java.io.File;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class FileMapperTest {
-    private ConfigurationMapper mapper = Coffig.builder().withMappers(new FileMapper()).build().getMapper();
+    private ConfigurationMapper mapper = Coffig.basic().getMapper();
 
     @Test
     public void testMapEnum() {

@@ -119,9 +119,7 @@ public class FunctionEvaluatorTest {
 
     private FunctionEvaluator buildFunctionEvaluator() {
         return ((CompositeEvaluator) ((EvaluatingMapper) Coffig
-                .builder()
-                .withEvaluators(new FunctionEvaluator())
-                .build()
+                .basic()
                 .getMapper())
                 .getEvaluator())
                 .get(FunctionEvaluator.class);

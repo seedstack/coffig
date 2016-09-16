@@ -10,7 +10,7 @@ package org.seedstack.coffig.provider;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
-import org.seedstack.coffig.utils.AbstractComposite;
+import org.seedstack.coffig.util.AbstractComposite;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;

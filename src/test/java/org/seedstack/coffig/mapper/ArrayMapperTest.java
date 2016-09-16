@@ -15,7 +15,7 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ArrayMapperTest {
-    private ConfigurationMapper mapper = Coffig.builder().withMappers(new ArrayMapper(), new ValueMapper()).build().getMapper();
+    private ConfigurationMapper mapper = Coffig.basic().getMapper();
 
     @Test
     public void testMapArrays() {

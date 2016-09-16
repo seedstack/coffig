@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.Test;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.ConfigurationValidationException;
@@ -17,10 +18,18 @@ import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
+import javax.validation.Validation;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ValidatingMapperTest {
-    private ConfigurationMapper mapper = Coffig.builder().enableValidation().build().getMapper();
+    private ConfigurationMapper mapper = Coffig.builder()
+            .enableValidation(Validation.byDefaultProvider()
+                    .configure()
+                    .messageInterpolator(new ParameterMessageInterpolator())
+                    .buildValidatorFactory())
+            .build()
+            .getMapper();
 
     @Test
     public void testValidationOK() throws Exception {

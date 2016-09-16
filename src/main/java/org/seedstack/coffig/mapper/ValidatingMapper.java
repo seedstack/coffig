@@ -7,7 +7,6 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.ConfigurationValidationException;
 import org.seedstack.coffig.TreeNode;
@@ -15,31 +14,25 @@ import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.lang.reflect.Type;
 import java.util.Set;
 
 public class ValidatingMapper implements ConfigurationMapper {
     private final ConfigurationMapper mapper;
+    private final ValidatorFactory validatorFactory;
     private final Validator validator;
 
-    public ValidatingMapper(ConfigurationMapper mapper, Validator validator) {
+    public ValidatingMapper(ConfigurationMapper mapper, Object validatorFactory) {
         this.mapper = mapper;
-        if (validator != null) {
-            this.validator = validator;
-        } else {
-            this.validator = Validation
-                    .byDefaultProvider()
-                    .configure()
-                    .messageInterpolator(new ParameterMessageInterpolator())
-                    .buildValidatorFactory()
-                    .getValidator();
-        }
-    }
 
-    public ValidatingMapper(ConfigurationMapper mapper) {
-        this(mapper, null);
+        if (validatorFactory instanceof ValidatorFactory) {
+            this.validatorFactory = ((ValidatorFactory) validatorFactory);
+            this.validator = this.validatorFactory.getValidator();
+        } else {
+            throw new IllegalArgumentException("Second argument is not a Bean Validation ValidatorFactory instance");
+        }
     }
 
     @Override
@@ -59,7 +52,7 @@ public class ValidatingMapper implements ConfigurationMapper {
 
     @Override
     public ConfigurationComponent fork() {
-        return new ValidatingMapper((ConfigurationMapper) mapper.fork());
+        return new ValidatingMapper((ConfigurationMapper) mapper.fork(), validatorFactory);
     }
 
     @Override

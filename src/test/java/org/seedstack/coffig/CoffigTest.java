@@ -13,7 +13,7 @@ import org.seedstack.coffig.fixture.EnumFixture;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
-import org.seedstack.coffig.provider.EmptyProvider;
+import org.seedstack.coffig.provider.VoidProvider;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class CoffigTest {
@@ -40,7 +40,7 @@ public class CoffigTest {
 
     @Test
     public void testConfigurationNotNull() {
-        Coffig coffig = Coffig.builder().withProviders(new EmptyProvider()).build();
+        Coffig coffig = Coffig.builder().withProviders(new VoidProvider()).build();
         Assertions.assertThat(coffig.get(App.class)).isNotNull();
     }
 

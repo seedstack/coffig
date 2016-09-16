@@ -10,12 +10,12 @@ package org.seedstack.coffig.mapper;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
-import org.seedstack.coffig.utils.AbstractComposite;
+import org.seedstack.coffig.util.AbstractComposite;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-import static org.seedstack.coffig.utils.Utils.getRawClass;
+import static org.seedstack.coffig.util.Utils.getRawClass;
 
 public class CompositeMapper extends AbstractComposite<ConfigurationMapper> implements ConfigurationMapper {
     private Coffig coffig;

@@ -16,7 +16,7 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class EnumMapperTest {
-    private ConfigurationMapper mapper = Coffig.builder().withMappers(new EnumMapper()).build().getMapper();
+    private ConfigurationMapper mapper = Coffig.basic().getMapper();
 
     @Test
     public void testMapEnum() {

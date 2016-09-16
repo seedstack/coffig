@@ -8,6 +8,12 @@
 package org.seedstack.coffig.fixture;
 
 public enum EnumFixture {
-    FOO,
-    BAR
+    FOO("foo"),
+    BAR("bar");
+
+    private final String aString;
+
+    EnumFixture(String aString) {
+        this.aString = aString;
+    }
 }

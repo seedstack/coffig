@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import static org.seedstack.coffig.utils.Utils.resolvePath;
+import static org.seedstack.coffig.util.Utils.resolvePath;
 
 public class ProgrammaticProvider implements ConfigurationProvider, ConfigurationComponent {
     private final Map<Supplier<Object>, String> suppliers = new HashMap<>();

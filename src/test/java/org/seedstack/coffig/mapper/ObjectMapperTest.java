@@ -281,13 +281,13 @@ public class ObjectMapperTest {
 
     private <T> ObjectMapper<T> initialize(Class<T> aClass) {
         ObjectMapper<T> mapper = new ObjectMapper<>(aClass);
-        mapper.initialize(Coffig.builder().build());
+        mapper.initialize(Coffig.basic());
         return mapper;
     }
 
     private ObjectMapper initialize(Object object) {
         ObjectMapper mapper = new ObjectMapper<>(object);
-        mapper.initialize(Coffig.builder().build());
+        mapper.initialize(Coffig.basic());
         return mapper;
     }
 }

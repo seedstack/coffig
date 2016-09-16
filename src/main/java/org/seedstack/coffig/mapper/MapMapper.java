@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
-import static org.seedstack.coffig.utils.Utils.instantiateDefault;
+import static org.seedstack.coffig.util.Utils.instantiateDefault;
 
 public class MapMapper implements ConfigurationMapper {
     private Coffig coffig;
