@@ -10,12 +10,7 @@ package org.seedstack.coffig.util;
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 
 public final class Utils {
     private Utils() {
@@ -87,6 +82,46 @@ public final class Utils {
             return Object.class;
         } else {
             throw new IllegalArgumentException("Unsupported type " + type.getTypeName());
+        }
+    }
+
+    public static String getSimpleTypeName(Type type) {
+        return buildTypeName(type, new StringBuilder()).toString();
+    }
+
+    private static StringBuilder buildTypeName(Type type, StringBuilder sb) {
+        if (type instanceof ParameterizedType) {
+            buildTypeName(((ParameterizedType) type).getRawType(), sb);
+            Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+            sb.append("<");
+            buildGenericTypeNames(actualTypeArguments, sb);
+            sb.append(">");
+        } else if (type instanceof Class) {
+            sb.append(((Class) type).getSimpleName());
+        } else if (type instanceof WildcardType) {
+            sb.append("?");
+            Type[] lowerBounds = ((WildcardType) type).getLowerBounds();
+            Type[] upperBounds = ((WildcardType) type).getUpperBounds();
+            if (lowerBounds.length > 0) {
+                sb.append(" super ");
+                buildGenericTypeNames(lowerBounds, sb);
+            } else if (upperBounds.length > 0) {
+                if (upperBounds.length > 1 || !upperBounds[0].equals(Object.class)) {
+                    sb.append(" extends ");
+                    buildGenericTypeNames(upperBounds, sb);
+                }
+            }
+        }
+        return sb;
+    }
+
+    private static void buildGenericTypeNames(Type[] actualTypeArguments, StringBuilder sb) {
+        for (int i = 0; i < actualTypeArguments.length; i++) {
+            Type typeArgument = actualTypeArguments[i];
+            buildTypeName(typeArgument, sb);
+            if (i < actualTypeArguments.length - 1) {
+                sb.append(", ");
+            }
         }
     }
 }
