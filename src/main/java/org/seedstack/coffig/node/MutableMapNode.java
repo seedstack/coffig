@@ -31,16 +31,26 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
         return (MutableNodeAttributes) super.attributes();
     }
 
-    public TreeNode put(String key, TreeNode value) {
-        return children.put(key, value.unfreeze());
+    @Override
+    public MutableTreeNode item(String key) {
+        return (MutableTreeNode) super.item(key);
+    }
+
+    @Override
+    public MutableTreeNode[] items() {
+        return (MutableTreeNode[]) super.items();
+    }
+
+    public MutableTreeNode put(String key, TreeNode value) {
+        return (MutableTreeNode) children.put(key, value.unfreeze());
     }
 
     public void putAll(Map<String, TreeNode> m) {
         children.putAll(Freezer.unfreeze(m));
     }
 
-    public TreeNode remove(TreeNode treeNode) {
-        return children.remove(treeNode);
+    public MutableTreeNode remove(TreeNode treeNode) {
+        return (MutableTreeNode) children.remove(treeNode);
     }
 
     public void clear() {

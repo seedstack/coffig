@@ -22,11 +22,12 @@ public class RemovalProcessor implements ConfigurationProcessor {
 
         configuration.stream()
                 .filter(node -> node instanceof MutableMapNode)
+                .map(node -> (MutableMapNode) node)
                 .forEach(mapNode -> {
-                    ((MutableMapNode) mapNode).keys().stream().filter(key -> key.startsWith("-")).forEach(key -> {
+                    mapNode.keys().stream().filter(key -> key.startsWith("-")).forEach(key -> {
                         List<String> strings = toRemove.get(mapNode);
                         if (strings == null) {
-                            toRemove.put((MutableMapNode) mapNode, strings = new ArrayList<>());
+                            toRemove.put(mapNode, strings = new ArrayList<>());
                         }
                         strings.add(key);
                         strings.add(key.substring(1));
