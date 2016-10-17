@@ -12,6 +12,8 @@ import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -52,8 +54,8 @@ public class ArrayNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode[] items() {
-        return childNodes.toArray(new TreeNode[childNodes.size()]);
+    public Collection<TreeNode> items() {
+        return Collections.unmodifiableList(childNodes);
     }
 
     @Override

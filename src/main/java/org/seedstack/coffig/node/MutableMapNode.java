@@ -12,6 +12,7 @@ import org.seedstack.coffig.MutableTreeNode;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class MutableMapNode extends MapNode implements MutableTreeNode {
@@ -37,8 +38,8 @@ public class MutableMapNode extends MapNode implements MutableTreeNode {
     }
 
     @Override
-    public MutableTreeNode[] items() {
-        return (MutableTreeNode[]) super.items();
+    public Collection<TreeNode> items() {
+        return super.items();
     }
 
     public MutableTreeNode put(String key, TreeNode value) {

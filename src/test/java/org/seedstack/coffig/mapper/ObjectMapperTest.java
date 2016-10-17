@@ -196,7 +196,7 @@ public class ObjectMapperTest {
         assertThat(multiTypesFixture.fixtureArray[1].getField2()).isEqualTo("field22");
 
         TreeNode treeNode = initialize(multiTypesFixture).unmap();
-        assertThat(treeNode.get("fixtureArray").get().items().length).isEqualTo(2);
+        assertThat(treeNode.get("fixtureArray").get().items().size()).isEqualTo(2);
         assertThat(treeNode.get("fixtureArray[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureArray[1].field2").get().value()).isEqualTo("field22");
     }
@@ -209,7 +209,7 @@ public class ObjectMapperTest {
         assertThat(multiTypesFixture.fixtureList.get(1).getField2()).isEqualTo("field22");
 
         TreeNode treeNode = initialize(multiTypesFixture).unmap();
-        assertThat(treeNode.get("fixtureList").get().items().length).isEqualTo(2);
+        assertThat(treeNode.get("fixtureList").get().items().size()).isEqualTo(2);
         assertThat(treeNode.get("fixtureList[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureList[1].field2").get().value()).isEqualTo("field22");
     }
@@ -222,7 +222,7 @@ public class ObjectMapperTest {
         assertThat(multiTypesFixture.fixtureSet.iterator().next().getField2()).isEqualTo("field22");
 
         TreeNode treeNode = initialize(multiTypesFixture).unmap();
-        assertThat(treeNode.get("fixtureSet").get().items().length).isEqualTo(2);
+        assertThat(treeNode.get("fixtureSet").get().items().size()).isEqualTo(2);
         assertThat(treeNode.get("fixtureSet[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureSet[1].field2").get().value()).isEqualTo("field22");
     }

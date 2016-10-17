@@ -8,6 +8,7 @@
 package org.seedstack.coffig;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +21,7 @@ public interface TreeNode {
 
     TreeNode item(String key);
 
-    TreeNode[] items();
+    Collection<TreeNode> items();
 
     Optional<TreeNode> get(String path);
 

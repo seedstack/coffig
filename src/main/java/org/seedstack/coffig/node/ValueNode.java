@@ -9,6 +9,8 @@ package org.seedstack.coffig.node;
 
 import org.seedstack.coffig.TreeNode;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -31,8 +33,10 @@ public class ValueNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode[] items() {
-        return new TreeNode[]{this};
+    public Collection<TreeNode> items() {
+        ArrayList<TreeNode> treeNodes = new ArrayList<>(1);
+        treeNodes.add(this);
+        return treeNodes;
     }
 
     @Override

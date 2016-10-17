@@ -15,6 +15,7 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ArrayMapper implements ConfigurationMapper {
@@ -33,10 +34,10 @@ public class ArrayMapper implements ConfigurationMapper {
     @Override
     public Object map(TreeNode treeNode, Type type) {
         Class componentType = ((Class) type).getComponentType();
-        TreeNode[] values = treeNode.items();
-        Object array = Array.newInstance(componentType, values.length);
+        Collection<TreeNode> values = treeNode.items();
+        Object array = Array.newInstance(componentType, values.size());
         AtomicInteger index = new AtomicInteger();
-        Arrays.stream(values).map(childNode -> coffig.getMapper().map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));
+        values.stream().map(childNode -> coffig.getMapper().map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));
         return array;
     }
 

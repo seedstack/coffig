@@ -11,6 +11,8 @@ import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -52,8 +54,8 @@ public class MapNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode[] items() {
-        return children.values().toArray(new TreeNode[children.size()]);
+    public Collection<TreeNode> items() {
+        return Collections.unmodifiableCollection(children.values());
     }
 
     @Override
