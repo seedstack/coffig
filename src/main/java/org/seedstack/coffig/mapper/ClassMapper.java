@@ -54,23 +54,25 @@ public class ClassMapper implements ConfigurationMapper {
 
     private boolean isSatisfyingBounds(Class<?> aClass, WildcardType wildcardType) {
         for (Type bound : wildcardType.getUpperBounds()) {
-            if (!((Class<?>) bound).isAssignableFrom(aClass)) {
+            if (!(getRawType(bound)).isAssignableFrom(aClass)) {
                 return false;
             }
         }
         for (Type bound : wildcardType.getLowerBounds()) {
-            if (!(aClass.isAssignableFrom((Class<?>) bound))) {
+            if (!(aClass.isAssignableFrom(getRawType(bound)))) {
                 return false;
             }
         }
         return true;
     }
-//
-//    private Class getRawType(Type type) {
-//        if (type instanceof Class) {
-//            return ((Class<?>) type);
-//        } else if (type instanceof ParameterizedType) {
-//            return (Class) ((ParameterizedType) type).getRawType();
-//        }
-//    }
+
+    private Class<?> getRawType(Type type) {
+        if (type instanceof Class) {
+            return ((Class<?>) type);
+        } else if (type instanceof ParameterizedType) {
+            return getRawType(((ParameterizedType) type).getRawType());
+        } else {
+            throw new ConfigurationException("Cannot resolve raw type of " + type.getTypeName());
+        }
+    }
 }
