@@ -10,7 +10,13 @@ package org.seedstack.coffig.util;
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.ConfigurationException;
 
-import java.lang.reflect.*;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 public final class Utils {
     private Utils() {

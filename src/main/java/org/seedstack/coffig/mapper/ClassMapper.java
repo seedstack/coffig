@@ -16,6 +16,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 
+import static org.seedstack.coffig.util.Utils.getRawClass;
+
 public class ClassMapper implements ConfigurationMapper {
     @Override
     public boolean canHandle(Type type) {
@@ -54,25 +56,15 @@ public class ClassMapper implements ConfigurationMapper {
 
     private boolean isSatisfyingBounds(Class<?> aClass, WildcardType wildcardType) {
         for (Type bound : wildcardType.getUpperBounds()) {
-            if (!(getRawType(bound)).isAssignableFrom(aClass)) {
+            if (!(getRawClass(bound)).isAssignableFrom(aClass)) {
                 return false;
             }
         }
         for (Type bound : wildcardType.getLowerBounds()) {
-            if (!(aClass.isAssignableFrom(getRawType(bound)))) {
+            if (!(aClass.isAssignableFrom(getRawClass(bound)))) {
                 return false;
             }
         }
         return true;
-    }
-
-    private Class<?> getRawType(Type type) {
-        if (type instanceof Class) {
-            return ((Class<?>) type);
-        } else if (type instanceof ParameterizedType) {
-            return getRawType(((ParameterizedType) type).getRawType());
-        } else {
-            throw new ConfigurationException("Cannot resolve raw type of " + type.getTypeName());
-        }
     }
 }

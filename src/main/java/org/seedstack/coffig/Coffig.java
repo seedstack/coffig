@@ -12,10 +12,13 @@ import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.util.Utils;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.seedstack.coffig.util.Utils.getRawClass;
 import static org.seedstack.coffig.util.Utils.instantiateDefault;
 import static org.seedstack.coffig.util.Utils.resolvePath;
 
@@ -81,16 +84,30 @@ public class Coffig {
         );
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T get(Class<T> configurationClass, String... path) {
-        return getOptional(configurationClass, path).orElseGet(() -> instantiateDefault(configurationClass));
+        return (T) get((Type) configurationClass, path);
     }
 
+    public Object get(Type type, String... path) {
+        return getOptional(type, path).orElseGet(() -> instantiateDefault(Utils.getRawClass(type)));
+    }
+
+    @SuppressWarnings("unchecked")
     public <T> T getMandatory(Class<T> configurationClass, String... path) {
+        return (T) getMandatory((Type) configurationClass, path);
+    }
+
+    public Object getMandatory(Type configurationClass, String... path) {
         return getOptional(configurationClass, path).orElseThrow(() -> new ConfigurationException("Path not found: " + (path == null ? "null" : String.join(".", (CharSequence[]) path))));
     }
 
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getOptional(Class<T> configurationClass, String... path) {
+        return (Optional<T>) getOptional((Type) configurationClass, path);
+    }
+
+    public Optional<Object> getOptional(Type configurationType, String... path) {
         if (isDirty()) {
             refresh();
         }
@@ -99,16 +116,16 @@ public class Coffig {
         if (path != null && path.length > 0) {
             joinedPath = String.join(".", (CharSequence[]) path);
         } else {
-            joinedPath = resolvePath(configurationClass);
+            joinedPath = resolvePath(getRawClass(configurationType));
         }
 
         if (joinedPath == null || joinedPath.isEmpty()) {
             return Optional.of(configurationTree)
-                    .map(treeNode -> (T) mapper.map(treeNode, configurationClass));
+                    .map(treeNode -> mapper.map(treeNode, configurationType));
         } else {
             return configurationTree
                     .get(joinedPath)
-                    .map(treeNode -> (T) mapper.map(treeNode, configurationClass));
+                    .map(treeNode -> mapper.map(treeNode, configurationType));
         }
     }
 
