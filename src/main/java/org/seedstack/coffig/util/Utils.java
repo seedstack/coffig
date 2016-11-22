@@ -12,6 +12,7 @@ import org.seedstack.coffig.ConfigurationException;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -67,7 +68,9 @@ public final class Utils {
             return (T) new Character((char) 0);
         } else {
             try {
-                return configurationClass.newInstance();
+                Constructor<T> defaultConstructor = configurationClass.getDeclaredConstructor();
+                defaultConstructor.setAccessible(true);
+                return defaultConstructor.newInstance();
             } catch (Exception e) {
                 throw new ConfigurationException("Cannot instantiate default value", e);
             }
