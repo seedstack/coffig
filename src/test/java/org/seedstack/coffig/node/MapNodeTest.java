@@ -79,7 +79,7 @@ public class MapNodeTest {
             mapNode1.merge(mapNode2);
             Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
         } catch (ConfigurationException e) {
-            assertThat(e).hasMessage(String.format("Illegal attempt to merge %s with %s", ValueNode.class.getCanonicalName(), MapNode.class.getCanonicalName()));
+            assertThat(e).hasMessage(String.format("Illegal attempt to merge %s with %s", ValueNode.class.getSimpleName(), MapNode.class.getSimpleName()));
         }
     }
 

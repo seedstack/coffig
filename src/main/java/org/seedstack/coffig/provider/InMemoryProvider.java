@@ -7,48 +7,81 @@
  */
 package org.seedstack.coffig.provider;
 
+import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class InMemoryProvider implements ConfigurationProvider {
-    private final ConcurrentMap<String, String> data = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Object> data = new ConcurrentHashMap<>();
     private final AtomicBoolean dirty = new AtomicBoolean(true);
 
     @Override
+    @SuppressWarnings("unchecked")
     public MapNode provide() {
         MutableMapNode tree = new MutableMapNode();
-        data.entrySet().forEach(entry -> tree.set(entry.getKey(), new ValueNode(entry.getValue())));
+        data.entrySet().forEach(entry -> {
+            Object value = entry.getValue();
+            if (value.getClass().isArray()) {
+                tree.set(entry.getKey(), new ArrayNode((String[]) value));
+            } else if (List.class.isAssignableFrom(value.getClass())) {
+                tree.set(entry.getKey(), new ArrayNode(((List<String>) value)
+                        .stream()
+                        .map(ValueNode::new)
+                        .collect(Collectors.toList()))
+                );
+            } else {
+                tree.set(entry.getKey(), new ValueNode((String) value));
+            }
+        });
         dirty.set(false);
         return tree;
     }
 
-    public String put(String key, String value) {
-        String result = data.put(key, value);
+    public InMemoryProvider put(String key, String value) {
+        data.put(key, value);
         dirty.set(true);
-        return result;
+        return this;
     }
 
-    public String remove(String key) {
-        String result = data.remove(key);
+    public InMemoryProvider put(String key, String... values) {
+        data.put(key, values);
         dirty.set(true);
-        return result;
+        return this;
     }
 
-    public void putAll(Map<? extends String, ? extends String> m) {
+    public InMemoryProvider put(String key, Collection<String> values) {
+        data.put(key, new ArrayList<>(values));
+        dirty.set(true);
+        return this;
+    }
+
+    public InMemoryProvider remove(String key) {
+        Object result = data.remove(key);
+        dirty.set(true);
+        return this;
+    }
+
+    public InMemoryProvider putAll(Map<? extends String, ?> m) {
         data.putAll(m);
         dirty.set(true);
+        return this;
     }
 
-    public void clear() {
+    public InMemoryProvider clear() {
         data.clear();
         dirty.set(true);
+        return this;
     }
 
     @Override

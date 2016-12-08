@@ -14,8 +14,8 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 public class SystemPropertyProvider implements ConfigurationProvider {
     @Override
     public MapNode provide() {
-        return new MapNode(new NamedNode("sys", new MapNode(System.getProperties().entrySet().stream()
+        return new MapNode(System.getProperties().entrySet().stream()
                 .map(e -> new NamedNode((String) e.getKey(), (String) e.getValue()))
-                .toArray(NamedNode[]::new))));
+                .toArray(NamedNode[]::new));
     }
 }

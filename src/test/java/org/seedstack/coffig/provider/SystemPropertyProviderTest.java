@@ -35,7 +35,7 @@ public class SystemPropertyProviderTest {
 
         MapNode conf = underTest.provide();
 
-        Assertions.assertThat(conf.get("sys.test\\.property").get().value()).isEqualTo("testValue");
+        Assertions.assertThat(conf.get("test\\.property").get().value()).isEqualTo("testValue");
     }
 
     @Test

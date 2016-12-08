@@ -30,7 +30,8 @@ public class CompositeProvider extends AbstractComposite<ConfigurationProvider> 
     public MapNode provide() {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
         try {
-            return forkJoinPool.submit(() -> Arrays.stream(items).parallel()
+            return forkJoinPool.submit(() -> Arrays.stream(items)
+                    .parallel()
                     .map(ConfigurationProvider::provide)
                     .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                     .orElse(new MapNode())

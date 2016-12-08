@@ -81,7 +81,7 @@ public class MapNode extends AbstractTreeNode {
     @Override
     public TreeNode merge(TreeNode otherNode) {
         if (!(otherNode instanceof MapNode)) {
-            throw new ConfigurationException(String.format("Illegal attempt to merge %s with %s", otherNode.getClass().getCanonicalName(), getClass().getCanonicalName()));
+            throw new ConfigurationException(String.format("Illegal attempt to merge %s with %s", otherNode.getClass().getSimpleName(), getClass().getSimpleName()));
         }
         return mergeMapNode((MapNode) otherNode);
     }

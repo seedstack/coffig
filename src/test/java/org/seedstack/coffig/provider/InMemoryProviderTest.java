@@ -8,8 +8,10 @@
 package org.seedstack.coffig.provider;
 
 import mockit.Deencapsulation;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.ValueNode;
 
 import java.util.HashMap;
@@ -27,19 +29,40 @@ public class InMemoryProviderTest {
     }
 
     @Test
-    public void testPutIsMakingProviderDirty() throws Exception {
+    public void testPut() throws Exception {
         inMemoryProvider.provide();
         assertThat(inMemoryProvider.isDirty()).isFalse();
         inMemoryProvider.put("a", "b");
         assertThat(inMemoryProvider.isDirty()).isTrue();
+        assertThat(inMemoryProvider.provide().get("a").get()).isEqualTo(new ValueNode("b"));
     }
 
     @Test
-    public void testRemoveIsMakingProviderDirty() throws Exception {
+    public void testPutArray() throws Exception {
         inMemoryProvider.provide();
         assertThat(inMemoryProvider.isDirty()).isFalse();
+        inMemoryProvider.put("a", "b1", "b2");
+        assertThat(inMemoryProvider.isDirty()).isTrue();
+        assertThat(inMemoryProvider.provide().get("a").get()).isEqualTo(new ArrayNode("b1", "b2"));
+    }
+
+    @Test
+    public void testPutCollection() throws Exception {
+        inMemoryProvider.provide();
+        assertThat(inMemoryProvider.isDirty()).isFalse();
+        inMemoryProvider.put("a", Lists.newArrayList("b1", "b2"));
+        assertThat(inMemoryProvider.isDirty()).isTrue();
+        assertThat(inMemoryProvider.provide().get("a").get()).isEqualTo(new ArrayNode("b1", "b2"));
+    }
+
+    @Test
+    public void testRemove() throws Exception {
+        inMemoryProvider.provide();
+        assertThat(inMemoryProvider.isDirty()).isFalse();
+        inMemoryProvider.put("a", "b");
         inMemoryProvider.remove("a");
         assertThat(inMemoryProvider.isDirty()).isTrue();
+        assertThat(inMemoryProvider.provide().get("a").isPresent()).isFalse();
     }
 
     @Test
