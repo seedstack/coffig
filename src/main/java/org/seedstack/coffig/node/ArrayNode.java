@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class ArrayNode extends AbstractTreeNode {
-    protected final List<TreeNode> childNodes;
+    final List<TreeNode> childNodes;
 
     public ArrayNode() {
         childNodes = new ArrayList<>();

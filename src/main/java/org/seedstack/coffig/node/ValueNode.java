@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ValueNode extends AbstractTreeNode {
-    protected String value;
+    String value;
 
     public ValueNode(String value) {
         this.value = value;

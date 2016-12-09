@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MapNode extends AbstractTreeNode {
-    protected final Map<String, TreeNode> children;
+    final Map<String, TreeNode> children;
 
     public MapNode() {
         this.children = new HashMap<>();

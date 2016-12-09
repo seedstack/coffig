@@ -12,8 +12,8 @@ import org.seedstack.coffig.TreeNode;
 import java.util.Objects;
 
 public class NamedNode {
-    protected String name;
-    protected TreeNode value;
+    private String name;
+    private TreeNode value;
 
     public NamedNode(String name, TreeNode value) {
         this.name = name;
