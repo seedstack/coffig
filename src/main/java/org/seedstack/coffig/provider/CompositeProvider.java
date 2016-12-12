@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.provider;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
@@ -37,7 +38,7 @@ public class CompositeProvider extends AbstractComposite<ConfigurationProvider> 
                     .orElse(new MapNode())
             ).get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new ConfigurationException(e);
+            throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_OCCURRED_DURING_COMPOSITE_PROVIDE);
         } finally {
             forkJoinPool.shutdown();
         }

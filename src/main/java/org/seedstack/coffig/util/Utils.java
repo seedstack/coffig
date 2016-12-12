@@ -8,6 +8,7 @@
 package org.seedstack.coffig.util;
 
 import org.seedstack.coffig.Config;
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 
 import java.lang.reflect.AnnotatedElement;
@@ -72,7 +73,8 @@ public final class Utils {
                 defaultConstructor.setAccessible(true);
                 return defaultConstructor.newInstance();
             } catch (Exception e) {
-                throw new ConfigurationException("Cannot instantiate default value", e);
+                throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_INSTANTIATION)
+                        .put("class", configurationClass.getName());
             }
         }
     }

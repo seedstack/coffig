@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
@@ -42,7 +43,7 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public String value() {
-        throw new ConfigurationException("Cannot access map as single value");
+        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_MAP_AS_SINGLE_VAlUE);
     }
 
     @Override
@@ -81,7 +82,9 @@ public class MapNode extends AbstractTreeNode {
     @Override
     public TreeNode merge(TreeNode otherNode) {
         if (!(otherNode instanceof MapNode)) {
-            throw new ConfigurationException(String.format("Illegal attempt to merge %s with %s", otherNode.getClass().getSimpleName(), getClass().getSimpleName()));
+            throw ConfigurationException.createNew(ConfigurationErrorCode.ILLEGAL_TREE_MERGE)
+                    .put("firstNodeType", otherNode.getClass().getSimpleName())
+                    .put("secondNodeType", getClass().getSimpleName());
         }
         return mergeMapNode((MapNode) otherNode);
     }

@@ -7,12 +7,12 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
-import java.io.File;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,7 +28,9 @@ public class URLMapper implements ConfigurationMapper {
         try {
             return new URL(treeNode.value());
         } catch (MalformedURLException e) {
-            throw new ConfigurationException("Malformed URL", e);
+            throw ConfigurationException.wrap(e, ConfigurationErrorCode.ILLEGAL_CONVERSION)
+                    .put("value", treeNode.value())
+                    .put("type", type.getTypeName());
         }
     }
 

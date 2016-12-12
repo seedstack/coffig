@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
@@ -27,7 +28,9 @@ public class URIMapper implements ConfigurationMapper {
         try {
             return new URI(treeNode.value());
         } catch (URISyntaxException e) {
-            throw new ConfigurationException("Invalid URI syntax", e);
+            throw ConfigurationException.wrap(e, ConfigurationErrorCode.ILLEGAL_CONVERSION)
+                    .put("value", treeNode.value())
+                    .put("type", type.getTypeName());
         }
     }
 

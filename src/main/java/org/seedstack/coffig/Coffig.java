@@ -99,7 +99,10 @@ public class Coffig {
     }
 
     public Object getMandatory(Type configurationClass, String... path) {
-        return getOptional(configurationClass, path).orElseThrow(() -> new ConfigurationException("Path not found: " + (path == null ? "null" : String.join(".", (CharSequence[]) path))));
+        return getOptional(configurationClass, path).orElseThrow(() ->
+                (ConfigurationException) ConfigurationException.createNew(ConfigurationErrorCode.PATH_NOT_FOUND)
+                        .put("path", path == null ? "null" : String.join(".", (CharSequence[]) path))
+        );
     }
 
     @SuppressWarnings("unchecked")

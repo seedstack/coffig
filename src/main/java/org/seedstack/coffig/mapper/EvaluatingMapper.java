@@ -8,7 +8,6 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
@@ -22,40 +21,38 @@ public class EvaluatingMapper implements ConfigurationMapper {
     private Coffig coffig;
 
     public EvaluatingMapper(ConfigurationMapper mapper, ConfigurationEvaluator evaluator) {
+        if (mapper == null) {
+            throw new NullPointerException("Mapper cannot be null");
+        }
         this.mapper = mapper;
+        if (evaluator == null) {
+            throw new NullPointerException("Evaluator cannot be null");
+        }
         this.evaluator = evaluator;
     }
 
     @Override
     public void initialize(Coffig coffig) {
         this.coffig = coffig;
-        if (mapper != null) {
-            mapper.initialize(coffig);
-        }
-        if (evaluator != null) {
-            evaluator.initialize(coffig);
-        }
+        mapper.initialize(coffig);
+        evaluator.initialize(coffig);
     }
 
     @Override
     public void invalidate() {
-        if (mapper != null) {
-            mapper.invalidate();
-        }
-        if (evaluator != null) {
-            evaluator.invalidate();
-        }
+        mapper.invalidate();
+        evaluator.invalidate();
     }
 
     @Override
     public boolean isDirty() {
-        return mapper != null && mapper.isDirty() || evaluator != null && evaluator.isDirty();
+        return mapper.isDirty() || evaluator.isDirty();
     }
 
     @Override
     public EvaluatingMapper fork() {
-        ConfigurationMapper forkedMapper = mapper == null ? null : (ConfigurationMapper) mapper.fork();
-        ConfigurationEvaluator forkedEvaluator = evaluator == null ? null : (ConfigurationEvaluator) evaluator.fork();
+        ConfigurationMapper forkedMapper = (ConfigurationMapper) mapper.fork();
+        ConfigurationEvaluator forkedEvaluator = (ConfigurationEvaluator) evaluator.fork();
         return new EvaluatingMapper(forkedMapper, forkedEvaluator);
     }
 
@@ -66,13 +63,11 @@ public class EvaluatingMapper implements ConfigurationMapper {
 
     @Override
     public Object map(TreeNode treeNode, Type type) {
-        if (this.mapper == null) {
-            throw new ConfigurationException(String.format("Cannot map tree node to %s: no mapper specified", type.getTypeName()));
+        if (treeNode instanceof ValueNode) {
+            return mapper.map(evaluator.evaluate(coffig.getTree(), ((ValueNode) treeNode)), type);
+        } else {
+            return mapper.map(treeNode, type);
         }
-        if (evaluator != null && treeNode instanceof ValueNode) {
-            treeNode = evaluator.evaluate(coffig.getTree(), ((ValueNode) treeNode));
-        }
-        return mapper.map(treeNode, type);
     }
 
     @Override

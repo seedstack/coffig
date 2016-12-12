@@ -12,9 +12,10 @@ public class PropertyNotFoundException extends ConfigurationException {
     private String highlightedName;
 
     public PropertyNotFoundException(String propertyName, Throwable cause) {
-        super("Property not found: " + propertyName, cause);
+        super(ConfigurationErrorCode.PROPERTY_NOT_FOUND, cause);
         this.propertyName = propertyName;
         this.highlightedName = "<" + propertyName + ">";
+        put("property", highlightedName);
     }
 
     public PropertyNotFoundException(String propertyName) {
@@ -22,9 +23,10 @@ public class PropertyNotFoundException extends ConfigurationException {
     }
 
     public PropertyNotFoundException(PropertyNotFoundException e, String name) {
-        super("Sub-property not found: " + name + "." + e.highlightedName);
+        super(ConfigurationErrorCode.PROPERTY_NOT_FOUND);
         this.propertyName = name + "." + e.propertyName;
         this.highlightedName = name + "." + e.highlightedName;
+        put("property", this.highlightedName);
     }
 
     public String getPropertyName() {

@@ -9,6 +9,7 @@ package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.Config;
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
@@ -66,7 +67,9 @@ public class ProgrammaticProvider implements ConfigurationProvider, Configuratio
                     try {
                         return method.invoke(object);
                     } catch (Exception e) {
-                        throw new ConfigurationException("Cannot supply configuration object from " + method.toString());
+                        throw ConfigurationException.wrap(e, ConfigurationErrorCode.CANNOT_SUPPLY_CONFIGURATION_OBJECT)
+                                .put("class", object.getClass())
+                                .put("method", method.getName());
                     }
                 }, resolvePath(method)));
     }

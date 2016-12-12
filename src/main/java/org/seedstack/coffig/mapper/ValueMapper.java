@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MutableValueNode;
@@ -65,6 +66,8 @@ public class ValueMapper implements ConfigurationMapper {
         if (value.length() == 1) {
             return value.charAt(0);
         }
-        throw new ConfigurationException("Cannot convert \"" + value + "\" to char");
+        throw ConfigurationException.createNew(ConfigurationErrorCode.ILLEGAL_CONVERSION)
+                .put("value", value)
+                .put("type", char.class);
     }
 }

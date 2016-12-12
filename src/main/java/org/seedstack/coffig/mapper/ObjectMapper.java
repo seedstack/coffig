@@ -9,6 +9,7 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.Config;
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.SingleValue;
 import org.seedstack.coffig.TreeNode;
@@ -16,8 +17,12 @@ import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
+import org.seedstack.coffig.util.Utils;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +42,7 @@ class ObjectMapper<T> implements ConfigurationComponent {
         this.aClass = aClass;
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
-        this.holder = getNewInstance();
+        this.holder = Utils.instantiateDefault(aClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -55,26 +60,18 @@ class ObjectMapper<T> implements ConfigurationComponent {
 
     T map(TreeNode rootNode) {
         if (rootNode instanceof ValueNode && valueFieldInfo != null) {
-            try {
-                Object fieldValue = coffig.getMapper().map(rootNode, valueFieldInfo.type);
-                if (fieldValue != null) {
-                    valueFieldInfo.consumer.accept(fieldValue);
-                }
-            } catch (Exception e) {
-                throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", valueFieldInfo.name, aClass.getCanonicalName()), e);
+            Object fieldValue = coffig.getMapper().map(rootNode, valueFieldInfo.type);
+            if (fieldValue != null) {
+                valueFieldInfo.consumer.accept(fieldValue);
             }
         } else if (rootNode instanceof MapNode) {
             fieldInfo.forEach(fieldInfo -> {
-                try {
-                    Object fieldValue = coffig.getMapper().map(
-                            rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
-                            fieldInfo.type
-                    );
-                    if (fieldValue != null) {
-                        fieldInfo.consumer.accept(fieldValue);
-                    }
-                } catch (Exception e) {
-                    throw new ConfigurationException(String.format("Unable to inject value in field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
+                Object fieldValue = coffig.getMapper().map(
+                        rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
+                        fieldInfo.type
+                );
+                if (fieldValue != null) {
+                    fieldInfo.consumer.accept(fieldValue);
                 }
             });
         }
@@ -85,13 +82,9 @@ class ObjectMapper<T> implements ConfigurationComponent {
     TreeNode unmap() {
         MutableMapNode rootNode = new MutableMapNode();
         fieldInfo.forEach(fieldInfo -> {
-            try {
-                TreeNode unmapped = coffig.getMapper().unmap(fieldInfo.supplier.get(), fieldInfo.type);
-                if (unmapped != null) {
-                    rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
-                }
-            } catch (Exception e) {
-                throw new ConfigurationException(String.format("Unable to extract value from field '%s' of class '%s'", fieldInfo.name, aClass.getCanonicalName()), e);
+            TreeNode unmapped = coffig.getMapper().unmap(fieldInfo.supplier.get(), fieldInfo.type);
+            if (unmapped != null) {
+                rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
             }
         });
         return rootNode;
@@ -106,16 +99,6 @@ class ObjectMapper<T> implements ConfigurationComponent {
             }
         }
         return valueFieldInfo;
-    }
-
-    private T getNewInstance() {
-        try {
-            Constructor<? extends T> constructor = aClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            return constructor.newInstance();
-        } catch (Exception e) {
-            throw new ConfigurationException(e);
-        }
     }
 
     private List<FieldInfo> getFieldInfo() {
@@ -202,7 +185,9 @@ class ObjectMapper<T> implements ConfigurationComponent {
                 try {
                     setter.invoke(holder, o);
                 } catch (Exception e) {
-                    throw new ConfigurationException(e);
+                    throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_SETTER_INVOCATION)
+                            .put("class", holder.getClass().getName())
+                            .put("setter", setter.getName());
                 }
             };
         }
@@ -213,7 +198,9 @@ class ObjectMapper<T> implements ConfigurationComponent {
                 try {
                     field.set(holder, o);
                 } catch (Exception e) {
-                    throw new ConfigurationException(e);
+                    throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_FIELD_INJECTION)
+                            .put("class", holder.getClass().getName())
+                            .put("field", field.getName());
                 }
             };
         }
@@ -223,7 +210,9 @@ class ObjectMapper<T> implements ConfigurationComponent {
                 try {
                     return getter.invoke(holder);
                 } catch (Exception e) {
-                    throw new ConfigurationException(e);
+                    throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_GETTER_INVOCATION)
+                            .put("class", holder.getClass().getName())
+                            .put("getter", getter.getName());
                 }
             };
         }
@@ -234,7 +223,9 @@ class ObjectMapper<T> implements ConfigurationComponent {
                 try {
                     return field.get(holder);
                 } catch (Exception e) {
-                    throw new ConfigurationException(e);
+                    throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_FIELD_ACCESS)
+                            .put("class", holder.getClass().getName())
+                            .put("field", field.getName());
                 }
             };
         }

@@ -8,6 +8,7 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ArrayNode;
@@ -15,7 +16,6 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +44,7 @@ public class CollectionMapper implements ConfigurationMapper {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object map(TreeNode treeNode, Type type) {
         Class<?> rawClass = (Class<?>) ((ParameterizedType) type).getRawType();
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
@@ -57,7 +58,8 @@ public class CollectionMapper implements ConfigurationMapper {
                 try {
                     return (Collection<Object>) rawClass.newInstance();
                 } catch (Exception e) {
-                    throw new ConfigurationException("Unable to instantiate collection class " + rawClass);
+                    throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_INSTANTIATION)
+                            .put("class", rawClass.getName());
                 }
             }));
         }

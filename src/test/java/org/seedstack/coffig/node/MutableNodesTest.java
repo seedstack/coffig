@@ -133,7 +133,7 @@ public class MutableNodesTest {
             mapNode.remove("custom.0.0.fake.test");
             failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
-            assertThat(e).hasMessage("Sub-property not found: custom.0.0.<fake.test>");
+            assertThat(e).hasMessage("[CONFIGURATION] Property not found");
         }
     }
 

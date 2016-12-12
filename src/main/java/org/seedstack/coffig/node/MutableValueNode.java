@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.MutableNodeAttributes;
 import org.seedstack.coffig.MutableTreeNode;
@@ -32,12 +33,16 @@ public class MutableValueNode extends ValueNode implements MutableTreeNode {
 
     @Override
     public MutableTreeNode set(String path, TreeNode value) {
-        throw new ConfigurationException("Illegal attempt to set inner path " + path);
+        throw ConfigurationException.createNew(ConfigurationErrorCode.ILLEGAL_TREE_ACCESS)
+                .put("path", path)
+                .put("reason", "cannot add children to value node");
     }
 
     @Override
     public MutableTreeNode remove(String path) {
-        throw new ConfigurationException("Illegal attempt to remove inner path " + path);
+        throw ConfigurationException.createNew(ConfigurationErrorCode.ILLEGAL_TREE_ACCESS)
+                .put("path", path)
+                .put("reason", "cannot remove children from value node");
     }
 
     @Override

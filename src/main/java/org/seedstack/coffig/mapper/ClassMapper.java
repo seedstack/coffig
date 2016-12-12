@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
@@ -37,7 +38,8 @@ public class ClassMapper implements ConfigurationMapper {
         try {
             aClass = Class.forName(treeNode.value());
         } catch (ClassNotFoundException e) {
-            throw new ConfigurationException("Unable to load class <" + treeNode.value() + ">");
+            throw ConfigurationException.wrap(e, ConfigurationErrorCode.UNABLE_TO_LOAD_CLASS)
+                    .put("class", treeNode.value());
         }
 
         if (itemType instanceof Class && ((Class<?>) itemType).isAssignableFrom(aClass)) {
@@ -45,7 +47,9 @@ public class ClassMapper implements ConfigurationMapper {
         } else if (itemType instanceof WildcardType && isSatisfyingBounds(aClass, (WildcardType) itemType)) {
             return aClass;
         } else {
-            throw new ConfigurationException("Class<" + aClass.getCanonicalName() + "> is not assignable to Class<" + itemType.getTypeName() + ">");
+            throw ConfigurationException.createNew(ConfigurationErrorCode.NON_ASSIGNABLE_CLASS)
+                    .put("assigned", aClass.getName())
+                    .put("assignee", itemType.getTypeName());
         }
     }
 

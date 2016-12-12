@@ -10,6 +10,7 @@ package org.seedstack.coffig.provider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ArrayNode;
@@ -68,7 +69,8 @@ public class JacksonProvider implements ConfigurationProvider {
         try {
             return buildTreeFromFields(jacksonMapper.readTree(url));
         } catch (IOException e) {
-            throw new ConfigurationException("Failed to read configuration from " + url.toExternalForm(), e);
+            throw ConfigurationException.wrap(e, ConfigurationErrorCode.FAILED_TO_READ_CONFIGURATION)
+                    .put("url", url.toExternalForm());
         }
     }
 

@@ -8,6 +8,7 @@
 package org.seedstack.coffig.util;
 
 import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 
@@ -18,6 +19,7 @@ public abstract class AbstractComposite<T extends ConfigurationComponent> implem
     private final Class<T> itemClass;
     protected final T[] items;
 
+    @SafeVarargs
     public AbstractComposite(Class<T> itemClass, T... items) {
         this.itemClass = itemClass;
         this.items = createArray(items.length);
@@ -54,7 +56,8 @@ public abstract class AbstractComposite<T extends ConfigurationComponent> implem
                 return (U) item;
             }
         }
-        throw new ConfigurationException("Composite doesn't contain an item of class " + itemClass.getCanonicalName());
+        throw ConfigurationException.createNew(ConfigurationErrorCode.SPECIFIED_ITEM_CLASS_NOT_FOUND)
+                .put("itemClass", itemClass.getCanonicalName());
     }
 
     @SuppressWarnings("unchecked")

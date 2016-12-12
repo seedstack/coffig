@@ -28,7 +28,7 @@ public class MapNodeTest {
             mapNode1.item("name");
             Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
-            assertThat(e).hasMessage("Property not found: name");
+            assertThat(e).hasMessage("[CONFIGURATION] Property not found");
             assertThat(e.getPropertyName()).isEqualTo("name");
         }
     }
@@ -79,7 +79,7 @@ public class MapNodeTest {
             mapNode1.merge(mapNode2);
             Assertions.failBecauseExceptionWasNotThrown(ConfigurationException.class);
         } catch (ConfigurationException e) {
-            assertThat(e).hasMessage(String.format("Illegal attempt to merge %s with %s", ValueNode.class.getSimpleName(), MapNode.class.getSimpleName()));
+            assertThat(e).hasMessage("[CONFIGURATION] Illegal tree merge");
         }
     }
 

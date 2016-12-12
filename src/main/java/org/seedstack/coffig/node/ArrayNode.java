@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
@@ -41,7 +42,7 @@ public class ArrayNode extends AbstractTreeNode {
 
     @Override
     public String value() {
-        throw new ConfigurationException("Cannot access array as single value");
+        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_ARRAY_AS_SINGLE_VALUE);
     }
 
     @Override
