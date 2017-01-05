@@ -35,7 +35,8 @@ public class FunctionEvaluatorTest {
                     new NamedNode("nestedRef", "$greet('World', test.noArg)"),
                     new NamedNode("unresolvedRef", "$greet('World', test.unknown)"),
                     new NamedNode("mappedArg1", "$greetSeveralTimes('World', '5', '!')"),
-                    new NamedNode("mappedArg2", "$verifyObject(object)")
+                    new NamedNode("mappedArg2", "$verifyObject(object)"),
+                    new NamedNode("escaped", "test: \\$verifyObject(object)!")
             ))
     );
 
@@ -90,6 +91,11 @@ public class FunctionEvaluatorTest {
     @Test
     public void testMappedReference() throws Exception {
         assertThat(evaluate("test.mappedArg2")).isEqualTo("true");
+    }
+
+    @Test
+    public void testEscaping() throws Exception {
+        assertThat(evaluate("test.escaped")).isEqualTo("test: $verifyObject(object)!");
     }
 
     private static String greet(String name, String suffix) {

@@ -17,7 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MacroEvaluator implements ConfigurationEvaluator {
-    private static final Pattern MACRO_PATTERN = Pattern.compile("\\$\\{|\\}");
+    private static final Pattern MACRO_PATTERN = Pattern.compile("\\\\?\\$\\{|\\}");
     private final LRUCache<String, String> cache = new LRUCache<>(10000);
 
     @Override
@@ -43,27 +43,34 @@ public class MacroEvaluator implements ConfigurationEvaluator {
 
         StringBuilder result = new StringBuilder();
         int currentPos = 0;
-        int[] indices;
+        MatchingResult matchingResult;
 
         // Process all macros
-        while ((indices = findMatchingCurlyBraces(value, currentPos)) != null) {
+        while ((matchingResult = findMatchingCurlyBraces(value, currentPos)) != null) {
             // Add the beginning of the string (before the macro)
-            result.append(value.substring(currentPos, indices[0]));
+            result.append(value.substring(currentPos, matchingResult.startPos));
 
-            // Process the macro
-            for (String part : value.substring(indices[0] + 2, indices[1]).split(":")) {
-                if (part.startsWith("'") && part.endsWith("'")) {
-                    result.append(part.substring(1, part.length() - 1));
-                    break;
-                } else {
-                    Optional<TreeNode> node = rootNode.get(processValue(rootNode, part));
-                    if (node.isPresent()) {
-                        result.append(node.get().value());
+            if (matchingResult.escaped) {
+                // Add the macro as-is (without resolving it)
+                result.append(value.substring(matchingResult.startPos + 1, matchingResult.endPos + 1));
+            } else {
+                // Process the macro
+                for (String part : value.substring(matchingResult.startPos + 2, matchingResult.endPos).split(":")) {
+                    if (part.startsWith("'") && part.endsWith("'")) {
+                        result.append(part.substring(1, part.length() - 1));
                         break;
+                    } else {
+                        Optional<TreeNode> node = rootNode.get(processValue(rootNode, part));
+                        if (node.isPresent()) {
+                            result.append(node.get().value());
+                            break;
+                        }
                     }
                 }
             }
-            currentPos = indices[1] + 1;
+
+            // Advance currentPos to after the macro
+            currentPos = matchingResult.endPos + 1;
         }
 
         // Add the remaining of the string (after all macros)
@@ -75,14 +82,19 @@ public class MacroEvaluator implements ConfigurationEvaluator {
         return cachedResult;
     }
 
-    private int[] findMatchingCurlyBraces(String value, int startIndex) {
+    private MatchingResult findMatchingCurlyBraces(String value, int startIndex) {
         int level = 0, startPos = -1;
+        boolean escaped = false;
         Matcher matcher = MACRO_PATTERN.matcher(value);
         while (matcher.find()) {
             if (matcher.start() < startIndex) {
                 continue;
             }
             switch (matcher.group()) {
+                case "\\${":
+                    if (level == 0) {
+                        escaped = true;
+                    }
                 case "${":
                     if (level == 0) {
                         startPos = matcher.start();
@@ -92,7 +104,7 @@ public class MacroEvaluator implements ConfigurationEvaluator {
                 case "}":
                     level--;
                     if (level == 0) {
-                        return new int[]{startPos, matcher.start()};
+                        return new MatchingResult(startPos, matcher.start(), escaped);
                     }
                     break;
                 default:
@@ -100,5 +112,17 @@ public class MacroEvaluator implements ConfigurationEvaluator {
             }
         }
         return null;
+    }
+
+    private static class MatchingResult {
+        final int startPos;
+        final int endPos;
+        final boolean escaped;
+
+        MatchingResult(int startPos, int endPos, boolean escaped) {
+            this.startPos = startPos;
+            this.endPos = endPos;
+            this.escaped = escaped;
+        }
     }
 }

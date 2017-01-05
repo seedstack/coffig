@@ -26,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FunctionEvaluator implements ConfigurationEvaluator {
-    private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\$([_a-zA-Z]\\w*)\\(|\\)");
+    private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\\\?\\$([_a-zA-Z]\\w*)\\(|\\)");
     private final ConcurrentMap<String, FunctionRegistration> functions = new ConcurrentHashMap<>();
     private final LRUCache<String, String> cache = new LRUCache<>(10000);
     private final AtomicBoolean scanned = new AtomicBoolean();
@@ -91,12 +91,18 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
 
         // Iterate through all call sites in the value
         while ((callSiteInfo = findFunctionCall(value, currentPos)) != null) {
-            result.append(value.substring(currentPos, callSiteInfo.start));
-            result.append(invokeFunction(
-                    callSiteInfo.name,
-                    Arrays.stream(callSiteInfo.arguments).map(arg -> processArgument(rootNode, arg)).toArray(TreeNode[]::new)
-            ));
-            currentPos = callSiteInfo.end;
+            result.append(value.substring(currentPos, callSiteInfo.startPos));
+
+            if (callSiteInfo.escaped) {
+                result.append(value.substring(callSiteInfo.startPos + 1, callSiteInfo.endPos));
+            } else {
+                result.append(invokeFunction(
+                        callSiteInfo.name,
+                        Arrays.stream(callSiteInfo.arguments).map(arg -> processArgument(rootNode, arg)).toArray(TreeNode[]::new)
+                ));
+            }
+
+            currentPos = callSiteInfo.endPos;
         }
         result.append(value.substring(currentPos));
 
@@ -162,9 +168,12 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
             }
 
             if (matcher.group(1) != null) {
+                if (matcher.group().startsWith("\\")) {
+                    callSiteInfo.escaped = true;
+                }
                 if (level == 0) {
                     callSiteInfo.name = matcher.group(1).trim();
-                    callSiteInfo.start = matcher.start();
+                    callSiteInfo.startPos = matcher.start();
                     argumentPos = matcher.end(1) + 1;
                 }
                 level++;
@@ -177,7 +186,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
                     } else {
                         callSiteInfo.arguments = Arrays.stream(allArgs.split(",")).map(String::trim).toArray(String[]::new);
                     }
-                    callSiteInfo.end = matcher.end();
+                    callSiteInfo.endPos = matcher.end();
                     return callSiteInfo;
                 }
             }
@@ -186,8 +195,9 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     }
 
     private static class CallSiteInfo {
-        private int start;
-        private int end;
+        private int startPos;
+        private int endPos;
+        private boolean escaped;
         private String name;
         private String[] arguments;
     }
