@@ -9,3 +9,4 @@ org.seedstack.coffig.mapper.ClassMapper
 org.seedstack.coffig.mapper.URLMapper
 org.seedstack.coffig.mapper.URIMapper
 org.seedstack.coffig.mapper.PropertiesMapper
+org.seedstack.coffig.mapper.BuilderMapper

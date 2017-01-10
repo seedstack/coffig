@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -38,6 +39,11 @@ public class ArrayNode extends AbstractTreeNode {
 
     public ArrayNode(List<TreeNode> childNodes) {
         this.childNodes = new ArrayList<>(Freezer.freeze(childNodes));
+    }
+
+    @Override
+    public Set<String> keys() {
+        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_ARRAY_AS_MAP);
     }
 
     @Override

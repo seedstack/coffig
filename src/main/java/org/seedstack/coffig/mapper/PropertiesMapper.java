@@ -26,7 +26,7 @@ public class PropertiesMapper implements ConfigurationMapper {
     public Object map(TreeNode treeNode, Type type) {
         Properties properties = new Properties();
         if (treeNode instanceof MapNode) {
-            ((MapNode) treeNode).keys().forEach(key -> properties.setProperty(key, treeNode.item(key).value()));
+            treeNode.keys().forEach(key -> properties.setProperty(key, treeNode.item(key).value()));
         } else {
             treeNode.items().forEach(item -> properties.setProperty(item.value(), null));
         }

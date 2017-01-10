@@ -7,12 +7,15 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.ConfigurationErrorCode;
+import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class ValueNode extends AbstractTreeNode {
@@ -20,6 +23,11 @@ public class ValueNode extends AbstractTreeNode {
 
     public ValueNode(String value) {
         this.value = value;
+    }
+
+    @Override
+    public Set<String> keys() {
+        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_SINGLE_VALUE_AS_MAP);
     }
 
     @Override

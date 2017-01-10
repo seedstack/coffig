@@ -52,7 +52,7 @@ public class MapMapper implements ConfigurationMapper {
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
 
         if (treeNode instanceof MapNode) {
-            return ((MapNode) treeNode).keys().stream()
+            return treeNode.keys().stream()
                     .collect(toMap(
                             key -> coffig.getMapper().map(new ValueNode(key), keyType),
                             key -> coffig.getMapper().map(treeNode.item(key), valueType)
