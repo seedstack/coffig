@@ -18,12 +18,12 @@ import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.util.Utils;
+import org.seedstack.shed.reflect.Classes;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -102,7 +102,12 @@ class ObjectMapper<T> implements ConfigurationComponent {
     }
 
     private List<FieldInfo> getFieldInfo() {
-        return Arrays.stream(aClass.getDeclaredFields()).filter(field -> !Modifier.isStatic(field.getModifiers())).map(FieldInfo::new).collect(toList());
+        return Classes.from(aClass)
+                .traversingSuperclasses()
+                .fields()
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                .map(FieldInfo::new)
+                .collect(toList());
     }
 
     private class FieldInfo {
