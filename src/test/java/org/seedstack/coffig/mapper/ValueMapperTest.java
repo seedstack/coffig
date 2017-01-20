@@ -18,19 +18,6 @@ public class ValueMapperTest {
     private ConfigurationMapper mapper = Coffig.basic().getMapper();
 
     @Test
-    public void testMapFromNull() {
-        assertThat(mapper.map(null, Boolean.class)).isNull();
-        assertThat(mapper.map(null, Byte.class)).isNull();
-        assertThat(mapper.map(null, Character.class)).isNull();
-        assertThat(mapper.map(null, Double.class)).isNull();
-        assertThat(mapper.map(null, Float.class)).isNull();
-        assertThat(mapper.map(null, Integer.class)).isNull();
-        assertThat(mapper.map(null, Long.class)).isNull();
-        assertThat(mapper.map(null, Short.class)).isNull();
-        assertThat(mapper.map(null, String.class)).isNull();
-    }
-
-    @Test
     public void testMapValues() {
         assertThat(mapper.map(new ValueNode("true"), Boolean.class)).isEqualTo(true);
         assertThat(mapper.map(new ValueNode("false"), boolean.class)).isEqualTo(false);

@@ -12,11 +12,10 @@ import org.junit.Test;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static sun.security.krb5.internal.crypto.Nonce.value;
 
 public class ArrayNodeTest {
 
@@ -27,12 +26,12 @@ public class ArrayNodeTest {
 
     @Test
     public void testAccessWithName() {
-        new ArrayNode("plop").item("0");
+        new ArrayNode("plop").node("0");
     }
 
     @Test
     public void testChildNodes() {
-        List<TreeNode> treeNodes = (List<TreeNode>) new ArrayNode("foo", "bar").items();
+        List<TreeNode> treeNodes = new ArrayNode("foo", "bar").nodes().collect(Collectors.toList());
         assertThat(treeNodes).hasSize(2);
         assertThat(treeNodes.get(0).value()).isEqualTo("foo");
         assertThat(treeNodes.get(1).value()).isEqualTo("bar");

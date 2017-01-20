@@ -10,18 +10,17 @@ package org.seedstack.coffig.processor;
 import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.NamedNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProfileProcessorTest {
     private ProfileProcessor profileProcessor = new ProfileProcessor();
-    private MutableMapNode config;
+    private MapNode config;
 
     @Before
     public void setUp() throws Exception {
-        config = new MutableMapNode(
+        config = new MapNode(
                 new NamedNode("a", "1"),
                 new NamedNode("b<profile1>", "2"),
                 new NamedNode("c<profile2>", new MapNode(
@@ -33,7 +32,7 @@ public class ProfileProcessorTest {
     }
 
     @Test
-    public void testRemoval() throws Exception {
+    public void testProfileAttribute() throws Exception {
         assertThat(config.get("a").get().attributes().get("profile")).isNull();
         assertThat(config.get("b").get().attributes().get("profile")).isEqualTo("profile1");
         assertThat(config.get("c").get().attributes().get("profile")).isEqualTo("profile2");

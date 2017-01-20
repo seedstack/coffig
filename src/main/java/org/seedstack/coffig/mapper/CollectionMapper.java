@@ -50,11 +50,11 @@ public class CollectionMapper implements ConfigurationMapper {
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
 
         if (List.class.isAssignableFrom(rawClass)) {
-            return treeNode.items().stream().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toList());
+            return treeNode.nodes().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toList());
         } else if (Set.class.isAssignableFrom(rawClass)) {
-            return treeNode.items().stream().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toSet());
+            return treeNode.nodes().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toSet());
         } else {
-            return treeNode.items().stream().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toCollection(() -> {
+            return treeNode.nodes().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toCollection(() -> {
                 try {
                     return (Collection<Object>) rawClass.newInstance();
                 } catch (Exception e) {

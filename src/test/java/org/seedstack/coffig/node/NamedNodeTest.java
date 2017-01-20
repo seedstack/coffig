@@ -9,6 +9,7 @@ package org.seedstack.coffig.node;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.seedstack.coffig.NamedNode;
 
 public class NamedNodeTest {
 
@@ -16,7 +17,7 @@ public class NamedNodeTest {
 
     @Test
     public void testGet() {
-        Assertions.assertThat(pairWithMap.get().item("port").value()).isEqualTo("80");
+        Assertions.assertThat(pairWithMap.node().node("port").value()).isEqualTo("80");
     }
 
     @Test

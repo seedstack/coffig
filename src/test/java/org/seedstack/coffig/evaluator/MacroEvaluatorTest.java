@@ -11,19 +11,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.node.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MacroEvaluatorTest {
     private MacroEvaluator macroEvaluator = new MacroEvaluator();
-    private MutableMapNode config;
+    private MapNode config;
 
     @Before
     public void setUp() throws Exception {
-        config = new MutableMapNode(
+        config = new MapNode(
                 new NamedNode("index", "2"),
 
                 new NamedNode("erroneousIndex", "9"),

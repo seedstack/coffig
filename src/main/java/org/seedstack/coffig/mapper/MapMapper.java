@@ -10,7 +10,6 @@ package org.seedstack.coffig.mapper;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationMapper;
@@ -51,14 +50,14 @@ public class MapMapper implements ConfigurationMapper {
         Type keyType = ((ParameterizedType) type).getActualTypeArguments()[0];
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
 
-        if (treeNode instanceof MapNode) {
-            return treeNode.keys().stream()
+        if (treeNode.type() == TreeNode.Type.MAP_NODE) {
+            return treeNode.namedNodes()
                     .collect(toMap(
-                            key -> coffig.getMapper().map(new ValueNode(key), keyType),
-                            key -> coffig.getMapper().map(treeNode.item(key), valueType)
+                            namedNode -> coffig.getMapper().map(new ValueNode(namedNode.name()), keyType),
+                            namedNode -> coffig.getMapper().map(namedNode.node(), valueType)
                     ));
         } else {
-            return treeNode.items().stream()
+            return treeNode.nodes()
                     .collect(toMap(
                             node -> coffig.getMapper().map(node, keyType),
                             node -> instantiateDefault((Class<?>) valueType))
@@ -68,11 +67,11 @@ public class MapMapper implements ConfigurationMapper {
 
     @Override
     public TreeNode unmap(Object object, Type type) {
-        MutableMapNode mapNode = new MutableMapNode();
+        MapNode mapNode = new MapNode();
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
         ((Map<?, ?>) object).forEach((key, value) -> {
             if (key != null) {
-                mapNode.put(String.valueOf(key), coffig.getMapper().unmap(value, valueType));
+                mapNode.set(String.valueOf(key), coffig.getMapper().unmap(value, valueType));
             }
         });
         return mapNode;

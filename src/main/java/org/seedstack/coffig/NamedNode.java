@@ -5,15 +5,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.node;
+package org.seedstack.coffig;
 
-import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.ArrayNode;
+import org.seedstack.coffig.node.ValueNode;
 
 import java.util.Objects;
 
 public class NamedNode {
-    private String name;
-    private TreeNode value;
+    private final String name;
+    private final TreeNode value;
 
     public NamedNode(String name, TreeNode value) {
         this.name = name;
@@ -32,7 +33,7 @@ public class NamedNode {
         return name;
     }
 
-    public TreeNode get() {
+    public TreeNode node() {
         return value;
     }
 

@@ -8,6 +8,7 @@
 package org.seedstack.coffig.node;
 
 import org.junit.Test;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.TreeNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,19 +67,19 @@ public class MutableTreeNodeTest {
 
     @Test
     public void testNode() {
-        assertThat(root.item("id").value()).isEqualTo("foo");
-        assertThat(root.item("name").value()).isEqualTo("The Foo app");
+        assertThat(root.node("id").value()).isEqualTo("foo");
+        assertThat(root.node("name").value()).isEqualTo("The Foo app");
 
-        assertThat(root.item("users").items()).hasSize(2);
-        assertThat(root.item("users").item("0").value()).isEqualTo("u123456");
-        assertThat(root.item("users").item("1").value()).isEqualTo("u456789");
+        assertThat(root.node("users").nodes()).hasSize(2);
+        assertThat(root.node("users").node("0").value()).isEqualTo("u123456");
+        assertThat(root.node("users").node("1").value()).isEqualTo("u456789");
 
-        TreeNode dataSource1 = root.item("datasources").item("0");
-        assertThat(dataSource1.item("name").value()).isEqualTo("ds1");
-        assertThat(dataSource1.item("url").value()).isEqualTo("jdbc:hsqldb:hsql://localhost:9001/ds1");
+        TreeNode dataSource1 = root.node("datasources").node("0");
+        assertThat(dataSource1.node("name").value()).isEqualTo("ds1");
+        assertThat(dataSource1.node("url").value()).isEqualTo("jdbc:hsqldb:hsql://localhost:9001/ds1");
 
-        assertThat(root.item("server").item("host").value()).isEqualTo("localhost");
-        assertThat(root.item("server").item("port").value()).isEqualTo("80");
+        assertThat(root.node("server").node("host").value()).isEqualTo("localhost");
+        assertThat(root.node("server").node("port").value()).isEqualTo("80");
     }
 
     @Test

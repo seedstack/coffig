@@ -9,7 +9,6 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
@@ -63,11 +62,7 @@ public class EvaluatingMapper implements ConfigurationMapper {
 
     @Override
     public Object map(TreeNode treeNode, Type type) {
-        if (treeNode instanceof ValueNode) {
-            return mapper.map(evaluator.evaluate(coffig.getTree(), ((ValueNode) treeNode)), type);
-        } else {
-            return mapper.map(treeNode, type);
-        }
+        return mapper.map(evaluator.evaluate(coffig.getTree(), treeNode), type);
     }
 
     @Override

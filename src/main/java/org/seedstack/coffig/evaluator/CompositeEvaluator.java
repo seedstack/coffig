@@ -23,8 +23,8 @@ public class CompositeEvaluator extends AbstractComposite<ConfigurationEvaluator
     }
 
     @Override
-    public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
-        ValueNode result = valueNode;
+    public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
+        TreeNode result = valueNode;
         for (ConfigurationEvaluator evaluator : items) {
             result = evaluator.evaluate(rootNode, result);
         }

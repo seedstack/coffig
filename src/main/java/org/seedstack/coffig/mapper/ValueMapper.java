@@ -10,7 +10,7 @@ package org.seedstack.coffig.mapper;
 import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.MutableValueNode;
+import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.Type;
@@ -59,7 +59,7 @@ public class ValueMapper implements ConfigurationMapper {
         if (object == null) {
             return null;
         }
-        return new MutableValueNode(String.valueOf(object));
+        return new ValueNode(String.valueOf(object));
     }
 
     private char charOf(String value) {

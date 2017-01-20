@@ -57,8 +57,12 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     }
 
     @Override
-    public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
-        return new ValueNode(processValue(rootNode, valueNode.value()));
+    public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
+        if (valueNode.type() == TreeNode.Type.VALUE_NODE) {
+            return new ValueNode(processValue(rootNode, valueNode.value()));
+        } else {
+            return valueNode;
+        }
     }
 
     private void detectFunctionsOfHolder(ConfigFunctionHolder configFunctionHolder) {
@@ -121,7 +125,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         CallSiteInfo callSiteInfo = findFunctionCall(value, 0);
         if (callSiteInfo == null) {
             TreeNode refNode = tree.get(value).orElse(new ValueNode(""));
-            if (refNode instanceof ValueNode) {
+            if (refNode.type() == TreeNode.Type.VALUE_NODE) {
                 // References value nodes can be processed...
                 return new ValueNode(processValue(tree, refNode.value()));
             } else {

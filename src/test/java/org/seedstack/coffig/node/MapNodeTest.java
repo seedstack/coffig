@@ -10,6 +10,7 @@ package org.seedstack.coffig.node;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
@@ -21,11 +22,11 @@ public class MapNodeTest {
     public void testChildNode() {
         MapNode mapNode1 = new MapNode(new NamedNode("id", "foo"));
 
-        assertThat(mapNode1.item("id")).isNotNull();
-        assertThat(mapNode1.item("id")).isInstanceOf(ValueNode.class);
+        assertThat(mapNode1.node("id")).isNotNull();
+        assertThat(mapNode1.node("id")).isInstanceOf(ValueNode.class);
 
         try {
-            mapNode1.item("name");
+            mapNode1.node("name");
             Assertions.failBecauseExceptionWasNotThrown(PropertyNotFoundException.class);
         } catch (PropertyNotFoundException e) {
             assertThat(e).hasMessage("[CONFIGURATION] Property not found");
@@ -35,7 +36,7 @@ public class MapNodeTest {
 
     @Test
     public void testValues() {
-        assertThat(new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2")).items()).containsOnly(new ValueNode("val1"), new ValueNode("val2"));
+        assertThat(new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2")).nodes()).containsOnly(new ValueNode("val1"), new ValueNode("val2"));
     }
 
     @Test(expected = ConfigurationException.class)
@@ -50,24 +51,22 @@ public class MapNodeTest {
 
         TreeNode mapNode3 = mapNode1.merge(mapNode2);
         assertThat(mapNode3).isNotNull();
-        assertThat(mapNode3.item("id")).isSameAs(mapNode1.item("id"));
-        assertThat(mapNode3.item("id").value()).isEqualTo("foo");
-        assertThat(mapNode3.item("name").value()).isEqualTo("foo app");
-        assertThat(mapNode3.item("description").value()).isEqualTo("The app description");
+        assertThat(mapNode3.node("id")).isSameAs(mapNode1.node("id"));
+        assertThat(mapNode3.node("id").value()).isEqualTo("foo");
+        assertThat(mapNode3.node("name").value()).isEqualTo("foo app");
+        assertThat(mapNode3.node("description").value()).isEqualTo("The app description");
     }
 
     @Test
-    public void testMergeIsImmutable() {
+    public void testMergeAvoidUnnecessaryCopies() {
         MapNode mapNode1 = new MapNode(new NamedNode("id", "foo"));
         MapNode mapNode2 = new MapNode(new NamedNode("name", "foo app"));
 
         TreeNode newMapNode = mapNode1.merge(mapNode2);
-        assertThat(newMapNode).isNotSameAs(mapNode1);
-        assertThat(newMapNode).isNotSameAs(mapNode2);
 
         // test that we avoid to create unnecessary objects
-        assertThat(newMapNode.item("id")).isSameAs(mapNode1.item("id"));
-        assertThat(newMapNode.item("name")).isSameAs(mapNode2.item("name"));
+        assertThat(newMapNode.node("id")).isSameAs(mapNode1.node("id"));
+        assertThat(newMapNode.node("name")).isSameAs(mapNode2.node("name"));
     }
 
     @Test

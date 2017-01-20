@@ -7,7 +7,8 @@
  */
 package org.seedstack.coffig.processor;
 
-import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 
 import java.util.HashMap;
@@ -20,25 +21,24 @@ public class ProfileProcessor implements ConfigurationProcessor {
     private static Pattern keyWithProfilePattern = Pattern.compile("(.*)<(\\w+)>");
 
     @Override
-    public void process(MutableMapNode configuration) {
-        Map<MutableMapNode, Map<String, String>> moves = new HashMap<>();
+    public void process(MapNode configuration) {
+        Map<TreeNode, Map<String, String>> moves = new HashMap<>();
 
-        configuration.stream()
-                .filter(node -> node instanceof MutableMapNode)
-                .map(node -> (MutableMapNode) node)
-                .forEach((MutableMapNode mapNode) -> mapNode.keys().forEach(key -> {
-                    Matcher matcher = keyWithProfilePattern.matcher(key);
+        configuration.walk()
+                .filter(node -> node instanceof MapNode)
+                .forEach(node -> node.namedNodes().forEach(namedNode -> {
+                    Matcher matcher = keyWithProfilePattern.matcher(namedNode.name());
                     if (matcher.matches()) {
-                        mapNode.item(key).attributes().set(PROFILE_ATTRIBUTE, matcher.group(2));
-                        Map<String, String> move = moves.get(mapNode);
+                        namedNode.node().attributes().set(PROFILE_ATTRIBUTE, matcher.group(2));
+                        Map<String, String> move = moves.get(node);
                         if (move == null) {
-                            moves.put(mapNode, move = new HashMap<>());
+                            moves.put(node, move = new HashMap<>());
                         }
                         move.put(matcher.group(0), matcher.group(1));
                     }
                 }));
 
-        for (Map.Entry<MutableMapNode, Map<String, String>> movesEntry : moves.entrySet()) {
+        for (Map.Entry<TreeNode, Map<String, String>> movesEntry : moves.entrySet()) {
             for (Map.Entry<String, String> moveEntry : movesEntry.getValue().entrySet()) {
                 movesEntry.getKey().move(moveEntry.getKey(), moveEntry.getValue());
             }

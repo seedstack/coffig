@@ -7,7 +7,7 @@
  */
 package org.seedstack.coffig.processor;
 
-import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.util.AbstractComposite;
 
@@ -22,7 +22,7 @@ public class CompositeProcessor extends AbstractComposite<ConfigurationProcessor
     }
 
     @Override
-    public void process(MutableMapNode configuration) {
+    public void process(MapNode configuration) {
         for (ConfigurationProcessor processor : items) {
             processor.process(configuration);
         }

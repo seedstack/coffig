@@ -17,7 +17,7 @@ import org.seedstack.coffig.fixture.PrefixFixture;
 import org.seedstack.coffig.fixture.SingleValueFixture;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.NamedNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -196,7 +196,7 @@ public class ObjectMapperTest {
         assertThat(multiTypesFixture.fixtureArray[1].getField2()).isEqualTo("field22");
 
         TreeNode treeNode = initialize(multiTypesFixture).unmap();
-        assertThat(treeNode.get("fixtureArray").get().items().size()).isEqualTo(2);
+        assertThat(treeNode.get("fixtureArray").get().nodes()).hasSize(2);
         assertThat(treeNode.get("fixtureArray[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureArray[1].field2").get().value()).isEqualTo("field22");
     }
@@ -209,7 +209,7 @@ public class ObjectMapperTest {
         assertThat(multiTypesFixture.fixtureList.get(1).getField2()).isEqualTo("field22");
 
         TreeNode treeNode = initialize(multiTypesFixture).unmap();
-        assertThat(treeNode.get("fixtureList").get().items().size()).isEqualTo(2);
+        assertThat(treeNode.get("fixtureList").get().nodes()).hasSize(2);
         assertThat(treeNode.get("fixtureList[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureList[1].field2").get().value()).isEqualTo("field22");
     }
@@ -222,7 +222,7 @@ public class ObjectMapperTest {
         assertThat(multiTypesFixture.fixtureSet.iterator().next().getField2()).isEqualTo("field22");
 
         TreeNode treeNode = initialize(multiTypesFixture).unmap();
-        assertThat(treeNode.get("fixtureSet").get().items().size()).isEqualTo(2);
+        assertThat(treeNode.get("fixtureSet").get().nodes()).hasSize(2);
         assertThat(treeNode.get("fixtureSet[0].field1").get().value()).isEqualTo("field1");
         assertThat(treeNode.get("fixtureSet[1].field2").get().value()).isEqualTo("field22");
     }

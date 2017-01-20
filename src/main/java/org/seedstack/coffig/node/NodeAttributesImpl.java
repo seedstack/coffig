@@ -7,13 +7,21 @@
  */
 package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.MutableNodeAttributes;
+import org.seedstack.coffig.NodeAttributes;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class NodeAttributesImpl implements MutableNodeAttributes {
-    private final Map<String, String> attributes = new HashMap<>();
+class NodeAttributesImpl implements NodeAttributes {
+    private final Map<String, String> attributes;
+
+    NodeAttributesImpl() {
+        this.attributes = new HashMap<>();
+    }
+
+    NodeAttributesImpl(NodeAttributesImpl other) {
+        this.attributes = new HashMap<>(other.attributes);
+    }
 
     @Override
     public String get(String name) {

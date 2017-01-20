@@ -7,6 +7,8 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.TreeNode;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -120,4 +122,15 @@ class Path {
         }
         return index;
     }
+
+    TreeNode createNode() {
+        TreeNode treeNode;
+        if (isArray()) {
+            treeNode = new ArrayNode();
+        } else {
+            treeNode = new MapNode();
+        }
+        return treeNode;
+    }
+
 }

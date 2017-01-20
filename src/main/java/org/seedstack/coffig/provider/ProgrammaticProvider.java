@@ -13,7 +13,6 @@ import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
@@ -92,7 +91,7 @@ public class ProgrammaticProvider implements ConfigurationProvider, Configuratio
             prefix = resolvePath(o.getClass());
         }
         if (prefix != null && !prefix.isEmpty()) {
-            MutableMapNode mapNode = new MutableMapNode();
+            MapNode mapNode = new MapNode();
             mapNode.set(prefix, treeNode);
             return mapNode;
         } else {

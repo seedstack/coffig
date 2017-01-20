@@ -37,7 +37,7 @@ public class JacksonProviderTest {
         MapNode mapNode = jacksonProvider.provide();
 
         Assertions.assertThat(mapNode).isNotNull();
-        Assertions.assertThat(mapNode.item("app").value()).isEqualTo("bar");
+        Assertions.assertThat(mapNode.node("app").value()).isEqualTo("bar");
         Assertions.assertThat(mapNode.get("security.users[1]").get().value()).isEqualTo("user2");
     }
 

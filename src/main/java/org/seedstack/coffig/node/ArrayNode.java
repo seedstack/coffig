@@ -9,41 +9,47 @@ package org.seedstack.coffig.node;
 
 import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class ArrayNode extends AbstractTreeNode {
-    final List<TreeNode> childNodes;
+    private final List<TreeNode> children;
 
     public ArrayNode() {
-        childNodes = new ArrayList<>();
+        children = new ArrayList<>();
     }
 
-    public ArrayNode(TreeNode... childNodes) {
-        this.childNodes = new ArrayList<>(Freezer.freeze(childNodes));
+    public ArrayNode(ArrayNode other) {
+        super(other);
+        this.children = new ArrayList<>(other.children);
     }
 
-    public ArrayNode(String... childNodes) {
-        this.childNodes = Freezer.freeze(childNodes);
+    public ArrayNode(TreeNode... children) {
+        this.children = Arrays.stream(children).collect(toList());
     }
 
-    public ArrayNode(List<TreeNode> childNodes) {
-        this.childNodes = new ArrayList<>(Freezer.freeze(childNodes));
+    public ArrayNode(List<TreeNode> children) {
+        this.children = new ArrayList<>(children);
+    }
+
+    public ArrayNode(String... children) {
+        this.children = Arrays.stream(children).map(ValueNode::new).collect(toList());
     }
 
     @Override
-    public Set<String> keys() {
-        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_ARRAY_AS_MAP);
+    public Type type() {
+        return Type.ARRAY_NODE;
     }
 
     @Override
@@ -52,17 +58,22 @@ public class ArrayNode extends AbstractTreeNode {
     }
 
     @Override
-    public TreeNode item(String key) {
-        try {
-            return childNodes.get(Integer.parseInt(key));
-        } catch (Exception e) {
-            throw new PropertyNotFoundException(key, e);
-        }
+    public Stream<TreeNode> nodes() {
+        return children.stream();
     }
 
     @Override
-    public Collection<TreeNode> items() {
-        return Collections.unmodifiableList(childNodes);
+    public Stream<NamedNode> namedNodes() {
+        return IntStream.range(0, children.size()).mapToObj(i -> new NamedNode(Integer.toString(i), children.get(i)));
+    }
+
+    @Override
+    public TreeNode node(String key) {
+        try {
+            return children.get(Integer.parseInt(key));
+        } catch (Exception e) {
+            throw new PropertyNotFoundException(key, e);
+        }
     }
 
     @Override
@@ -72,8 +83,8 @@ public class ArrayNode extends AbstractTreeNode {
 
         if (_path.isArray()) {
             int index = _path.getIndex();
-            if (index >= 0 && index < childNodes.size()) {
-                treeNode = Optional.ofNullable(childNodes.get(index));
+            if (index >= 0 && index < children.size()) {
+                treeNode = Optional.ofNullable(children.get(index));
             }
             if (treeNode.isPresent() && _path.hasTail()) {
                 return treeNode.get().get(_path.getTail());
@@ -84,8 +95,13 @@ public class ArrayNode extends AbstractTreeNode {
     }
 
     @Override
-    public Stream<TreeNode> stream() {
-        return Stream.concat(Stream.of(this), childNodes.stream().flatMap(TreeNode::stream));
+    public Stream<TreeNode> walk() {
+        return Stream.concat(Stream.of(this), children.stream().flatMap(TreeNode::walk));
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.children.isEmpty();
     }
 
     @Override
@@ -93,14 +109,51 @@ public class ArrayNode extends AbstractTreeNode {
         return otherNode;
     }
 
+
     @Override
-    public ArrayNode freeze() {
+    public TreeNode set(String name, TreeNode treeNode) {
+        if (name == null) {
+            children.add(treeNode);
+        } else {
+            Path path = new Path(name);
+            TreeNode newTreeNode;
+            if (path.hasTail()) {
+                newTreeNode = getOrCreateTreeNode(path);
+                newTreeNode.set(path.getTail(), treeNode);
+            } else {
+                newTreeNode = treeNode;
+            }
+
+            if (path.getIndex() == children.size()) {
+                children.add(newTreeNode);
+            } else {
+                children.set(path.getIndex(), newTreeNode);
+            }
+        }
         return this;
     }
 
     @Override
-    public MutableArrayNode unfreeze() {
-        return new MutableArrayNode(childNodes);
+    public TreeNode remove(String name) {
+        Path path = new Path(name);
+        if (path.hasTail()) {
+            if (children.size() > path.getIndex()) {
+                TreeNode treeNode = children.get(path.getIndex());
+                try {
+                    TreeNode removedNode = treeNode.remove(path.getTail());
+                    if (treeNode.isEmpty()) {
+                        children.remove(path.getIndex());
+                    }
+                    return removedNode;
+                } catch (PropertyNotFoundException e) {
+                    throw new PropertyNotFoundException(e, path.getHead());
+                }
+            } else {
+                throw new PropertyNotFoundException(name);
+            }
+        } else {
+            return children.remove(path.getIndex());
+        }
     }
 
     @Override
@@ -109,20 +162,33 @@ public class ArrayNode extends AbstractTreeNode {
         if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass()))
             return false;
         ArrayNode arrayNode = (ArrayNode) o;
-        return childNodes.equals(arrayNode.childNodes);
+        return children.equals(arrayNode.children);
     }
 
     @Override
     public int hashCode() {
-        return childNodes.hashCode();
+        return children.hashCode();
     }
 
     @Override
     public String toString() {
-        if (childNodes.size() > 0 && childNodes.get(0) instanceof ValueNode) {
-            return childNodes.stream().map(item -> "- " + item.toString()).collect(joining("\n"));
+        if (isHidden()) {
+            return HIDDEN_PLACEHOLDER;
+        } else if (children.size() > 0 && children.get(0).type() == Type.VALUE_NODE) {
+            return children.stream().map(item -> "- " + item.toString()).collect(joining("\n"));
         } else {
-            return childNodes.stream().map(item -> "-\n" + indent(item.toString())).collect(joining("\n"));
+            return children.stream().map(item -> "-\n" + indent(item.toString())).collect(joining("\n"));
         }
+    }
+
+    private TreeNode getOrCreateTreeNode(Path path) {
+        TreeNode treeNode;
+        int index = path.getIndex();
+        if (children.size() > index) {
+            treeNode = children.get(index);
+        } else {
+            treeNode = new Path(path.getTail()).createNode();
+        }
+        return treeNode;
     }
 }

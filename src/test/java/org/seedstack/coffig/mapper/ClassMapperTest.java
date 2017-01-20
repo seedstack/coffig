@@ -11,25 +11,13 @@ import org.junit.Test;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassMapperTest {
     private ConfigurationMapper mapper = Coffig.basic().getMapper();
-
-    private static class FixtureAnyClass {
-        private Class<?> anyClass;
-    }
-
-    private static class FixtureUpperBoundedClass {
-        private Class<? extends ConfigurationMapper> mapperClass;
-    }
-
-    private static class FixtureLowerBoundedClass {
-        private Class<? super ClassMapper> configurationMapperClass;
-    }
 
     @Test
     public void testMapAnyClass() {
@@ -64,5 +52,17 @@ public class ClassMapperTest {
 
     @Test
     public void testUnmapOptional() {
+    }
+
+    private static class FixtureAnyClass {
+        private Class<?> anyClass;
+    }
+
+    private static class FixtureUpperBoundedClass {
+        private Class<? extends ConfigurationMapper> mapperClass;
+    }
+
+    private static class FixtureLowerBoundedClass {
+        private Class<? super ClassMapper> configurationMapperClass;
     }
 }

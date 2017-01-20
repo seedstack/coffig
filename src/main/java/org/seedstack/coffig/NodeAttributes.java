@@ -11,4 +11,8 @@ public interface NodeAttributes {
 
     String get(String name);
 
+    void set(String name, String value);
+
+    void clear();
+
 }

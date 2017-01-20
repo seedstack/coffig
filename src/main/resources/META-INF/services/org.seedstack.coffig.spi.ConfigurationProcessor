@@ -1,1 +1,2 @@
 org.seedstack.coffig.processor.RemovalProcessor
+org.seedstack.coffig.processor.ProfileProcessor

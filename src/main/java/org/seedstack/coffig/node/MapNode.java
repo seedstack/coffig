@@ -9,54 +9,63 @@ package org.seedstack.coffig.node;
 
 import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MapNode extends AbstractTreeNode {
-    final Map<String, TreeNode> children;
+    private final Map<String, TreeNode> children;
 
     public MapNode() {
         this.children = new HashMap<>();
     }
 
+    public MapNode(MapNode other) {
+        super(other);
+        this.children = new HashMap<>(other.children);
+    }
+
+    public MapNode(Map<String, TreeNode> children) {
+        this.children = new HashMap<>(children);
+    }
+
     public MapNode(NamedNode... children) {
-        this.children = Freezer.freeze(children);
+        this.children = Arrays.stream(children).collect(Collectors.toMap(NamedNode::name, NamedNode::node));
     }
 
-    public MapNode(Map<String, TreeNode> newChildNodes) {
-        this.children = Freezer.freeze(newChildNodes);
-    }
-
-    public Set<String> keys() {
-        return children.keySet();
+    @Override
+    public Type type() {
+        return Type.MAP_NODE;
     }
 
     @Override
     public String value() {
-        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_MAP_AS_SINGLE_VAlUE);
+        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_MAP_AS_SINGLE_VALUE);
     }
 
     @Override
-    public TreeNode item(String key) {
+    public Stream<TreeNode> nodes() {
+        return children.values().stream();
+    }
+
+    public Stream<NamedNode> namedNodes() {
+        return children.entrySet().stream().map(entry -> new NamedNode(entry.getKey(), entry.getValue()));
+    }
+
+    @Override
+    public TreeNode node(String key) {
         if (children.containsKey(key))
             return children.get(key);
         else
             throw new PropertyNotFoundException(key);
-    }
-
-    @Override
-    public Collection<TreeNode> items() {
-        return Collections.unmodifiableCollection(children.values());
     }
 
     @Override
@@ -65,9 +74,13 @@ public class MapNode extends AbstractTreeNode {
         Optional<TreeNode> treeNode = Optional.empty();
 
         if (_path.hasHead()) {
-            treeNode = Optional.ofNullable(children.get(_path.getHead()));
-            if (treeNode.isPresent() && _path.hasTail()) {
-                return treeNode.get().get(_path.getTail());
+            TreeNode child = children.get(_path.getHead());
+            if (child != null) {
+                if (_path.hasTail()) {
+                    return child.get(_path.getTail());
+                } else {
+                    return Optional.of(child);
+                }
             }
         }
 
@@ -75,38 +88,63 @@ public class MapNode extends AbstractTreeNode {
     }
 
     @Override
-    public Stream<TreeNode> stream() {
-        return Stream.concat(Stream.of(this), children.values().stream().flatMap(TreeNode::stream));
+    public Stream<TreeNode> walk() {
+        return Stream.concat(Stream.of(this), children.values().stream().flatMap(TreeNode::walk));
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.children.isEmpty();
     }
 
     @Override
     public TreeNode merge(TreeNode otherNode) {
-        if (!(otherNode instanceof MapNode)) {
+        if ((otherNode.type() == Type.MAP_NODE)) {
+            ((MapNode) otherNode).children.forEach((nodeName, treeNode) -> {
+                TreeNode node = this.children.containsKey(nodeName) ? this.children.get(nodeName).merge(treeNode) : treeNode;
+                this.children.put(nodeName, node);
+            });
+            return this;
+        } else {
             throw ConfigurationException.createNew(ConfigurationErrorCode.ILLEGAL_TREE_MERGE)
                     .put("firstNodeType", otherNode.getClass().getSimpleName())
                     .put("secondNodeType", getClass().getSimpleName());
         }
-        return mergeMapNode((MapNode) otherNode);
-    }
-
-    private TreeNode mergeMapNode(MapNode otherNode) {
-        Map<String, TreeNode> newChildNodes = this.children;
-
-        otherNode.children.forEach((nodeName, treeNode) -> {
-            TreeNode node = this.children.containsKey(nodeName) ? this.children.get(nodeName).merge(treeNode) : treeNode;
-            newChildNodes.put(nodeName, node);
-        });
-        return new MapNode(newChildNodes);
     }
 
     @Override
-    public MapNode freeze() {
-        return this;
+    public TreeNode set(String name, TreeNode treeNode) {
+        Path path = new Path(name);
+        if (path.hasTail()) {
+            TreeNode nexNode = getOrCreateNode(path);
+            TreeNode finalNode = nexNode.set(path.getTail(), treeNode);
+            children.put(path.getHead(), nexNode);
+            return finalNode;
+        } else {
+            children.put(path.getHead(), treeNode);
+            return treeNode;
+        }
     }
 
     @Override
-    public MutableMapNode unfreeze() {
-        return new MutableMapNode(children);
+    public TreeNode remove(String name) {
+        Path path = new Path(name);
+        if (path.hasTail()) {
+            if (children.containsKey(path.getHead())) {
+                TreeNode treeNode = children.get(path.getHead());
+                try {
+                    TreeNode removedNode = treeNode.remove(path.getTail());
+                    removeEmptyIntermediateNode(path, treeNode);
+                    return removedNode;
+                } catch (PropertyNotFoundException e) {
+                    throw new PropertyNotFoundException(e, path.getHead());
+                }
+            } else {
+                throw new PropertyNotFoundException(name);
+            }
+        } else {
+            return children.remove(path.getHead());
+        }
     }
 
     @Override
@@ -125,12 +163,32 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
-        return children.entrySet().stream().map(entry -> {
-            if (entry.getValue() instanceof ValueNode) {
-                return entry.getKey() + ": " + entry.getValue().toString();
-            } else {
-                return entry.getKey() + ":\n" + indent(entry.getValue().toString());
-            }
-        }).collect(Collectors.joining("\n"));
+        if (isHidden()) {
+            return HIDDEN_PLACEHOLDER;
+        } else {
+            return children.entrySet().stream().map(entry -> {
+                if (entry.getValue().type() == Type.VALUE_NODE) {
+                    return entry.getKey() + ": " + entry.getValue().toString();
+                } else {
+                    return entry.getKey() + ":\n" + indent(entry.getValue().toString());
+                }
+            }).collect(Collectors.joining("\n"));
+        }
+    }
+
+    private TreeNode getOrCreateNode(Path path) {
+        TreeNode treeNode;
+        if (children.containsKey(path.getHead())) {
+            treeNode = children.get(path.getHead());
+        } else {
+            treeNode = new Path(path.getTail()).createNode();
+        }
+        return treeNode;
+    }
+
+    private void removeEmptyIntermediateNode(Path path, TreeNode treeNode) {
+        if (treeNode.isEmpty()) {
+            children.remove(path.getHead());
+        }
     }
 }

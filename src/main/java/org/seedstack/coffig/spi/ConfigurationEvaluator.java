@@ -8,9 +8,8 @@
 package org.seedstack.coffig.spi;
 
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ValueNode;
 
 @FunctionalInterface
 public interface ConfigurationEvaluator extends ConfigurationComponent {
-    ValueNode evaluate(TreeNode rootNode, ValueNode valueNode);
+    TreeNode evaluate(TreeNode rootNode, TreeNode valueNode);
 }

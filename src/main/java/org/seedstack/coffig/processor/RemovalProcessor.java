@@ -7,7 +7,8 @@
  */
 package org.seedstack.coffig.processor;
 
-import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 
 import java.util.ArrayList;
@@ -17,22 +18,23 @@ import java.util.Map;
 
 public class RemovalProcessor implements ConfigurationProcessor {
     @Override
-    public void process(MutableMapNode configuration) {
-        Map<MutableMapNode, List<String>> toRemove = new HashMap<>();
+    public void process(MapNode configuration) {
+        Map<MapNode, List<String>> toRemove = new HashMap<>();
 
-        configuration.stream()
-                .filter(node -> node instanceof MutableMapNode)
-                .map(node -> (MutableMapNode) node)
-                .forEach(mapNode -> {
-                    mapNode.keys().stream().filter(key -> key.startsWith("-")).forEach(key -> {
-                        List<String> strings = toRemove.get(mapNode);
-                        if (strings == null) {
-                            toRemove.put(mapNode, strings = new ArrayList<>());
-                        }
-                        strings.add(key);
-                        strings.add(key.substring(1));
-                    });
-                });
+        configuration.walk()
+                .filter(node -> node.type() == TreeNode.Type.MAP_NODE)
+                .map(node -> (MapNode) node)
+                .forEach(mapNode -> mapNode
+                        .namedNodes()
+                        .filter(namedNode -> namedNode.name().startsWith("-"))
+                        .forEach(namedNode -> {
+                            List<String> strings = toRemove.get(mapNode);
+                            if (strings == null) {
+                                toRemove.put(mapNode, strings = new ArrayList<>());
+                            }
+                            strings.add(namedNode.name());
+                            strings.add(namedNode.name().substring(1));
+                        }));
 
         toRemove.forEach((node, list) -> list.forEach(node::remove));
     }

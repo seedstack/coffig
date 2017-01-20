@@ -7,11 +7,11 @@
  */
 package org.seedstack.coffig.mapper;
 
+import org.seedstack.coffig.BuilderSupplier;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.BuilderSupplier;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.util.Utils;
 
@@ -41,17 +41,17 @@ public class BuilderMapper implements ConfigurationMapper {
         Object builder = supplier.get();
         Map<String, Method> builderMethods = getBuilderMethods(builder);
 
-        for (String key : treeNode.keys()) {
-            Method method = builderMethods.get(key);
+        treeNode.namedNodes().forEach(namedNode -> {
+            Method method = builderMethods.get(namedNode.name());
             if (method != null) {
                 try {
-                    method.invoke(builder, coffig.getMapper().map(treeNode.item(key), method.getGenericParameterTypes()[0]));
+                    method.invoke(builder, coffig.getMapper().map(namedNode.node(), method.getGenericParameterTypes()[0]));
                 } catch (Exception e) {
                     throw ConfigurationException.createNew(ConfigurationErrorCode.ERROR_DURING_METHOD_INVOCATION)
                             .put("method", method.toString());
                 }
             }
-        }
+        });
 
         return supplier;
     }

@@ -9,7 +9,6 @@ package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
@@ -24,7 +23,7 @@ public class PrefixProvider<T extends ConfigurationProvider> implements Configur
 
     @Override
     public MapNode provide() {
-        MutableMapNode result = new MutableMapNode();
+        MapNode result = new MapNode();
         result.set(prefix, configurationProvider.provide());
         return result;
     }

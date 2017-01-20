@@ -10,10 +10,8 @@ package org.seedstack.coffig;
 import org.seedstack.shed.exception.ErrorCode;
 
 public enum ConfigurationErrorCode implements ErrorCode {
-    CANNOT_ACCESS_ARRAY_AS_MAP,
     CANNOT_ACCESS_ARRAY_AS_SINGLE_VALUE,
-    CANNOT_ACCESS_MAP_AS_SINGLE_VAlUE,
-    CANNOT_ACCESS_SINGLE_VALUE_AS_MAP,
+    CANNOT_ACCESS_MAP_AS_SINGLE_VALUE,
     CANNOT_SUPPLY_CONFIGURATION_OBJECT,
     ERROR_DURING_FIELD_ACCESS,
     ERROR_DURING_FIELD_INJECTION,

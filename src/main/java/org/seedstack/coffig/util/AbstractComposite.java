@@ -16,8 +16,8 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public abstract class AbstractComposite<T extends ConfigurationComponent> implements ConfigurationComponent {
-    private final Class<T> itemClass;
     protected final T[] items;
+    private final Class<T> itemClass;
 
     @SafeVarargs
     public AbstractComposite(Class<T> itemClass, T... items) {

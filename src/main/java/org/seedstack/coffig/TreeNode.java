@@ -7,37 +7,47 @@
  */
 package org.seedstack.coffig;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface TreeNode {
 
     NodeAttributes attributes();
 
-    Set<String> keys();
+    boolean isHidden();
+
+    void hide();
+
+    Type type();
 
     String value();
 
-    TreeNode item(String key);
+    Stream<TreeNode> nodes();
 
-    Collection<TreeNode> items();
+    Stream<NamedNode> namedNodes();
+
+    TreeNode node(String key);
 
     Optional<TreeNode> get(String path);
 
-    Stream<TreeNode> stream();
+    Stream<TreeNode> walk();
+
+    boolean isEmpty();
 
     TreeNode merge(TreeNode otherNode);
 
-    TreeNode freeze();
+    TreeNode set(String path, TreeNode value);
 
-    MutableTreeNode unfreeze();
+    TreeNode remove(String path);
 
-    default String indent(String s) {
-        return Arrays.stream(s.split("\n")).map(line -> "  " + line).collect(Collectors.joining("\n"));
+    default TreeNode move(String sourcePath, String destinationPath) {
+        this.set(destinationPath, this.remove(sourcePath));
+        return this;
     }
 
+    enum Type {
+        MAP_NODE,
+        ARRAY_NODE,
+        VALUE_NODE
+    }
 }

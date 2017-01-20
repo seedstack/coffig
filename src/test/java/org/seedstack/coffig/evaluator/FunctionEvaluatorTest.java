@@ -12,8 +12,8 @@ import org.junit.Test;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.mapper.EvaluatingMapper;
 import org.seedstack.coffig.node.ArrayNode;
-import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.node.ValueNode;
 
 import java.util.List;
@@ -23,12 +23,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FunctionEvaluatorTest {
     private FunctionEvaluator functionEvaluator = buildFunctionEvaluator();
 
-    private MutableMapNode config = new MutableMapNode(
-            new NamedNode("object", new MutableMapNode(
+    private MapNode config = new MapNode(
+            new NamedNode("object", new MapNode(
                     new NamedNode("field1", "hello"),
                     new NamedNode("field2", new ArrayNode("item1", "item2", "item3"))
             )),
-            new NamedNode("test", new MutableMapNode(
+            new NamedNode("test", new MapNode(
                     new NamedNode("noArg", "$prefix()"),
                     new NamedNode("literal", "$greet('World', '?')"),
                     new NamedNode("nestedCall", "$greet('World', $prefix())"),
@@ -40,18 +40,37 @@ public class FunctionEvaluatorTest {
             ))
     );
 
+    private static String greet(String name, String suffix) {
+        return "Hello " + name + suffix;
+    }
+
+    private static String verifyObject(MappedClass mappedObject) {
+        assertThat(mappedObject.field1).isEqualTo("hello");
+        assertThat(mappedObject.field2).containsExactly("item1", "item2", "item3");
+        return "true";
+    }
+
+    private static String greetSeveralTimes(String name, int count, String suffix) {
+        StringBuilder sb = new StringBuilder("Hello ");
+        for (int i = 0; i < count; i++) {
+            sb.append(name);
+            if (i < count - 1) {
+                sb.append(" ");
+            }
+        }
+        return sb.append(suffix).toString();
+    }
+
+    private static String prefix() {
+        return "!";
+    }
+
     @Before
     public void setUp() throws Exception {
         functionEvaluator.registerFunction("greet", FunctionEvaluatorTest.class.getDeclaredMethod("greet", String.class, String.class), null);
         functionEvaluator.registerFunction("greetSeveralTimes", FunctionEvaluatorTest.class.getDeclaredMethod("greetSeveralTimes", String.class, int.class, String.class), null);
         functionEvaluator.registerFunction("prefix", FunctionEvaluatorTest.class.getDeclaredMethod("prefix"), null);
         functionEvaluator.registerFunction("verifyObject", FunctionEvaluatorTest.class.getDeclaredMethod("verifyObject", MappedClass.class), null);
-    }
-
-    private static class MappedClass {
-
-        private String field1;
-        private List<String> field2;
     }
 
     private String evaluate(String path) {
@@ -98,36 +117,17 @@ public class FunctionEvaluatorTest {
         assertThat(evaluate("test.escaped")).isEqualTo("test: $verifyObject(object)!");
     }
 
-    private static String greet(String name, String suffix) {
-        return "Hello " + name + suffix;
-    }
-
-    private static String verifyObject(MappedClass mappedObject) {
-        assertThat(mappedObject.field1).isEqualTo("hello");
-        assertThat(mappedObject.field2).containsExactly("item1", "item2", "item3");
-        return "true";
-    }
-
-    private static String greetSeveralTimes(String name, int count, String suffix) {
-        StringBuilder sb = new StringBuilder("Hello ");
-        for (int i = 0; i < count; i++) {
-            sb.append(name);
-            if (i < count - 1) {
-                sb.append(" ");
-            }
-        }
-        return sb.append(suffix).toString();
-    }
-
-    private static String prefix() {
-        return "!";
-    }
-
     private FunctionEvaluator buildFunctionEvaluator() {
         return ((CompositeEvaluator) ((EvaluatingMapper) Coffig
                 .basic()
                 .getMapper())
                 .getEvaluator())
                 .get(FunctionEvaluator.class);
+    }
+
+    private static class MappedClass {
+
+        private String field1;
+        private List<String> field2;
     }
 }

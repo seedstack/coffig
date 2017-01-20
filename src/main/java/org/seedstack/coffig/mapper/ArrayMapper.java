@@ -9,14 +9,14 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.MutableArrayNode;
+import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class ArrayMapper implements ConfigurationMapper {
     private Coffig coffig;
@@ -34,7 +34,7 @@ public class ArrayMapper implements ConfigurationMapper {
     @Override
     public Object map(TreeNode treeNode, Type type) {
         Class componentType = ((Class) type).getComponentType();
-        Collection<TreeNode> values = treeNode.items();
+        Collection<TreeNode> values = treeNode.nodes().collect(Collectors.toList());
         Object array = Array.newInstance(componentType, values.size());
         AtomicInteger index = new AtomicInteger();
         values.stream().map(childNode -> coffig.getMapper().map(childNode, componentType)).forEach(item -> Array.set(array, index.getAndIncrement(), item));
@@ -43,15 +43,15 @@ public class ArrayMapper implements ConfigurationMapper {
 
     @Override
     public TreeNode unmap(Object object, Type type) {
-        MutableArrayNode mutableArrayNode = new MutableArrayNode();
+        ArrayNode arrayNode = new ArrayNode();
         Class componentType = ((Class) type).getComponentType();
         int length = Array.getLength(object);
         for (int i = 0; i < length; i++) {
             TreeNode treeNode = coffig.getMapper().unmap(Array.get(object, i), componentType);
             if (treeNode != null) {
-                mutableArrayNode.add(treeNode);
+                arrayNode.set(null, treeNode);
             }
         }
-        return mutableArrayNode;
+        return arrayNode;
     }
 }

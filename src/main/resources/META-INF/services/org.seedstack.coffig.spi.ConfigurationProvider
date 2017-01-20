@@ -1,2 +1,0 @@
-org.seedstack.coffig.provider.EnvironmentVariableProvider
-org.seedstack.coffig.provider.SystemPropertyProvider

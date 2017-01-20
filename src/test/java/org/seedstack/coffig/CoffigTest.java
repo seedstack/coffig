@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.seedstack.coffig.fixture.EnumFixture;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.provider.VoidProvider;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
@@ -28,15 +27,6 @@ public class CoffigTest {
             new NamedNode("users", new ArrayNode("u123456", "u456789")),
             new NamedNode("elements", new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2"))),
             new NamedNode("items", "one"));
-
-    private static class App {
-        String id;
-        String name;
-        EnumFixture enumFixture;
-        String[] users;
-        String[] items;
-        String[] elements;
-    }
 
     @Test
     public void testConfigurationNotNull() {
@@ -89,6 +79,12 @@ public class CoffigTest {
         Assertions.assertThat(coffig.get(String.class, "unknown")).isEqualTo("");
     }
 
+    @Test(expected = ConfigurationException.class)
+    public void testGetMandatoryWithPathAndDefaultValue() throws Exception {
+        Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
+        coffig.getMandatory(String.class, "unknown");
+    }
+
     @Test
     public void testGetSingleValueAsArray() throws Exception {
         Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
@@ -99,5 +95,14 @@ public class CoffigTest {
     public void testGetMapAsArray() throws Exception {
         Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
         Assertions.assertThat(coffig.get(App.class).elements).containsOnly("val1", "val2");
+    }
+
+    private static class App {
+        String id;
+        String name;
+        EnumFixture enumFixture;
+        String[] users;
+        String[] items;
+        String[] elements;
     }
 }

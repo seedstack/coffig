@@ -10,7 +10,7 @@ package org.seedstack.coffig.mapper;
 import org.junit.Test;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.util.Optional;
@@ -19,10 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class OptionalMapperTest {
     private ConfigurationMapper mapper = Coffig.basic().getMapper();
-
-    private static class Fixture {
-        private Optional<String> optionalString = Optional.empty();
-    }
 
     @Test
     @SuppressWarnings("unchecked")
@@ -39,5 +35,9 @@ public class OptionalMapperTest {
 
     @Test
     public void testUnmapOptional() {
+    }
+
+    private static class Fixture {
+        private Optional<String> optionalString = Optional.empty();
     }
 }

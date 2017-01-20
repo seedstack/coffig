@@ -31,8 +31,12 @@ public class MacroEvaluator implements ConfigurationEvaluator {
     }
 
     @Override
-    public ValueNode evaluate(TreeNode rootNode, ValueNode valueNode) {
-        return new ValueNode(processValue(rootNode, valueNode.value()));
+    public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
+        if (valueNode.type() == TreeNode.Type.VALUE_NODE) {
+            return new ValueNode(processValue(rootNode, valueNode.value()));
+        } else {
+            return valueNode;
+        }
     }
 
     private String processValue(TreeNode rootNode, String value) {

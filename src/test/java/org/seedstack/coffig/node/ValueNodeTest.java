@@ -29,12 +29,12 @@ public class ValueNodeTest {
 
     @Test
     public void testChildNode() {
-        assertThat(val1.item("dummy")).isEqualTo(new ValueNode("val1"));
+        assertThat(val1.node("dummy")).isEqualTo(new ValueNode("val1"));
     }
 
     @Test
     public void testValues() {
-        assertThat(val1.items()).containsExactly(new ValueNode("val1"));
+        assertThat(val1.nodes()).containsExactly(new ValueNode("val1"));
     }
 
     @Test

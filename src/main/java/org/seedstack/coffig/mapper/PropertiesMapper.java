@@ -9,7 +9,6 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
@@ -25,20 +24,20 @@ public class PropertiesMapper implements ConfigurationMapper {
     @Override
     public Object map(TreeNode treeNode, Type type) {
         Properties properties = new Properties();
-        if (treeNode instanceof MapNode) {
-            treeNode.keys().forEach(key -> properties.setProperty(key, treeNode.item(key).value()));
+        if (treeNode.type() == TreeNode.Type.MAP_NODE) {
+            treeNode.namedNodes().forEach(namedNode -> properties.setProperty(namedNode.name(), namedNode.node().value()));
         } else {
-            treeNode.items().forEach(item -> properties.setProperty(item.value(), null));
+            treeNode.nodes().forEach(item -> properties.setProperty(item.value(), null));
         }
         return properties;
     }
 
     @Override
     public TreeNode unmap(Object object, Type type) {
-        MutableMapNode mapNode = new MutableMapNode();
+        MapNode mapNode = new MapNode();
         ((Properties) object).forEach((key, value) -> {
             if (key != null) {
-                mapNode.put(String.valueOf(key), new ValueNode(String.valueOf(value)));
+                mapNode.set(String.valueOf(key), new ValueNode(String.valueOf(value)));
             }
         });
         return mapNode;

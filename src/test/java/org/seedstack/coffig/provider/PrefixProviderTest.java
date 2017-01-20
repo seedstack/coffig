@@ -9,7 +9,7 @@ package org.seedstack.coffig.provider;
 
 import org.junit.Test;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.NamedNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

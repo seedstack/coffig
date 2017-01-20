@@ -14,8 +14,6 @@ import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.SingleValue;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
-import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.util.Utils;
 import org.seedstack.shed.reflect.Classes;
@@ -59,34 +57,22 @@ class ObjectMapper<T> implements ConfigurationComponent {
     }
 
     T map(TreeNode rootNode) {
-        if (rootNode instanceof ValueNode && valueFieldInfo != null) {
-            Object fieldValue = coffig.getMapper().map(rootNode, valueFieldInfo.type);
-            if (fieldValue != null) {
-                valueFieldInfo.consumer.accept(fieldValue);
-            }
-        } else if (rootNode instanceof MapNode) {
-            fieldInfo.forEach(fieldInfo -> {
-                Object fieldValue = coffig.getMapper().map(
-                        rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name).orElse(null),
-                        fieldInfo.type
-                );
-                if (fieldValue != null) {
-                    fieldInfo.consumer.accept(fieldValue);
-                }
-            });
+        if (rootNode.type() == TreeNode.Type.VALUE_NODE && valueFieldInfo != null) {
+            Optional.ofNullable(coffig.getMapper().map(rootNode, valueFieldInfo.type))
+                    .ifPresent(valueFieldInfo.consumer);
+        } else if (rootNode.type() == TreeNode.Type.MAP_NODE) {
+            fieldInfo.forEach(fieldInfo -> rootNode.get(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name)
+                    .map(treeNode -> coffig.getMapper().map(treeNode, fieldInfo.type))
+                    .ifPresent(fieldInfo.consumer));
         }
 
         return holder;
     }
 
     TreeNode unmap() {
-        MutableMapNode rootNode = new MutableMapNode();
-        fieldInfo.forEach(fieldInfo -> {
-            TreeNode unmapped = coffig.getMapper().unmap(fieldInfo.supplier.get(), fieldInfo.type);
-            if (unmapped != null) {
-                rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, unmapped);
-            }
-        });
+        MapNode rootNode = new MapNode();
+        fieldInfo.forEach(fieldInfo -> Optional.ofNullable(coffig.getMapper().unmap(fieldInfo.supplier.get(), fieldInfo.type))
+                .ifPresent(treeNode -> rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, treeNode)));
         return rootNode;
     }
 

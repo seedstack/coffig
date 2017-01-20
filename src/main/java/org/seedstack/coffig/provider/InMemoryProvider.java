@@ -9,7 +9,6 @@ package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
@@ -29,7 +28,7 @@ public class InMemoryProvider implements ConfigurationProvider {
     @Override
     @SuppressWarnings("unchecked")
     public MapNode provide() {
-        MutableMapNode tree = new MutableMapNode();
+        MapNode tree = new MapNode();
         data.entrySet().forEach(entry -> {
             Object value = entry.getValue();
             if (value.getClass().isArray()) {

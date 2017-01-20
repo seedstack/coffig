@@ -63,12 +63,12 @@ public class CompositeMapper extends AbstractComposite<ConfigurationMapper> impl
 
         for (ConfigurationMapper configurationMapper : items) {
             if (configurationMapper.canHandle(type)) {
-                return configurationMapper.unmap(object, type).freeze();
+                return configurationMapper.unmap(object, type);
             }
         }
 
         ObjectMapper<Object> objectMapper = new ObjectMapper<>(object);
         objectMapper.initialize(coffig);
-        return objectMapper.unmap().freeze();
+        return objectMapper.unmap();
     }
 }

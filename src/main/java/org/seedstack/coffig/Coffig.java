@@ -8,7 +8,6 @@
 package org.seedstack.coffig;
 
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.MutableMapNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
@@ -27,7 +26,7 @@ public class Coffig {
     private final ConfigurationProvider provider;
     private final ConfigurationProcessor processor;
     private final AtomicBoolean dirty = new AtomicBoolean(true);
-    private volatile MapNode configurationTree = new MapNode();
+    private volatile TreeNode configurationTree = new MapNode();
 
     Coffig(ConfigurationMapper mapper, ConfigurationProvider provider, ConfigurationProcessor processor) {
         this.mapper = mapper;
@@ -68,11 +67,10 @@ public class Coffig {
         }
 
         if (processor != null) {
-            pendingConfigurationTree = pendingConfigurationTree.unfreeze();
-            processor.process((MutableMapNode) pendingConfigurationTree);
+            processor.process(pendingConfigurationTree);
         }
 
-        configurationTree = pendingConfigurationTree.freeze();
+        configurationTree = UnmodifiableTreeNode.of(pendingConfigurationTree);
         dirty.set(false);
     }
 

@@ -7,9 +7,9 @@
  */
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.node.MutableMapNode;
+import org.seedstack.coffig.node.MapNode;
 
 @FunctionalInterface
 public interface ConfigurationProcessor extends ConfigurationComponent {
-    void process(MutableMapNode configuration);
+    void process(MapNode configuration);
 }
