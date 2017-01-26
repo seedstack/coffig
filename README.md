@@ -21,7 +21,7 @@ Coffig coffig = Coffig.builder().withProviders(new JacksonProvider().addSource("
 String stringValue = coffig.get(String.class, "some.string");
 int[] intArray = coffig.get(int[].class, "some.array");
 MyPojo myPojo = coffig.get(MyPojo.class, "some.object");
-String defaultValue = coffig.getOptional(MyPojo.class, "unknown.node").orElse("default");
+String defaultValue = coffig.getOptional(String.class, "unknown.node").orElse("default");
 ```
 
 ## Mapping    
