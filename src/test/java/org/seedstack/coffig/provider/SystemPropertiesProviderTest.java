@@ -18,9 +18,9 @@ import org.seedstack.coffig.node.MapNode;
 import java.util.Properties;
 
 @RunWith(JMockit.class)
-public class SystemPropertyProviderTest {
+public class SystemPropertiesProviderTest {
 
-    private SystemPropertyProvider underTest = new SystemPropertyProvider();
+    private SystemPropertiesProvider underTest = new SystemPropertiesProvider();
 
     @Test
     public void testProvide() {

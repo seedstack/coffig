@@ -11,11 +11,11 @@ import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
-public class SystemPropertyProvider implements ConfigurationProvider {
+public class EnvironmentProvider implements ConfigurationProvider {
     @Override
     public MapNode provide() {
-        return new MapNode(System.getProperties().entrySet().stream()
-                .map(e -> new NamedNode((String) e.getKey(), (String) e.getValue()))
+        return new MapNode(System.getenv().entrySet().stream()
+                .map(e -> new NamedNode(e.getKey(), e.getValue()))
                 .toArray(NamedNode[]::new));
     }
 }

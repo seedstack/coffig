@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(JMockit.class)
-public class EnvironmentVariableProviderTest {
+public class EnvironmentProviderTest {
 
-    private EnvironmentVariableProvider underTest = new EnvironmentVariableProvider();
+    private EnvironmentProvider underTest = new EnvironmentProvider();
 
     @Test
     public void testProvide() {
