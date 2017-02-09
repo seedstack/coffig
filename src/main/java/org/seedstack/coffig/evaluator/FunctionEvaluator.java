@@ -140,7 +140,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     private String invokeFunction(String functionName, TreeNode[] arguments) {
         FunctionRegistration functionRegistration = functions.get(functionName);
         if (functionRegistration == null) {
-            return "";
+            return "<ERROR: unknown function " + functionName + ">";
         }
 
         try {
@@ -158,7 +158,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
                 return "";
             }
         } catch (Exception e) {
-            return "";
+            return "<ERROR: " + e.getMessage() + ">";
         }
     }
 
