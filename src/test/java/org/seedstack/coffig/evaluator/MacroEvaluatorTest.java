@@ -99,6 +99,6 @@ public class MacroEvaluatorTest {
     }
 
     private String evaluate(String path) {
-        return macroEvaluator.evaluate(config, (ValueNode) config.get(path).get()).value();
+        return macroEvaluator.evaluate(config, config.get(path).get()).value();
     }
 }

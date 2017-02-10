@@ -12,12 +12,14 @@ import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigFunction;
 import org.seedstack.coffig.spi.ConfigFunctionHolder;
+import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
-import org.seedstack.coffig.util.LRUCache;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -25,11 +27,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.stream.Collectors.toList;
+
 public class FunctionEvaluator implements ConfigurationEvaluator {
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\\\?\\$([_a-zA-Z]\\w*)\\(|\\)");
-    private final ConcurrentMap<String, FunctionRegistration> functions = new ConcurrentHashMap<>();
-    private final LRUCache<String, String> cache = new LRUCache<>(10000);
     private final AtomicBoolean scanned = new AtomicBoolean();
+    private final List<ConfigFunctionHolder> configFunctionHolders = new ArrayList<>();
+    private final ConcurrentMap<String, FunctionRegistration> functions = new ConcurrentHashMap<>();
     private Coffig coffig;
 
     @Override
@@ -37,20 +41,29 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         this.coffig = coffig;
         if (!scanned.getAndSet(true)) {
             for (ConfigFunctionHolder configFunctionHolder : ServiceLoader.load(ConfigFunctionHolder.class)) {
+                configFunctionHolders.add(configFunctionHolder);
                 detectFunctionsOfHolder(configFunctionHolder);
-                configFunctionHolder.initialize(coffig);
             }
+        }
+        for (ConfigFunctionHolder configFunctionHolder : configFunctionHolders) {
+            configFunctionHolder.initialize(coffig);
         }
     }
 
     @Override
     public void invalidate() {
-        cache.clear();
+        configFunctionHolders.forEach(ConfigurationComponent::invalidate);
+    }
+
+    @Override
+    public boolean isDirty() {
+        return configFunctionHolders.stream().filter(ConfigurationComponent::isDirty).count() > 0;
     }
 
     @Override
     public FunctionEvaluator fork() {
         FunctionEvaluator fork = new FunctionEvaluator();
+        fork.configFunctionHolders.addAll(configFunctionHolders.stream().map(ConfigurationComponent::fork).map(ConfigFunctionHolder.class::cast).collect(toList()));
         fork.functions.putAll(functions);
         fork.scanned.getAndSet(scanned.get());
         return fork;
@@ -83,12 +96,6 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     }
 
     private String processValue(TreeNode rootNode, String value) {
-        // Try the cache before doing any processing
-        String cachedResult = cache.get(value);
-        if (cachedResult != null) {
-            return cachedResult;
-        }
-
         int currentPos = 0;
         StringBuilder result = new StringBuilder();
         CallSiteInfo callSiteInfo;
@@ -110,11 +117,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         }
         result.append(value.substring(currentPos));
 
-        // Populate the cache with the result
-        cachedResult = result.toString();
-        cache.put(value, cachedResult);
-
-        return cachedResult;
+        return result.toString();
     }
 
     private TreeNode processArgument(TreeNode tree, String value) {

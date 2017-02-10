@@ -7,8 +7,6 @@
  */
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.Coffig;
+public interface ConfigFunctionHolder extends ConfigurationComponent {
 
-public interface ConfigFunctionHolder {
-    void initialize(Coffig coffig);
 }

@@ -66,7 +66,7 @@ public class InMemoryProvider implements ConfigurationProvider {
     }
 
     public InMemoryProvider remove(String key) {
-        Object result = data.remove(key);
+        data.remove(key);
         dirty.set(true);
         return this;
     }

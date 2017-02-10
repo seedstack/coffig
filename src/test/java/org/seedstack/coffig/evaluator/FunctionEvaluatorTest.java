@@ -10,18 +10,16 @@ package org.seedstack.coffig.evaluator;
 import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.mapper.EvaluatingMapper;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.NamedNode;
-import org.seedstack.coffig.node.ValueNode;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class FunctionEvaluatorTest {
-    private FunctionEvaluator functionEvaluator = buildFunctionEvaluator();
+    private FunctionEvaluator functionEvaluator = new FunctionEvaluator();
 
     private MapNode config = new MapNode(
             new NamedNode("object", new MapNode(
@@ -71,10 +69,11 @@ public class FunctionEvaluatorTest {
         functionEvaluator.registerFunction("greetSeveralTimes", FunctionEvaluatorTest.class.getDeclaredMethod("greetSeveralTimes", String.class, int.class, String.class), null);
         functionEvaluator.registerFunction("prefix", FunctionEvaluatorTest.class.getDeclaredMethod("prefix"), null);
         functionEvaluator.registerFunction("verifyObject", FunctionEvaluatorTest.class.getDeclaredMethod("verifyObject", MappedClass.class), null);
+        functionEvaluator.initialize(Coffig.basic());
     }
 
     private String evaluate(String path) {
-        return functionEvaluator.evaluate(config, (ValueNode) config.get(path).get()).value();
+        return functionEvaluator.evaluate(config, config.get(path).get()).value();
     }
 
     @Test
@@ -117,16 +116,7 @@ public class FunctionEvaluatorTest {
         assertThat(evaluate("test.escaped")).isEqualTo("test: $verifyObject(object)!");
     }
 
-    private FunctionEvaluator buildFunctionEvaluator() {
-        return ((CompositeEvaluator) ((EvaluatingMapper) Coffig
-                .basic()
-                .getMapper())
-                .getEvaluator())
-                .get(FunctionEvaluator.class);
-    }
-
     private static class MappedClass {
-
         private String field1;
         private List<String> field2;
     }

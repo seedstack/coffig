@@ -12,8 +12,11 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.seedstack.coffig.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,6 +25,7 @@ import static org.seedstack.coffig.util.Utils.instantiateDefault;
 import static org.seedstack.coffig.util.Utils.resolvePath;
 
 public class Coffig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Coffig.class);
     private final ConfigurationMapper mapper;
     private final ConfigurationProvider provider;
     private final ConfigurationProcessor processor;
@@ -29,6 +33,8 @@ public class Coffig {
     private volatile TreeNode configurationTree = new MapNode();
 
     Coffig(ConfigurationMapper mapper, ConfigurationProvider provider, ConfigurationProcessor processor) {
+        LOGGER.debug("Creating new configuration");
+
         this.mapper = mapper;
         this.provider = provider;
         this.processor = processor;
@@ -59,6 +65,8 @@ public class Coffig {
     }
 
     public void refresh() {
+        LOGGER.debug("Refreshing configuration");
+
         MapNode pendingConfigurationTree;
         if (provider != null) {
             pendingConfigurationTree = provider.provide();
@@ -75,6 +83,8 @@ public class Coffig {
     }
 
     public Coffig fork() {
+        LOGGER.debug("Forking configuration");
+
         return new Coffig(
                 mapper == null ? null : (ConfigurationMapper) mapper.fork(),
                 provider == null ? null : (ConfigurationProvider) provider.fork(),
@@ -109,6 +119,8 @@ public class Coffig {
     }
 
     public Optional<Object> getOptional(Type configurationType, String... path) {
+        LOGGER.trace("Accessing configuration path '" + Arrays.toString(path) + "' and mapping it to '" + configurationType.getTypeName() + "'");
+
         if (isDirty()) {
             refresh();
         }
