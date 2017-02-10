@@ -3,7 +3,10 @@
 * [brk] Replace immutable/mutable dual data-structure with a single one and an unmodifiable wrapper.
 * [brk] Replace collections by streams when accessing nodes.
 * [brk] API refactoring
-* [chg] Remove automatic registration of `EnvironmentVariableProvider` and `SystemPropertyProvider`. There is no default provider anymore.
+* [chg] Add debug and trace logging for main configuration operations (create, fork, refresh, get).
+* [chg] No provider is registered by default anymore.
+* [chg] No processor is registered by default anymore.
+* [chg] No evaluator is registered by default anymore.
 
 # Version 1.1.0 (2017-01-12)
 
