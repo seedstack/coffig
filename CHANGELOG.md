@@ -1,4 +1,4 @@
-# Version 2.0.0 (2017-??-??)
+# Version 2.0.0 (2017-02-16)
 
 * [brk] Replace immutable/mutable dual data-structure with a single one and an unmodifiable wrapper.
 * [brk] Replace collections by streams when accessing nodes.
