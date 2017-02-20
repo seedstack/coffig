@@ -107,10 +107,6 @@ public class ValueNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
-        if (isHidden()) {
-            return HIDDEN_PLACEHOLDER;
-        } else {
-            return value;
-        }
+        return "\"" + (isHidden() ? HIDDEN_PLACEHOLDER : quote(value)) + "\"";
     }
 }

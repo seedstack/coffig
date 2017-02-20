@@ -148,7 +148,7 @@ public class Coffig {
 
     @Override
     public String toString() {
-        return configurationTree.toString();
+        return "---\n" + configurationTree.toString();
     }
 
     public ConfigurationMapper getMapper() {

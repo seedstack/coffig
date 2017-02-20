@@ -164,7 +164,7 @@ public class MapNode extends AbstractTreeNode {
     @Override
     public String toString() {
         if (isHidden()) {
-            return HIDDEN_PLACEHOLDER;
+            return "\"" + HIDDEN_PLACEHOLDER + "\"";
         } else {
             return children.entrySet().stream().map(entry -> {
                 if (entry.getValue().type() == Type.VALUE_NODE) {

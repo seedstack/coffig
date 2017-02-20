@@ -1,3 +1,7 @@
+# Version 2.0.0 (2017-02-20)
+
+* [fix] Fix formatting of configuration YAML dump.
+
 # Version 2.0.0 (2017-02-16)
 
 * [brk] Replace immutable/mutable dual data-structure with a single one and an unmodifiable wrapper.

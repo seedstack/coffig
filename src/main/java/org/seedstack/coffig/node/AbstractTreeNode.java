@@ -44,4 +44,8 @@ abstract class AbstractTreeNode implements TreeNode {
     String indent(String s) {
         return Arrays.stream(s.split("\n")).map(line -> "  " + line).collect(Collectors.joining("\n"));
     }
+
+    String quote(String s) {
+        return s.replace("\"", "\\\"");
+    }
 }

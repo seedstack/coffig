@@ -173,7 +173,7 @@ public class ArrayNode extends AbstractTreeNode {
     @Override
     public String toString() {
         if (isHidden()) {
-            return HIDDEN_PLACEHOLDER;
+            return "\"" + HIDDEN_PLACEHOLDER + "\"";
         } else if (children.size() > 0 && children.get(0).type() == Type.VALUE_NODE) {
             return children.stream().map(item -> "- " + item.toString()).collect(joining("\n"));
         } else {
