@@ -9,8 +9,8 @@ package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
-import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 import java.io.IOException;
@@ -60,11 +60,11 @@ public class PropertiesProvider implements ConfigurationProvider {
 
     private MapNode buildTreeFromSource(URL url) {
         try (InputStream inputStream = url.openStream()) {
+            MapNode mapNode = new MapNode();
             Properties properties = new Properties();
             properties.load(inputStream);
-            return new MapNode(properties.entrySet().stream()
-                    .map(e -> new NamedNode((String) e.getKey(), (String) e.getValue()))
-                    .toArray(NamedNode[]::new));
+            properties.forEach((key, value) -> mapNode.set((String) key, new ValueNode((String) value)));
+            return mapNode;
         } catch (IOException e) {
             throw ConfigurationException.wrap(e, ConfigurationErrorCode.FAILED_TO_READ_CONFIGURATION)
                     .put("url", url.toExternalForm());

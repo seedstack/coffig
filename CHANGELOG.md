@@ -1,3 +1,7 @@
+# Version 2.0.1 (2017-02-20)
+
+* [chg] Map properties files as in-depth trees (not flat keys at the top-level).
+
 # Version 2.0.0 (2017-02-20)
 
 * [fix] Fix formatting of configuration YAML dump.
