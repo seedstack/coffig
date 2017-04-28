@@ -43,6 +43,10 @@ public class OptionalMapper implements ConfigurationMapper {
     @Override
     public TreeNode unmap(Object object, Type type) {
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
-        return coffig.getMapper().unmap(object, itemType);
+        if (((Optional<?>) object).isPresent()) {
+            return coffig.getMapper().unmap(((Optional<?>) object).get(), itemType);
+        } else {
+            return null;
+        }
     }
 }

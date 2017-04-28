@@ -10,3 +10,4 @@ org.seedstack.coffig.mapper.URLMapper
 org.seedstack.coffig.mapper.URIMapper
 org.seedstack.coffig.mapper.PropertiesMapper
 org.seedstack.coffig.mapper.BuilderMapper
+org.seedstack.coffig.mapper.DurationMapper

@@ -1,5 +1,6 @@
-# Version 2.0.1 (2017-02-20)
+# Version 2.1.0 (2017-04-28)
 
+* [new] Mapper for durations.
 * [chg] Map properties files as in-depth trees (not flat keys at the top-level).
 
 # Version 2.0.0 (2017-02-20)

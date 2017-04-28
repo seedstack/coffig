@@ -9,10 +9,11 @@ package org.seedstack.coffig.mapper;
 
 import org.junit.Test;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.NamedNode;
+import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +35,10 @@ public class OptionalMapperTest {
     }
 
     @Test
-    public void testUnmapOptional() {
+    public void testUnmapOptional() throws Exception {
+        Field optionalString = Fixture.class.getDeclaredField("optionalString");
+        assertThat(mapper.unmap(Optional.of("something"), optionalString.getGenericType()).value()).isEqualTo("something");
+        assertThat(mapper.unmap(Optional.empty(), optionalString.getGenericType())).isNull();
     }
 
     private static class Fixture {
