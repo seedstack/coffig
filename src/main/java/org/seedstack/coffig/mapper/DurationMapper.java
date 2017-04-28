@@ -7,7 +7,6 @@
  */
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
@@ -16,13 +15,6 @@ import java.lang.reflect.Type;
 import java.time.Duration;
 
 public class DurationMapper implements ConfigurationMapper {
-    private Coffig coffig;
-
-    @Override
-    public void initialize(Coffig coffig) {
-        this.coffig = coffig;
-    }
-
     @Override
     public boolean canHandle(Type type) {
         return type instanceof Class && Duration.class.isAssignableFrom((Class<?>) type);
