@@ -51,21 +51,30 @@ public final class Utils {
 
     @SuppressWarnings("unchecked")
     public static <T> T instantiateDefault(Class<T> configurationClass) {
-        if (Boolean.class.equals(configurationClass)) {
+        if (configurationClass.isArray()) {
+            return (T) Array.newInstance(configurationClass.getComponentType(), 0);
+        } else {
+            return instantiateScalar(configurationClass);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T instantiateScalar(Class<T> configurationClass) {
+        if (boolean.class.equals(configurationClass) || Boolean.class.equals(configurationClass)) {
             return (T) Boolean.FALSE;
-        } else if (Integer.class.equals(configurationClass)) {
+        } else if (int.class.equals(configurationClass) || Integer.class.equals(configurationClass)) {
             return (T) new Integer(0);
-        } else if (Long.class.equals(configurationClass)) {
+        } else if (long.class.equals(configurationClass) || Long.class.equals(configurationClass)) {
             return (T) new Long(0L);
-        } else if (Short.class.equals(configurationClass)) {
+        } else if (short.class.equals(configurationClass) || Short.class.equals(configurationClass)) {
             return (T) new Short((short) 0);
-        } else if (Float.class.equals(configurationClass)) {
+        } else if (float.class.equals(configurationClass) || Float.class.equals(configurationClass)) {
             return (T) new Float(0f);
-        } else if (Double.class.equals(configurationClass)) {
+        } else if (double.class.equals(configurationClass) || Double.class.equals(configurationClass)) {
             return (T) new Double(0d);
-        } else if (Byte.class.equals(configurationClass)) {
+        } else if (byte.class.equals(configurationClass) || Byte.class.equals(configurationClass)) {
             return (T) new Byte((byte) 0);
-        } else if (Character.class.equals(configurationClass)) {
+        } else if (char.class.equals(configurationClass) || Character.class.equals(configurationClass)) {
             return (T) new Character((char) 0);
         } else {
             try {
