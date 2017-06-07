@@ -1,4 +1,4 @@
-# Version 2.1.1 (2017-06-??)
+# Version 2.1.1 (2017-06-07)
 
 * [fix] Fix instantiation of arrays as default values.
 
