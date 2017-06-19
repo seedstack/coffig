@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.evaluator;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
@@ -86,6 +87,7 @@ public class MacroEvaluator implements ConfigurationEvaluator {
         return cachedResult;
     }
 
+    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     private MatchingResult findMatchingCurlyBraces(String value, int startIndex) {
         int level = 0, startPos = -1;
         boolean escaped = false;

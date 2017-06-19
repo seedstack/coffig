@@ -99,7 +99,7 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public TreeNode merge(TreeNode otherNode) {
-        if ((otherNode.type() == Type.MAP_NODE)) {
+        if (otherNode instanceof MapNode) {
             ((MapNode) otherNode).children.forEach((nodeName, treeNode) -> {
                 TreeNode node = this.children.containsKey(nodeName) ? this.children.get(nodeName).merge(treeNode) : treeNode;
                 this.children.put(nodeName, node);

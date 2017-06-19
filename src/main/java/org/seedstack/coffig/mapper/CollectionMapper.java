@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.ConfigurationErrorCode;
 import org.seedstack.coffig.ConfigurationException;
@@ -45,6 +46,7 @@ public class CollectionMapper implements ConfigurationMapper {
 
     @Override
     @SuppressWarnings("unchecked")
+    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST", justification = "Cast is verified in canHandle() method")
     public Object map(TreeNode treeNode, Type type) {
         Class<?> rawClass = (Class<?>) ((ParameterizedType) type).getRawType();
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
@@ -66,6 +68,7 @@ public class CollectionMapper implements ConfigurationMapper {
     }
 
     @Override
+    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST", justification = "Cast is verified in canHandle() method")
     public TreeNode unmap(Object object, Type type) {
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
         return new ArrayNode(((Collection<?>) object).stream().map(item -> coffig.getMapper().unmap(item, itemType)).collect(toList()));

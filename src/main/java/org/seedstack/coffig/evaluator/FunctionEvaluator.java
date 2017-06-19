@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.evaluator;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
@@ -14,6 +15,7 @@ import org.seedstack.coffig.spi.ConfigFunction;
 import org.seedstack.coffig.spi.ConfigFunctionHolder;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.shed.reflect.ReflectUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -28,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
+import static org.seedstack.shed.reflect.ReflectUtils.makeAccessible;
 
 public class FunctionEvaluator implements ConfigurationEvaluator {
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\\\?\\$([_a-zA-Z]\\w*)\\(|\\)");
@@ -91,7 +94,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         if (functions.putIfAbsent(name, new FunctionRegistration(method, instance)) != null) {
             throw new IllegalStateException("Function " + name + " already registered");
         } else {
-            method.setAccessible(true);
+            makeAccessible(method);
         }
     }
 
@@ -140,6 +143,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private String invokeFunction(String functionName, TreeNode[] arguments) {
         FunctionRegistration functionRegistration = functions.get(functionName);
         if (functionRegistration == null) {

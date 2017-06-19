@@ -63,19 +63,19 @@ public final class Utils {
         if (boolean.class.equals(configurationClass) || Boolean.class.equals(configurationClass)) {
             return (T) Boolean.FALSE;
         } else if (int.class.equals(configurationClass) || Integer.class.equals(configurationClass)) {
-            return (T) new Integer(0);
+            return (T) Integer.valueOf(0);
         } else if (long.class.equals(configurationClass) || Long.class.equals(configurationClass)) {
-            return (T) new Long(0L);
+            return (T) Long.valueOf(0L);
         } else if (short.class.equals(configurationClass) || Short.class.equals(configurationClass)) {
-            return (T) new Short((short) 0);
+            return (T) Short.valueOf((short) 0);
         } else if (float.class.equals(configurationClass) || Float.class.equals(configurationClass)) {
-            return (T) new Float(0f);
+            return (T) Float.valueOf(0f);
         } else if (double.class.equals(configurationClass) || Double.class.equals(configurationClass)) {
-            return (T) new Double(0d);
+            return (T) Double.valueOf(0d);
         } else if (byte.class.equals(configurationClass) || Byte.class.equals(configurationClass)) {
-            return (T) new Byte((byte) 0);
+            return (T) Byte.valueOf((byte) 0);
         } else if (char.class.equals(configurationClass) || Character.class.equals(configurationClass)) {
-            return (T) new Character((char) 0);
+            return (T) Character.valueOf((char) 0);
         } else {
             try {
                 Constructor<T> defaultConstructor = configurationClass.getDeclaredConstructor();

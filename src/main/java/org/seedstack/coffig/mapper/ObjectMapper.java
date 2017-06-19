@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -164,11 +165,11 @@ class ObjectMapper<T> implements ConfigurationComponent {
         }
 
         private String fieldToSetterName(Field field) {
-            return "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+            return "set" + field.getName().substring(0, 1).toUpperCase(Locale.ENGLISH) + field.getName().substring(1);
         }
 
         private String fieldToGetterName(Field field) {
-            return "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+            return "get" + field.getName().substring(0, 1).toUpperCase(Locale.ENGLISH) + field.getName().substring(1);
         }
 
         private Consumer<Object> getSetterConsumer(Method setter) {

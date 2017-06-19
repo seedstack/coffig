@@ -1,3 +1,7 @@
+# Version 2.1.2 (2017-07-??)
+
+* [chg] Internal changes. 
+
 # Version 2.1.1 (2017-06-07)
 
 * [fix] Fix instantiation of arrays as default values.

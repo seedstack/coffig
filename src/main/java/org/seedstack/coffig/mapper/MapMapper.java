@@ -7,6 +7,7 @@
  */
 package org.seedstack.coffig.mapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
@@ -46,6 +47,7 @@ public class MapMapper implements ConfigurationMapper {
     }
 
     @Override
+    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST", justification = "Cast is verified in canHandle() method")
     public Object map(TreeNode treeNode, Type type) {
         Type keyType = ((ParameterizedType) type).getActualTypeArguments()[0];
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
@@ -66,6 +68,7 @@ public class MapMapper implements ConfigurationMapper {
     }
 
     @Override
+    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST", justification = "Cast is verified in canHandle() method")
     public TreeNode unmap(Object object, Type type) {
         MapNode mapNode = new MapNode();
         Type valueType = ((ParameterizedType) type).getActualTypeArguments()[1];
