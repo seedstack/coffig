@@ -48,17 +48,11 @@ public class ValueMapper implements ConfigurationMapper {
 
     @Override
     public Object map(TreeNode value, Type type) {
-        if (value == null) {
-            return null;
-        }
         return converters.get(type).apply(value.value());
     }
 
     @Override
     public TreeNode unmap(Object object, Type type) {
-        if (object == null) {
-            return null;
-        }
         return new ValueNode(String.valueOf(object));
     }
 

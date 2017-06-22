@@ -132,14 +132,13 @@ public class Coffig {
             joinedPath = resolvePath(getRawClass(configurationType));
         }
 
+        Optional<TreeNode> resolvedTree;
         if (joinedPath == null || joinedPath.isEmpty()) {
-            return Optional.of(configurationTree)
-                    .map(treeNode -> mapper.map(treeNode, configurationType));
+            resolvedTree = Optional.of(this.configurationTree);
         } else {
-            return configurationTree
-                    .get(joinedPath)
-                    .map(treeNode -> mapper.map(treeNode, configurationType));
+            resolvedTree = this.configurationTree.get(joinedPath);
         }
+        return resolvedTree.map(treeNode -> mapper.map(treeNode, configurationType));
     }
 
     public TreeNode getTree() {

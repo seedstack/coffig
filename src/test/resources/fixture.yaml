@@ -7,6 +7,9 @@
 #
 
 app: bar
+empty: ""
+null:
+someInt: 5
 jdbc:
   dataSources:
     -

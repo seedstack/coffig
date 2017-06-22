@@ -1,6 +1,6 @@
 # Version 2.1.2 (2017-07-??)
 
-* [chg] Internal changes. 
+* [fix] Properly parse and handle null values. 
 
 # Version 2.1.1 (2017-06-07)
 

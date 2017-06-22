@@ -46,6 +46,6 @@ abstract class AbstractTreeNode implements TreeNode {
     }
 
     String quote(String s) {
-        return s.replace("\"", "\\\"");
+        return s == null ? null : s.replace("\"", "\\\"");
     }
 }

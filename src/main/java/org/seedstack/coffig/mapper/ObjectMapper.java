@@ -66,7 +66,6 @@ class ObjectMapper<T> implements ConfigurationComponent {
                     .map(treeNode -> coffig.getMapper().map(treeNode, fieldInfo.type))
                     .ifPresent(fieldInfo.consumer));
         }
-
         return holder;
     }
 
@@ -128,20 +127,12 @@ class ObjectMapper<T> implements ConfigurationComponent {
 
         private Consumer<Object> getPropertyConsumer(Field field) {
             Optional<Method> setter = getSetter(field);
-            if (setter.isPresent()) {
-                return getSetterConsumer(setter.get());
-            } else {
-                return getFieldConsumer(field);
-            }
+            return setter.map(this::getSetterConsumer).orElseGet(() -> getFieldConsumer(field));
         }
 
         private Supplier<Object> getPropertySupplier(Field field) {
             Optional<Method> getter = getGetter(field);
-            if (getter.isPresent()) {
-                return getGetterSupplier(getter.get());
-            } else {
-                return getFieldSupplier(field);
-            }
+            return getter.map(this::getGetterSupplier).orElseGet(() -> getFieldSupplier(field));
         }
 
         private Optional<Method> getSetter(Field field) {

@@ -9,10 +9,9 @@ package org.seedstack.coffig.evaluator;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.NamedNode;
-import org.seedstack.coffig.node.ValueNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,6 +22,10 @@ public class MacroEvaluatorTest {
     @Before
     public void setUp() throws Exception {
         config = new MapNode(
+                new NamedNode("null", (String) null),
+
+                new NamedNode("nullMacro", "${null}"),
+
                 new NamedNode("index", "2"),
 
                 new NamedNode("erroneousIndex", "9"),
@@ -76,6 +79,12 @@ public class MacroEvaluatorTest {
                         )
                 ))
         );
+    }
+
+    @Test
+    public void testNullMacro() throws Exception {
+        assertThat(evaluate("null")).isEqualTo(null);
+        assertThat(evaluate("nullMacro")).isEqualTo("null");
     }
 
     @Test

@@ -34,6 +34,7 @@ public class PropertiesProviderTest {
 
         Assertions.assertThat(mapNode).isNotNull();
         Assertions.assertThat(mapNode.node("app").value()).isEqualTo("foo");
+        Assertions.assertThat(mapNode.node("empty").value()).isEmpty();
         Assertions.assertThat(mapNode.get("test.property").get().value()).isEqualTo("testValue");
     }
 }

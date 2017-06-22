@@ -29,8 +29,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class JacksonProvider implements ConfigurationProvider {
     private final List<URL> sources = new ArrayList<>();
-    private final ObjectMapper jacksonMapper = new ObjectMapper(new YAMLFactory());
     private final AtomicBoolean dirty = new AtomicBoolean(true);
+    private final ObjectMapper jacksonMapper;
+
+    public JacksonProvider() {
+        YAMLFactory yamlFactory = new YAMLFactory();
+        jacksonMapper = new ObjectMapper(yamlFactory);
+    }
 
     @Override
     public MapNode provide() {
@@ -103,7 +108,7 @@ public class JacksonProvider implements ConfigurationProvider {
     private static class ValueNodeBuilder implements NodeBuilder {
         @Override
         public TreeNode build(JsonNode jsonNode) {
-            return new ValueNode(jsonNode.asText());
+            return new ValueNode(jsonNode.asText(null));
         }
     }
 

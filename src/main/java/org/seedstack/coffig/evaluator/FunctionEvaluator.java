@@ -15,7 +15,6 @@ import org.seedstack.coffig.spi.ConfigFunction;
 import org.seedstack.coffig.spi.ConfigFunctionHolder;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
-import org.seedstack.shed.reflect.ReflectUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -74,7 +73,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
 
     @Override
     public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
-        if (valueNode.type() == TreeNode.Type.VALUE_NODE) {
+        if (valueNode.type() == TreeNode.Type.VALUE_NODE && !valueNode.isEmpty()) {
             return new ValueNode(processValue(rootNode, valueNode.value()));
         } else {
             return valueNode;

@@ -44,12 +44,20 @@ public class ValueNode extends AbstractTreeNode {
 
     @Override
     public Stream<TreeNode> nodes() {
-        return Stream.of(this);
+        if (value == null) {
+            return Stream.empty();
+        } else {
+            return Stream.of(this);
+        }
     }
 
     @Override
     public Stream<NamedNode> namedNodes() {
-        return Stream.of(new NamedNode("value", this));
+        if (value == null) {
+            return Stream.empty();
+        } else {
+            return Stream.of(new NamedNode("value", this));
+        }
     }
 
     @Override
@@ -64,7 +72,11 @@ public class ValueNode extends AbstractTreeNode {
 
     @Override
     public Stream<TreeNode> walk() {
-        return Stream.of(this);
+        if (value == null) {
+            return Stream.empty();
+        } else {
+            return Stream.of(this);
+        }
     }
 
     @Override
@@ -107,6 +119,6 @@ public class ValueNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
-        return "\"" + (isHidden() ? HIDDEN_PLACEHOLDER : quote(value)) + "\"";
+        return value == null ? "~" : "\"" + (isHidden() ? HIDDEN_PLACEHOLDER : quote(value)) + "\"";
     }
 }

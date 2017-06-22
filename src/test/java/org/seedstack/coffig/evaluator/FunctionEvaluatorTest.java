@@ -22,6 +22,7 @@ public class FunctionEvaluatorTest {
     private FunctionEvaluator functionEvaluator = new FunctionEvaluator();
 
     private MapNode config = new MapNode(
+            new NamedNode("null", (String) null),
             new NamedNode("object", new MapNode(
                     new NamedNode("field1", "hello"),
                     new NamedNode("field2", new ArrayNode("item1", "item2", "item3"))

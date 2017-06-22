@@ -33,7 +33,7 @@ public class MacroEvaluator implements ConfigurationEvaluator {
 
     @Override
     public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
-        if (valueNode.type() == TreeNode.Type.VALUE_NODE) {
+        if (valueNode.type() == TreeNode.Type.VALUE_NODE && !valueNode.isEmpty()) {
             return new ValueNode(processValue(rootNode, valueNode.value()));
         } else {
             return valueNode;
@@ -41,6 +41,10 @@ public class MacroEvaluator implements ConfigurationEvaluator {
     }
 
     private String processValue(TreeNode rootNode, String value) {
+        if (value == null) {
+            return null;
+        }
+
         String cachedResult = cache.get(value);
         if (cachedResult != null) {
             return cachedResult;

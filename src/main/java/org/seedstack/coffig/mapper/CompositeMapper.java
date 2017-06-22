@@ -41,7 +41,7 @@ public class CompositeMapper extends AbstractComposite<ConfigurationMapper> impl
     }
 
     public Object map(TreeNode treeNode, Type type) {
-        if (treeNode == null) {
+        if (treeNode == null || (treeNode.type() == TreeNode.Type.VALUE_NODE && treeNode.isEmpty())) {
             return null;
         }
 
