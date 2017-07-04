@@ -11,7 +11,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
-import org.seedstack.coffig.util.LRUCache;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -19,12 +18,6 @@ import java.util.regex.Pattern;
 
 public class MacroEvaluator implements ConfigurationEvaluator {
     private static final Pattern MACRO_PATTERN = Pattern.compile("\\\\?\\$\\{|\\}");
-    private final LRUCache<String, String> cache = new LRUCache<>(10000);
-
-    @Override
-    public void invalidate() {
-        cache.clear();
-    }
 
     @Override
     public MacroEvaluator fork() {
@@ -43,11 +36,6 @@ public class MacroEvaluator implements ConfigurationEvaluator {
     private String processValue(TreeNode rootNode, String value) {
         if (value == null) {
             return null;
-        }
-
-        String cachedResult = cache.get(value);
-        if (cachedResult != null) {
-            return cachedResult;
         }
 
         StringBuilder result = new StringBuilder();
@@ -85,10 +73,7 @@ public class MacroEvaluator implements ConfigurationEvaluator {
         // Add the remaining of the string (after all macros)
         result.append(value.substring(currentPos));
 
-        cachedResult = result.toString();
-        cache.put(value, cachedResult);
-
-        return cachedResult;
+        return result.toString();
     }
 
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
