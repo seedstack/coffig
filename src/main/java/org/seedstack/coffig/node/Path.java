@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
  * </pre>
  */
 class Path {
-    private static final String PATH_REGEX = "(?<!\\\\)" + Pattern.quote(".");
+    private static final Pattern PATH_REGEX = Pattern.compile("(?<!\\\\)" + Pattern.quote("."));
     private static final Pattern SUBSCRIPTION_PATTERN = Pattern.compile("(.*)\\[(\\d+)\\]");
 
     private final String head;
@@ -70,24 +70,30 @@ class Path {
      * @param path the configuration path
      */
     Path(String path) {
-        String[] splitPath = path.split(PATH_REGEX, 2);
-        Matcher matcher = SUBSCRIPTION_PATTERN.matcher(splitPath[0]);
+        String[] splitPath = PATH_REGEX.split(path, 2);
 
-        if (matcher.matches()) {
-            if (matcher.group(1).isEmpty()) {
-                head = matcher.group(2);
-                tail = splitPath.length > 1 ? splitPath[1] : null;
-                index = Integer.parseInt(head);
-            } else {
-                head = matcher.group(1).replaceAll("\\\\", "");
-                tail = String.format("[%s]", matcher.group(2)) + (splitPath.length > 1 ? "." + splitPath[1] : "");
-                index = -1;
+        if (splitPath[0].contains("[")) {
+            // Check for [ character for performance reasons
+            Matcher matcher = SUBSCRIPTION_PATTERN.matcher(splitPath[0]);
+            if (matcher.matches()) {
+                if (matcher.group(1).isEmpty()) {
+                    head = matcher.group(2);
+                    tail = splitPath.length > 1 ? splitPath[1] : null;
+                    index = Integer.parseInt(head);
+                    return;
+                } else {
+                    head = matcher.group(1).replace("\\", "");
+                    tail = String.format("[%s]", matcher.group(2)) + (splitPath.length > 1 ? "." + splitPath[1] : "");
+                    index = -1;
+                    return;
+                }
             }
-        } else {
-            head = splitPath[0].replaceAll("\\\\", "");
-            tail = splitPath.length > 1 ? splitPath[1] : null;
-            index = -1;
         }
+
+        // no array subscription pattern
+        head = splitPath[0].replace("\\", "");
+        tail = splitPath.length > 1 ? splitPath[1] : null;
+        index = -1;
     }
 
     boolean hasHead() {
