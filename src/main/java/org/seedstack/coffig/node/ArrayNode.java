@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -64,7 +63,7 @@ public class ArrayNode extends AbstractTreeNode {
 
     @Override
     public Stream<NamedNode> namedNodes() {
-        return IntStream.range(0, children.size()).mapToObj(i -> new NamedNode(Integer.toString(i), children.get(i)));
+        return children.stream().map(child -> new NamedNode(child.value(), (String) null));
     }
 
     @Override

@@ -1,6 +1,7 @@
 # Version 2.1.2 (2017-07-??)
 
-* [fix] Properly parse and handle null values. 
+* [fix] Properly parse and handle null values.
+* [chg] When converting an array node to a map node, items are used as keys instead of values.
 
 # Version 2.1.1 (2017-06-07)
 
