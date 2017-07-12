@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.internal;
 
 import org.seedstack.shed.exception.ErrorCode;
 
@@ -16,7 +16,6 @@ public enum ConfigurationErrorCode implements ErrorCode {
     ERROR_DURING_FIELD_ACCESS,
     ERROR_DURING_FIELD_INJECTION,
     ERROR_DURING_GETTER_INVOCATION,
-    ERROR_DURING_INSTANTIATION,
     ERROR_DURING_METHOD_INVOCATION,
     ERROR_DURING_SETTER_INVOCATION,
     ERROR_OCCURRED_DURING_COMPOSITE_PROVIDE,

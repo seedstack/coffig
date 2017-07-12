@@ -15,7 +15,7 @@ import org.seedstack.coffig.util.AbstractComposite;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-import static org.seedstack.coffig.util.Utils.getRawClass;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
 
 public class CompositeMapper extends AbstractComposite<ConfigurationMapper> implements ConfigurationMapper {
     private Coffig coffig;
@@ -51,7 +51,7 @@ public class CompositeMapper extends AbstractComposite<ConfigurationMapper> impl
             }
         }
 
-        ObjectMapper<?> objectMapper = new ObjectMapper<>(getRawClass(type));
+        ObjectMapper<?> objectMapper = new ObjectMapper<>(rawClassOf(type));
         objectMapper.initialize(coffig);
         return objectMapper.map(treeNode);
     }

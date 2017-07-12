@@ -7,11 +7,12 @@
  */
 package org.seedstack.coffig;
 
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
-import org.seedstack.coffig.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +21,9 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.seedstack.coffig.util.Utils.getRawClass;
-import static org.seedstack.coffig.util.Utils.instantiateDefault;
 import static org.seedstack.coffig.util.Utils.resolvePath;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
 
 public class Coffig {
     private static final Logger LOGGER = LoggerFactory.getLogger(Coffig.class);
@@ -98,7 +99,7 @@ public class Coffig {
     }
 
     public Object get(Type type, String... path) {
-        return getOptional(type, path).orElseGet(() -> instantiateDefault(Utils.getRawClass(type)));
+        return getOptional(type, path).orElseGet(() -> instantiateDefault(rawClassOf(type)));
     }
 
     @SuppressWarnings("unchecked")
@@ -129,7 +130,7 @@ public class Coffig {
         if (path != null && path.length > 0) {
             joinedPath = String.join(".", (CharSequence[]) path);
         } else {
-            joinedPath = resolvePath(getRawClass(configurationType));
+            joinedPath = resolvePath(rawClassOf(configurationType));
         }
 
         Optional<TreeNode> resolvedTree;

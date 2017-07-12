@@ -7,8 +7,8 @@
  */
 package org.seedstack.coffig.provider;
 
-import org.seedstack.coffig.ConfigurationErrorCode;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.seedstack.coffig.util.AbstractComposite;

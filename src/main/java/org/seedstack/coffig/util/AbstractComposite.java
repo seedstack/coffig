@@ -8,8 +8,8 @@
 package org.seedstack.coffig.util;
 
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.ConfigurationErrorCode;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 
 import java.lang.reflect.Array;

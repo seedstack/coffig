@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
-import static org.seedstack.coffig.util.Utils.instantiateDefault;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 
 public class MapMapper implements ConfigurationMapper {
     private Coffig coffig;

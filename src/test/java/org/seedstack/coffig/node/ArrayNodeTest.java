@@ -9,7 +9,7 @@ package org.seedstack.coffig.node;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 
 import java.util.List;

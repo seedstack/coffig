@@ -9,11 +9,10 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.BuilderSupplier;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.ConfigurationErrorCode;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
-import org.seedstack.coffig.util.Utils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -21,6 +20,9 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
 
 public class BuilderMapper implements ConfigurationMapper {
     private Coffig coffig;
@@ -32,7 +34,7 @@ public class BuilderMapper implements ConfigurationMapper {
 
     @Override
     public boolean canHandle(Type type) {
-        return type != null && BuilderSupplier.class.isAssignableFrom(Utils.getRawClass(type));
+        return type != null && BuilderSupplier.class.isAssignableFrom(rawClassOf(type));
     }
 
     @Override
@@ -64,13 +66,13 @@ public class BuilderMapper implements ConfigurationMapper {
 
     @SuppressWarnings("unchecked")
     private BuilderSupplier<?> instantiateBuilderSupplier(Type type) {
-        Class<?> rawClass = Utils.getRawClass(type);
+        Class<?> rawClass = rawClassOf(type);
         if (rawClass.equals(BuilderSupplier.class)) {
             // If the type equals to the supplier interface, instantiate a default supplier
-            return BuilderSupplier.of(Utils.instantiateDefault(Utils.getRawClass(((ParameterizedType) type).getActualTypeArguments()[0])));
+            return BuilderSupplier.of(instantiateDefault(rawClassOf(((ParameterizedType) type).getActualTypeArguments()[0])));
         } else {
             // Otherwise try to instantiate the supplier
-            return (BuilderSupplier<?>) Utils.instantiateDefault(rawClass);
+            return (BuilderSupplier<?>) instantiateDefault(rawClass);
         }
     }
 

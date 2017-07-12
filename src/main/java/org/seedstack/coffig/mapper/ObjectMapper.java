@@ -9,13 +9,12 @@ package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.Config;
-import org.seedstack.coffig.ConfigurationErrorCode;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.SingleValue;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
-import org.seedstack.coffig.util.Utils;
 import org.seedstack.shed.reflect.Classes;
 
 import java.lang.reflect.Field;
@@ -29,6 +28,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 
 class ObjectMapper<T> implements ConfigurationComponent {
     private final Class<T> aClass;
@@ -41,7 +41,7 @@ class ObjectMapper<T> implements ConfigurationComponent {
         this.aClass = aClass;
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
-        this.holder = Utils.instantiateDefault(aClass);
+        this.holder = instantiateDefault(aClass);
     }
 
     @SuppressWarnings("unchecked")

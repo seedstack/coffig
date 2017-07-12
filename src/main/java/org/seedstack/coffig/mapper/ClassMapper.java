@@ -8,8 +8,8 @@
 package org.seedstack.coffig.mapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.seedstack.coffig.ConfigurationErrorCode;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
@@ -18,7 +18,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 
-import static org.seedstack.coffig.util.Utils.getRawClass;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
 
 public class ClassMapper implements ConfigurationMapper {
     @Override
@@ -62,12 +62,12 @@ public class ClassMapper implements ConfigurationMapper {
 
     private boolean isSatisfyingBounds(Class<?> aClass, WildcardType wildcardType) {
         for (Type bound : wildcardType.getUpperBounds()) {
-            if (!(getRawClass(bound)).isAssignableFrom(aClass)) {
+            if (!(rawClassOf(bound)).isAssignableFrom(aClass)) {
                 return false;
             }
         }
         for (Type bound : wildcardType.getLowerBounds()) {
-            if (!(aClass.isAssignableFrom(getRawClass(bound)))) {
+            if (!(aClass.isAssignableFrom(rawClassOf(bound)))) {
                 return false;
             }
         }

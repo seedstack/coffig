@@ -135,7 +135,12 @@
                             <excludes>
                                 <exclude>*.internal.*</exclude>
                                 <exclude>org.seedstack.coffig.util.LRUCache</exclude>
+                                <exclude>org.seedstack.coffig.util.Utils</exclude>
                                 <exclude>org.seedstack.coffig.evaluator.MacroEvaluator</exclude>
+                                <exclude>org.seedstack.coffig.ConfigurationErrorCode</exclude>
+                                <exclude>org.seedstack.coffig.ConfigurationException</exclude>
+                                <exclude>org.seedstack.coffig.ConfigurationValidationException</exclude>
+                                <exclude>org.seedstack.coffig.PropertyNotFoundException</exclude>
                             </excludes>
                         </parameter>
                     </configuration>

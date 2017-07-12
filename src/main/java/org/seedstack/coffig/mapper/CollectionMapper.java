@@ -9,8 +9,6 @@ package org.seedstack.coffig.mapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.ConfigurationErrorCode;
-import org.seedstack.coffig.ConfigurationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
@@ -24,6 +22,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 
 public class CollectionMapper implements ConfigurationMapper {
     private Coffig coffig;
@@ -56,14 +55,8 @@ public class CollectionMapper implements ConfigurationMapper {
         } else if (Set.class.isAssignableFrom(rawClass)) {
             return treeNode.nodes().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toSet());
         } else {
-            return treeNode.nodes().map(childNode -> coffig.getMapper().map(childNode, itemType)).collect(toCollection(() -> {
-                try {
-                    return (Collection<Object>) rawClass.newInstance();
-                } catch (Exception e) {
-                    throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_INSTANTIATION)
-                            .put("class", rawClass.getName());
-                }
-            }));
+            return treeNode.nodes().map(childNode -> coffig.getMapper().map(childNode, itemType))
+                    .collect(toCollection(() -> (Collection<Object>) instantiateDefault(rawClass)));
         }
     }
 

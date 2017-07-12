@@ -9,9 +9,9 @@ package org.seedstack.coffig.node;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.NamedNode;
-import org.seedstack.coffig.PropertyNotFoundException;
+import org.seedstack.coffig.internal.PropertyNotFoundException;
 import org.seedstack.coffig.TreeNode;
 
 import static org.assertj.core.api.Assertions.assertThat;

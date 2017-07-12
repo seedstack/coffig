@@ -10,6 +10,7 @@ package org.seedstack.coffig;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.seedstack.coffig.fixture.EnumFixture;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.provider.VoidProvider;

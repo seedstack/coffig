@@ -8,7 +8,7 @@
 package org.seedstack.coffig.mapper;
 
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.ConfigurationValidationException;
+import org.seedstack.coffig.internal.ConfigurationValidationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationMapper;

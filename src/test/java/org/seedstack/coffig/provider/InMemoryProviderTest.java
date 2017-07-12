@@ -10,7 +10,7 @@ package org.seedstack.coffig.provider;
 import mockit.Deencapsulation;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
-import org.seedstack.coffig.ConfigurationException;
+import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.ValueNode;
 

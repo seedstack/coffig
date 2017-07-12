@@ -10,7 +10,7 @@ package org.seedstack.coffig.mapper;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.Test;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.ConfigurationValidationException;
+import org.seedstack.coffig.internal.ConfigurationValidationException;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.fixture.ValidatingFixture;
 import org.seedstack.coffig.node.MapNode;
