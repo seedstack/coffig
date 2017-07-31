@@ -7,11 +7,10 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.internal.PropertyNotFoundException;
-import org.seedstack.coffig.TreeNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +28,6 @@ public class MapNode extends AbstractTreeNode {
     }
 
     public MapNode(MapNode other) {
-        super(other);
         this.children = new HashMap<>(other.children);
     }
 

@@ -9,7 +9,6 @@ package org.seedstack.coffig.node;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.seedstack.coffig.NamedNode;
 
 public class NamedNodeTest {
 

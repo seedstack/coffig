@@ -7,7 +7,6 @@
  */
 package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.NodeAttributes;
 import org.seedstack.coffig.TreeNode;
 
 import java.util.Arrays;
@@ -15,22 +14,7 @@ import java.util.stream.Collectors;
 
 abstract class AbstractTreeNode implements TreeNode {
     static String HIDDEN_PLACEHOLDER = "***";
-
-    private final NodeAttributesImpl attributes;
     private boolean hidden = false;
-
-    AbstractTreeNode() {
-        this.attributes = new NodeAttributesImpl();
-    }
-
-    AbstractTreeNode(AbstractTreeNode other) {
-        this.attributes = new NodeAttributesImpl(other.attributes);
-    }
-
-    @Override
-    public NodeAttributes attributes() {
-        return attributes;
-    }
 
     public boolean isHidden() {
         return this.hidden;

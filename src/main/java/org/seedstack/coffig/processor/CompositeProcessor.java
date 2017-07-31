@@ -9,9 +9,9 @@ package org.seedstack.coffig.processor;
 
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
-import org.seedstack.coffig.util.AbstractComposite;
+import org.seedstack.coffig.spi.BaseComposite;
 
-public class CompositeProcessor extends AbstractComposite<ConfigurationProcessor> implements ConfigurationProcessor {
+public class CompositeProcessor extends BaseComposite<ConfigurationProcessor> implements ConfigurationProcessor {
     public CompositeProcessor(ConfigurationProcessor... items) {
         super(ConfigurationProcessor.class, items);
     }

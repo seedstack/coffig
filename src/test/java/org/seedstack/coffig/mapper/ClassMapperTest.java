@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.NamedNode;
+import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -17,7 +17,7 @@ import org.seedstack.coffig.fixture.PrefixFixture;
 import org.seedstack.coffig.fixture.SingleValueFixture;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.NamedNode;
+import org.seedstack.coffig.node.NamedNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;

@@ -8,7 +8,6 @@
 package org.seedstack.coffig.node;
 
 import org.junit.Test;
-import org.seedstack.coffig.NamedNode;
 import org.seedstack.coffig.TreeNode;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -11,13 +11,13 @@ import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
-import org.seedstack.coffig.util.AbstractComposite;
+import org.seedstack.coffig.spi.BaseComposite;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
-public class CompositeProvider extends AbstractComposite<ConfigurationProvider> implements ConfigurationProvider {
+public class CompositeProvider extends BaseComposite<ConfigurationProvider> implements ConfigurationProvider {
     public CompositeProvider(ConfigurationProvider... items) {
         super(ConfigurationProvider.class, items);
     }

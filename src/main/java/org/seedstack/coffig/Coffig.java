@@ -10,18 +10,19 @@ package org.seedstack.coffig;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.UnmodifiableTreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.seedstack.coffig.util.Utils.resolvePath;
 import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 import static org.seedstack.shed.reflect.Types.rawClassOf;
 
@@ -48,14 +49,6 @@ public class Coffig {
         if (processor != null) {
             processor.initialize(this);
         }
-    }
-
-    public static CoffigBuilder builder() {
-        return new CoffigBuilder();
-    }
-
-    public static Coffig basic() {
-        return new CoffigBuilder().build();
     }
 
     public boolean isDirty() {
@@ -130,7 +123,7 @@ public class Coffig {
         if (path != null && path.length > 0) {
             joinedPath = String.join(".", (CharSequence[]) path);
         } else {
-            joinedPath = resolvePath(rawClassOf(configurationType));
+            joinedPath = pathOf(rawClassOf(configurationType));
         }
 
         Optional<TreeNode> resolvedTree;
@@ -161,5 +154,38 @@ public class Coffig {
 
     public ConfigurationProcessor getProcessor() {
         return processor;
+    }
+
+    public static CoffigBuilder builder() {
+        return new CoffigBuilder();
+    }
+
+    public static Coffig basic() {
+        return new CoffigBuilder().build();
+    }
+
+    public static String pathOf(AnnotatedElement annotatedElement) {
+        Config annotation;
+        StringBuilder path = new StringBuilder();
+        if (annotatedElement instanceof Class) {
+            Class<?> currentClass = (Class) annotatedElement;
+            while (currentClass != null && (annotation = currentClass.getAnnotation(Config.class)) != null) {
+                if (!annotation.value().isEmpty()) {
+                    if (path.length() > 0) {
+                        path.insert(0, ".");
+                    }
+                    path.insert(0, annotation.value());
+                }
+                currentClass = currentClass.getDeclaringClass();
+            }
+            return path.toString();
+        } else {
+            annotation = annotatedElement.getAnnotation(Config.class);
+            if (annotation != null) {
+                return annotation.value();
+            } else {
+                return null;
+            }
+        }
     }
 }

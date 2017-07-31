@@ -7,12 +7,12 @@
  */
 package org.seedstack.coffig;
 
+import org.seedstack.coffig.node.NamedNode;
+
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface TreeNode {
-
-    NodeAttributes attributes();
 
     boolean isHidden();
 

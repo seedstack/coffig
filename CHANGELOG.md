@@ -1,7 +1,10 @@
-# Version 2.1.2 (2017-07-31)
+# Version 3.0.0 (2017-07-31)
 
+* [brk] Remove node attributes.
+* [brk] API cleanup.
+* [brk] When converting an array node to a map node, items are used as keys instead of values.
+* [chg] Compatibility with Jackson 2.8.0+. 
 * [fix] Properly parse and handle null values.
-* [chg] When converting an array node to a map node, items are used as keys instead of values.
 
 # Version 2.1.1 (2017-06-07)
 
@@ -12,7 +15,7 @@
 * [new] Mapper for durations.
 * [chg] Map properties files as in-depth trees (not flat keys at the top-level).
 
-# Version 2.0.0 (2017-02-20)
+# Version 2.0.1 (2017-02-20)
 
 * [fix] Fix formatting of configuration YAML dump.
 

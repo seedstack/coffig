@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.util;
+package org.seedstack.coffig.spi;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
@@ -15,12 +15,12 @@ import org.seedstack.coffig.spi.ConfigurationComponent;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-public abstract class AbstractComposite<T extends ConfigurationComponent> implements ConfigurationComponent {
+public abstract class BaseComposite<T extends ConfigurationComponent> implements ConfigurationComponent {
     protected final T[] items;
     private final Class<T> itemClass;
 
     @SafeVarargs
-    public AbstractComposite(Class<T> itemClass, T... items) {
+    public BaseComposite(Class<T> itemClass, T... items) {
         this.itemClass = itemClass;
         this.items = createArray(items.length);
         System.arraycopy(items, 0, this.items, 0, this.items.length);

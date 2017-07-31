@@ -5,10 +5,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig;
+package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.node.ArrayNode;
-import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.TreeNode;
 
 import java.util.Objects;
 

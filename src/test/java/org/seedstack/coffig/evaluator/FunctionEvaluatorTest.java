@@ -10,7 +10,7 @@ package org.seedstack.coffig.evaluator;
 import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.NamedNode;
+import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
 

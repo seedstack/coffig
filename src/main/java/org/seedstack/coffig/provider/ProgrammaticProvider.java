@@ -9,9 +9,9 @@ package org.seedstack.coffig.provider;
 
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.Config;
+import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationProvider;
@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
-
-import static org.seedstack.coffig.util.Utils.resolvePath;
 
 public class ProgrammaticProvider implements ConfigurationProvider, ConfigurationComponent {
     private final Map<Supplier<Object>, String> suppliers = new HashMap<>();
@@ -70,7 +68,7 @@ public class ProgrammaticProvider implements ConfigurationProvider, Configuratio
                                 .put("class", object.getClass())
                                 .put("method", method.getName());
                     }
-                }, resolvePath(method)));
+                }, Coffig.pathOf(method)));
     }
 
     public void addSupplier(Supplier<Object> supplier) {
@@ -88,7 +86,7 @@ public class ProgrammaticProvider implements ConfigurationProvider, Configuratio
         TreeNode treeNode = coffig.getMapper().unmap(o, o.getClass());
         String prefix = suppliers.get(supplier);
         if (prefix == null || prefix.isEmpty()) {
-            prefix = resolvePath(o.getClass());
+            prefix = Coffig.pathOf(o.getClass());
         }
         if (prefix != null && !prefix.isEmpty()) {
             MapNode mapNode = new MapNode();

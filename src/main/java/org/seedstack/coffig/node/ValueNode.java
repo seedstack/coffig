@@ -7,10 +7,9 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.NamedNode;
-import org.seedstack.coffig.TreeNode;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -24,7 +23,6 @@ public class ValueNode extends AbstractTreeNode {
     }
 
     public ValueNode(ValueNode other) {
-        super(other);
         this.value = other.value;
     }
 
