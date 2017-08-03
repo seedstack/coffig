@@ -1,3 +1,8 @@
+# Version 3.0.1 (2017-08-03)
+
+* [fix] Fix handling of colon (:) inside macro quoted values (i.e. ${'1:2:3'}).
+* [fix] Fix the ability to map maps with null values.
+
 # Version 3.0.0 (2017-07-31)
 
 * [brk] Remove node attributes.

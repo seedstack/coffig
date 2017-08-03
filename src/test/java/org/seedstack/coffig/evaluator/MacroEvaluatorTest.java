@@ -76,6 +76,12 @@ public class MacroEvaluatorTest {
                         ),
                         new MapNode(
                                 new NamedNode("message", "Hello ${names[\\${index}]}!")
+                        ),
+                        new MapNode(
+                                new NamedNode("message", "Hello ${unknown:'Toto:Titi:Tata'}!")
+                        ),
+                        new MapNode(
+                                new NamedNode("message", "${'1:2:3'}")
                         )
                 ))
         );
@@ -105,6 +111,12 @@ public class MacroEvaluatorTest {
         assertThat(evaluate("test[9].message")).isEqualTo("Hello ${names[0]} and Kavi!");
         assertThat(evaluate("test[10].message")).isEqualTo("Hello ${names[${index}]}!");
         assertThat(evaluate("test[11].message")).isEqualTo("Hello !");
+    }
+
+    @Test
+    public void testColonInQuotes() throws Exception {
+        assertThat(evaluate("test[12].message")).isEqualTo("Hello Toto:Titi:Tata!");
+        assertThat(evaluate("test[13].message")).isEqualTo("1:2:3");
     }
 
     private String evaluate(String path) {

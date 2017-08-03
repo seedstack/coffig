@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 
 public class MacroEvaluator implements ConfigurationEvaluator {
     private static final Pattern MACRO_PATTERN = Pattern.compile("\\\\?\\$\\{|\\}");
+    public static final String VALUE_QUOTE = "'";
+    public static final String VALUE_SEPARATOR = ":";
 
     @Override
     public MacroEvaluator fork() {
@@ -52,10 +54,19 @@ public class MacroEvaluator implements ConfigurationEvaluator {
                 result.append(value.substring(matchingResult.startPos + 1, matchingResult.endPos + 1));
             } else {
                 // Process the macro
-                for (String part : value.substring(matchingResult.startPos + 2, matchingResult.endPos).split(":")) {
-                    if (part.startsWith("'") && part.endsWith("'")) {
+                boolean insideQuotes = false;
+                for (String part : value.substring(matchingResult.startPos + 2, matchingResult.endPos).split(VALUE_SEPARATOR)) {
+                    if (part.startsWith(VALUE_QUOTE) && part.endsWith(VALUE_QUOTE)) {
                         result.append(part.substring(1, part.length() - 1));
                         break;
+                    } else if (!insideQuotes && part.startsWith(VALUE_QUOTE)) {
+                        result.append(part.substring(1));
+                        insideQuotes = true;
+                    } else if (insideQuotes && part.endsWith(VALUE_QUOTE)) {
+                        result.append(VALUE_SEPARATOR).append(part.substring(0, part.length() - 1));
+                        insideQuotes = false;
+                    } else if (insideQuotes) {
+                        result.append(VALUE_SEPARATOR).append(part);
                     } else {
                         Optional<TreeNode> node = rootNode.get(processValue(rootNode, part));
                         if (node.isPresent()) {

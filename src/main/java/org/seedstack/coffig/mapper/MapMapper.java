@@ -18,6 +18,7 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toMap;
 import static org.seedstack.shed.reflect.Classes.instantiateDefault;
@@ -56,7 +57,7 @@ public class MapMapper implements ConfigurationMapper {
             return treeNode.namedNodes()
                     .collect(toMap(
                             namedNode -> coffig.getMapper().map(new ValueNode(namedNode.name()), keyType),
-                            namedNode -> coffig.getMapper().map(namedNode.node(), valueType)
+                            namedNode -> Optional.ofNullable(coffig.getMapper().map(namedNode.node(), valueType)).orElseGet(() -> instantiateDefault((Class<?>) valueType))
                     ));
         } else {
             return treeNode.nodes()
