@@ -5,12 +5,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.node;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 import org.seedstack.coffig.TreeNode;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class MutableTreeNodeTest {
 
@@ -90,6 +91,13 @@ public class MutableTreeNodeTest {
     public void testSearch() throws Exception {
         assertThat(mergedRoot.get("users[0]").get().value()).isEqualTo("u123456");
         assertThat(mergedRoot.get("server.scheme[0]").get().value()).isEqualTo("http");
+    }
+
+    @Test
+    public void testEquality() throws Exception {
+        MapNode tree1 = new MapNode(new NamedNode("key1", "value1"));
+        MapNode tree2 = new MapNode(new NamedNode("key1", "value1"));
+        assertThat(tree1.equals(tree2));
     }
 
     @Test

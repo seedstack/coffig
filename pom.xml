@@ -19,7 +19,7 @@
 
     <groupId>org.seedstack.coffig</groupId>
     <artifactId>coffig</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
 
     <properties>
         <shed.version>1.1.0</shed.version>
@@ -86,6 +86,12 @@
             <version>5.4.1.Final</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <scm>
@@ -136,6 +142,8 @@
                         <parameter>
                             <excludes>
                                 <exclude>*.internal.*</exclude>
+                                <exclude>org.seedstack.coffig.provider.JacksonProvider</exclude>
+                                <exclude>org.seedstack.coffig.provider.PropertiesProvider</exclude>
                                 <exclude>org.seedstack.coffig.util.LRUCache</exclude>
                                 <exclude>org.seedstack.coffig.util.Utils</exclude>
                                 <exclude>org.seedstack.coffig.evaluator.MacroEvaluator</exclude>

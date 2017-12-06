@@ -5,6 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.spi;
 
 import org.seedstack.coffig.Coffig;
@@ -28,7 +29,11 @@ public interface ConfigurationComponent {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
+    default boolean watch() {
+        // no changes by default
+        return false;
+    }
+
     default ConfigurationComponent fork() {
         // consider this as stateless (shareable) component by default
         return this;

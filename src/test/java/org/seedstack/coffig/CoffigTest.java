@@ -5,9 +5,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.seedstack.coffig.fixture.EnumFixture;
 import org.seedstack.coffig.internal.ConfigurationException;
@@ -18,6 +21,9 @@ import org.seedstack.coffig.provider.VoidProvider;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class CoffigTest {
+    private String mutableValue1 = "bar";
+    private String mutableValue2 = "val1";
+    private String mutableValue3 = "val2";
 
     private final ConfigurationProvider appConfigProvider = () -> new MapNode(
             new NamedNode("id", "foo"),
@@ -25,23 +31,24 @@ public class CoffigTest {
             new NamedNode("someEnum", "FOO"));
 
     private final ConfigurationProvider usersConfigProvider = () -> new MapNode(
-            new NamedNode("id", "bar"),
+            new NamedNode("id", mutableValue1),
             new NamedNode("users", new ArrayNode("u123456", "u456789")),
-            new NamedNode("elements", new MapNode(new NamedNode("key1", "val1"), new NamedNode("key2", "val2"))),
+            new NamedNode("elements",
+                    new MapNode(new NamedNode("key1", mutableValue2), new NamedNode("key2", mutableValue3))),
             new NamedNode("items", "one"));
 
     @Test
     public void testConfigurationNotNull() {
         Coffig coffig = Coffig.builder().withProviders(new VoidProvider()).build();
-        Assertions.assertThat(coffig.get(App.class)).isNotNull();
+        assertThat(coffig.get(App.class)).isNotNull();
     }
 
     @Test
     public void testWithSimpleProvider() {
         Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
         App app = coffig.get(App.class);
-        Assertions.assertThat(app.id).isEqualTo("foo");
-        Assertions.assertThat(app.name).isEqualTo("The Foo app");
+        assertThat(app.id).isEqualTo("foo");
+        assertThat(app.name).isEqualTo("The Foo app");
     }
 
     @Test
@@ -49,12 +56,12 @@ public class CoffigTest {
         Coffig coffig = Coffig.builder().withProviders(appConfigProvider, usersConfigProvider).build();
         App app = coffig.get(App.class);
 
-        Assertions.assertThat(app.id).isEqualTo("bar");
-        Assertions.assertThat(app.name).isEqualTo("The Foo app");
+        assertThat(app.id).isEqualTo("bar");
+        assertThat(app.name).isEqualTo("The Foo app");
 
-        Assertions.assertThat(app.users).hasSize(2);
-        Assertions.assertThat(app.users[0]).isEqualTo("u123456");
-        Assertions.assertThat(app.users[1]).isEqualTo("u456789");
+        assertThat(app.users).hasSize(2);
+        assertThat(app.users[0]).isEqualTo("u123456");
+        assertThat(app.users[1]).isEqualTo("u456789");
     }
 
     @Test
@@ -66,19 +73,20 @@ public class CoffigTest {
                 )
         )).build();
         Integer appServerPort = coffig.get(Integer.class, "app.server.port");
-        Assertions.assertThat(appServerPort).isEqualTo(8080);
+        assertThat(appServerPort).isEqualTo(8080);
     }
 
     @Test
     public void testGetOptionalWithPathAndDefaultValue() throws Exception {
         Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
-        Assertions.assertThat(coffig.getOptional(String.class, "unknown").orElse("defaultValue")).isEqualTo("defaultValue");
+        assertThat(coffig.getOptional(String.class, "unknown").orElse("defaultValue"))
+                .isEqualTo("defaultValue");
     }
 
     @Test
     public void testGetWithPathAndDefaultValue() throws Exception {
         Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
-        Assertions.assertThat(coffig.get(String.class, "unknown")).isEqualTo("");
+        assertThat(coffig.get(String.class, "unknown")).isEqualTo("");
     }
 
     @Test(expected = ConfigurationException.class)
@@ -90,13 +98,53 @@ public class CoffigTest {
     @Test
     public void testGetSingleValueAsArray() throws Exception {
         Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
-        Assertions.assertThat(coffig.get(App.class).items).containsExactly("one");
+        assertThat(coffig.get(App.class).items).containsExactly("one");
     }
 
     @Test
     public void testGetMapAsArray() throws Exception {
         Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
-        Assertions.assertThat(coffig.get(App.class).elements).containsOnly("val1", "val2");
+        assertThat(coffig.get(App.class).elements).containsOnly("val1", "val2");
+    }
+
+    @Test
+    public void testListeners() {
+        AtomicInteger listener0CallCount = new AtomicInteger();
+        AtomicInteger listener1CallCount = new AtomicInteger();
+        AtomicInteger listener2CallCount = new AtomicInteger();
+        Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
+        coffig.registerListener("", c -> listener0CallCount.incrementAndGet());
+        coffig.registerListener("elements", c -> listener1CallCount.incrementAndGet());
+        ConfigChangeListener configChangeListener = c -> listener2CallCount.incrementAndGet();
+        coffig.registerListener("elements.key1", configChangeListener);
+        assertThat(listener0CallCount.get()).isEqualTo(0);
+        assertThat(listener1CallCount.get()).isEqualTo(0);
+        assertThat(listener2CallCount.get()).isEqualTo(0);
+        coffig.refresh();
+        assertThat(listener0CallCount.get()).isEqualTo(0);
+        assertThat(listener1CallCount.get()).isEqualTo(0);
+        assertThat(listener2CallCount.get()).isEqualTo(0);
+        mutableValue1 = "baz";
+        coffig.refresh();
+        assertThat(listener0CallCount.get()).isEqualTo(1);
+        assertThat(listener1CallCount.get()).isEqualTo(0);
+        assertThat(listener2CallCount.get()).isEqualTo(0);
+        mutableValue3 = "newVal";
+        coffig.refresh();
+        assertThat(listener0CallCount.get()).isEqualTo(2);
+        assertThat(listener1CallCount.get()).isEqualTo(1);
+        assertThat(listener2CallCount.get()).isEqualTo(0);
+        mutableValue2 = "newVal";
+        coffig.refresh();
+        assertThat(listener0CallCount.get()).isEqualTo(3);
+        assertThat(listener1CallCount.get()).isEqualTo(2);
+        assertThat(listener2CallCount.get()).isEqualTo(1);
+        coffig.unregisterListener(configChangeListener);
+        mutableValue2 = "otherNewVal";
+        coffig.refresh();
+        assertThat(listener0CallCount.get()).isEqualTo(4);
+        assertThat(listener1CallCount.get()).isEqualTo(3);
+        assertThat(listener2CallCount.get()).isEqualTo(1);
     }
 
     private static class App {

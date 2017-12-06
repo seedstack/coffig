@@ -5,21 +5,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.internal.PropertyNotFoundException;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.internal.PropertyNotFoundException;
 
 public class ArrayNode extends AbstractTreeNode {
     private final List<TreeNode> children;
@@ -75,9 +75,12 @@ public class ArrayNode extends AbstractTreeNode {
 
     @Override
     public Optional<TreeNode> get(String path) {
+        if (path.isEmpty()) {
+            return Optional.of(this);
+        }
+
         Path _path = new Path(path);
         Optional<TreeNode> treeNode = Optional.empty();
-
         if (_path.isArray()) {
             int index = _path.getIndex();
             if (index >= 0 && index < children.size()) {
@@ -87,7 +90,6 @@ public class ArrayNode extends AbstractTreeNode {
                 return treeNode.get().get(_path.getTail());
             }
         }
-
         return treeNode;
     }
 
@@ -105,7 +107,6 @@ public class ArrayNode extends AbstractTreeNode {
     public TreeNode merge(TreeNode otherNode) {
         return otherNode;
     }
-
 
     @Override
     public TreeNode set(String name, TreeNode treeNode) {

@@ -5,29 +5,34 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.node.NamedNode;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ArrayNode;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationProvider;
-
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.ArrayNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.BaseWatchingProvider;
+import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class JacksonProvider implements ConfigurationProvider {
+public class JacksonProvider extends BaseWatchingProvider implements ConfigurationProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonProvider.class);
     private final List<URL> sources = new ArrayList<>();
     private final AtomicBoolean dirty = new AtomicBoolean(true);
     private final ObjectMapper jacksonMapper;
@@ -38,7 +43,7 @@ public class JacksonProvider implements ConfigurationProvider {
     }
 
     @Override
-    public MapNode provide() {
+    public synchronized MapNode provide() {
         MapNode mapNode = sources
                 .stream()
                 .map(this::buildTreeFromSource)
@@ -60,14 +65,20 @@ public class JacksonProvider implements ConfigurationProvider {
         return dirty.get();
     }
 
-    public JacksonProvider addSource(URL url) {
+    public synchronized JacksonProvider addSource(URL url) {
         if (url == null) {
             throw new NullPointerException("Source URL cannot be null");
         }
-
-        this.sources.add(url);
+        sources.add(url);
+        watchSource(url);
         dirty.set(true);
         return this;
+    }
+
+    @Override
+    protected void fileChanged(Path path) {
+        LOGGER.info("Configuration file changed: " + path.toString());
+        dirty.set(true);
     }
 
     private MapNode buildTreeFromSource(URL url) {

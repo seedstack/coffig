@@ -28,5 +28,6 @@ public enum ConfigurationErrorCode implements ErrorCode {
     PROPERTY_NOT_FOUND,
     SPECIFIED_ITEM_CLASS_NOT_FOUND,
     UNABLE_TO_LOAD_CLASS,
+    UNEXPECTED_EXCEPTION,
     UNMAPPING_IS_NOT_SUPPORTED
 }

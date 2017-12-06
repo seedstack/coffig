@@ -5,28 +5,33 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.provider;
 
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationProvider;
+package org.seedstack.coffig.provider;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.BaseWatchingProvider;
+import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class PropertiesProvider implements ConfigurationProvider {
+public class PropertiesProvider extends BaseWatchingProvider implements ConfigurationProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesProvider.class);
     private final List<URL> sources = new ArrayList<>();
     private final AtomicBoolean dirty = new AtomicBoolean(true);
 
     @Override
-    public MapNode provide() {
+    public synchronized MapNode provide() {
         MapNode mapNode = sources
                 .stream()
                 .map(this::buildTreeFromSource)
@@ -48,7 +53,7 @@ public class PropertiesProvider implements ConfigurationProvider {
         return dirty.get();
     }
 
-    public PropertiesProvider addSource(URL url) {
+    public synchronized PropertiesProvider addSource(URL url) {
         if (url == null) {
             throw new NullPointerException("Source URL cannot be null");
         }
@@ -56,6 +61,12 @@ public class PropertiesProvider implements ConfigurationProvider {
         this.sources.add(url);
         dirty.set(true);
         return this;
+    }
+
+    @Override
+    protected void fileChanged(Path path) {
+        LOGGER.info("Configuration file changed: " + path.toString());
+        dirty.set(true);
     }
 
     private MapNode buildTreeFromSource(URL url) {

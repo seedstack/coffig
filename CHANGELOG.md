@@ -1,3 +1,8 @@
+# Version 3.1.0 (2017-12-06)
+
+* [new] Ability to register change listeners that will be called on refresh if the nodes they are interested in change.
+* [new] Ability to automatically refresh the configuration on YAML/JSON/Properties file change.
+
 # Version 3.0.1 (2017-08-03)
 
 * [fix] Fix handling of colon (:) inside macro quoted values (i.e. ${'1:2:3'}).

@@ -5,8 +5,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig;
 
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
@@ -17,48 +34,86 @@ import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.seedstack.shed.reflect.Classes.instantiateDefault;
-import static org.seedstack.shed.reflect.Types.rawClassOf;
-
 public class Coffig {
     private static final Logger LOGGER = LoggerFactory.getLogger(Coffig.class);
     private final ConfigurationMapper mapper;
     private final ConfigurationProvider provider;
     private final ConfigurationProcessor processor;
-    private final AtomicBoolean dirty = new AtomicBoolean(true);
+    private final Map<String, List<ConfigChangeListener>> listeners = new TreeMap<>(Comparator.reverseOrder());
+    private volatile boolean dirty = true;
+    private volatile Timer timer;
     private volatile TreeNode configurationTree = new MapNode();
 
     Coffig(ConfigurationMapper mapper, ConfigurationProvider provider, ConfigurationProcessor processor) {
         LOGGER.debug("Creating new configuration");
 
         this.mapper = mapper;
-        this.provider = provider;
-        this.processor = processor;
         if (mapper != null) {
             mapper.initialize(this);
         }
+
+        this.provider = provider;
         if (provider != null) {
             provider.initialize(this);
         }
+
+        this.processor = processor;
         if (processor != null) {
             processor.initialize(this);
+        }
+
+        refresh();
+    }
+
+    public void startWatching() {
+        startWatching(2000);
+    }
+
+    public void startWatching(int period) {
+        timer = new Timer("coffig-watch");
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                LOGGER.debug("Watching for changes...");
+                if (provider.watch()) {
+                    refresh();
+                }
+            }
+        }, 0, period);
+    }
+
+    public void stopWatching() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
         }
     }
 
     public boolean isDirty() {
-        return dirty.get() ||
-                mapper != null && mapper.isDirty() ||
-                provider != null && provider.isDirty() ||
-                processor != null && processor.isDirty();
+        return dirty
+                || mapper != null && mapper.isDirty()
+                || provider != null && provider.isDirty()
+                || processor != null && processor.isDirty();
     }
 
-    public void refresh() {
+    public synchronized void registerListener(String path, ConfigChangeListener configChangeListener) {
+        listeners.computeIfAbsent(path, key -> new ArrayList<>()).add(configChangeListener);
+    }
+
+    public synchronized void unregisterListener(ConfigChangeListener configChangeListener) {
+        Iterator<Map.Entry<String, List<ConfigChangeListener>>> it = listeners.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, List<ConfigChangeListener>> listeners = it.next();
+            if (listeners.getValue().remove(configChangeListener)) {
+                if (listeners.getValue().isEmpty()) {
+                    it.remove();
+                }
+                break;
+            }
+        }
+    }
+
+    public synchronized void refresh() {
         LOGGER.debug("Refreshing configuration");
 
         MapNode pendingConfigurationTree;
@@ -72,8 +127,23 @@ public class Coffig {
             processor.process(pendingConfigurationTree);
         }
 
+        TreeNode oldConfigurationTree = configurationTree;
         configurationTree = UnmodifiableTreeNode.of(pendingConfigurationTree);
-        dirty.set(false);
+        dirty = false;
+
+        String lastPath = null;
+        for (Map.Entry<String, List<ConfigChangeListener>> entry : listeners.entrySet()) {
+            String path = entry.getKey();
+            if (lastPath != null && lastPath.startsWith(path)
+                    || !Objects.equals(oldConfigurationTree.get(path), configurationTree.get(path))) {
+                for (ConfigChangeListener listener : entry.getValue()) {
+                    listener.onChange(this);
+                }
+                lastPath = path;
+            } else {
+                lastPath = null;
+            }
+        }
     }
 
     public Coffig fork() {
@@ -113,7 +183,9 @@ public class Coffig {
     }
 
     public Optional<Object> getOptional(Type configurationType, String... path) {
-        LOGGER.trace("Accessing configuration path '" + Arrays.toString(path) + "' and mapping it to '" + configurationType.getTypeName() + "'");
+        LOGGER.trace(
+                "Accessing configuration path '" + Arrays.toString(path) + "' and mapping it to '" + configurationType
+                        .getTypeName() + "'");
 
         if (isDirty()) {
             refresh();

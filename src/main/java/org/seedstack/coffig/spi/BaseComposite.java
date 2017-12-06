@@ -5,15 +5,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.spi.ConfigurationComponent;
+package org.seedstack.coffig.spi;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
 
 public abstract class BaseComposite<T extends ConfigurationComponent> implements ConfigurationComponent {
     protected final T[] items;
@@ -38,7 +41,21 @@ public abstract class BaseComposite<T extends ConfigurationComponent> implements
 
     @Override
     public boolean isDirty() {
-        return Arrays.stream(items).filter(ConfigurationComponent::isDirty).count() > 0;
+        return Arrays.stream(items).anyMatch(ConfigurationComponent::isDirty);
+    }
+
+    @Override
+    public boolean watch() {
+        AtomicBoolean hasChanges = new AtomicBoolean(false);
+        ForkJoinPool.commonPool().invokeAll(
+                Arrays.stream(items).map(item -> (Callable<T>) () -> {
+                    if (item.watch()) {
+                        hasChanges.set(true);
+                    }
+                    return null;
+                }).collect(Collectors.toList())
+        );
+        return hasChanges.get();
     }
 
     @Override

@@ -5,12 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.provider;
 
-import org.seedstack.coffig.node.ArrayNode;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationProvider;
+package org.seedstack.coffig.provider;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import org.seedstack.coffig.node.ArrayNode;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class InMemoryProvider implements ConfigurationProvider {
     private final ConcurrentMap<String, Object> data = new ConcurrentHashMap<>();
@@ -29,18 +29,17 @@ public class InMemoryProvider implements ConfigurationProvider {
     @SuppressWarnings("unchecked")
     public MapNode provide() {
         MapNode tree = new MapNode();
-        data.entrySet().forEach(entry -> {
-            Object value = entry.getValue();
+        data.forEach((key, value) -> {
             if (value.getClass().isArray()) {
-                tree.set(entry.getKey(), new ArrayNode((String[]) value));
+                tree.set(key, new ArrayNode((String[]) value));
             } else if (List.class.isAssignableFrom(value.getClass())) {
-                tree.set(entry.getKey(), new ArrayNode(((List<String>) value)
+                tree.set(key, new ArrayNode(((List<String>) value)
                         .stream()
                         .map(ValueNode::new)
                         .collect(Collectors.toList()))
                 );
             } else {
-                tree.set(entry.getKey(), new ValueNode((String) value));
+                tree.set(key, new ValueNode((String) value));
             }
         });
         dirty.set(false);

@@ -5,12 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.internal.PropertyNotFoundException;
+package org.seedstack.coffig.node;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +15,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.internal.PropertyNotFoundException;
 
 public class MapNode extends AbstractTreeNode {
     private final Map<String, TreeNode> children;
@@ -68,9 +68,11 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public Optional<TreeNode> get(String path) {
-        Path _path = new Path(path);
-        Optional<TreeNode> treeNode = Optional.empty();
+        if (path.isEmpty()) {
+            return Optional.of(this);
+        }
 
+        Path _path = new Path(path);
         if (_path.hasHead()) {
             TreeNode child = children.get(_path.getHead());
             if (child != null) {
@@ -81,8 +83,7 @@ public class MapNode extends AbstractTreeNode {
                 }
             }
         }
-
-        return treeNode;
+        return Optional.empty();
     }
 
     @Override
@@ -99,7 +100,8 @@ public class MapNode extends AbstractTreeNode {
     public TreeNode merge(TreeNode otherNode) {
         if (otherNode instanceof MapNode) {
             ((MapNode) otherNode).children.forEach((nodeName, treeNode) -> {
-                TreeNode node = this.children.containsKey(nodeName) ? this.children.get(nodeName).merge(treeNode) : treeNode;
+                TreeNode node = this.children.containsKey(nodeName) ? this.children.get(nodeName)
+                        .merge(treeNode) : treeNode;
                 this.children.put(nodeName, node);
             });
             return this;

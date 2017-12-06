@@ -5,12 +5,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.TreeNode;
+package org.seedstack.coffig.node;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.seedstack.coffig.TreeNode;
 
 public class UnmodifiableTreeNode implements TreeNode {
     private final TreeNode treeNode;
@@ -49,7 +49,8 @@ public class UnmodifiableTreeNode implements TreeNode {
 
     @Override
     public Stream<NamedNode> namedNodes() {
-        return treeNode.namedNodes().map(namedNode -> new NamedNode(namedNode.name(), UnmodifiableTreeNode.of(namedNode.node())));
+        return treeNode.namedNodes()
+                .map(namedNode -> new NamedNode(namedNode.name(), UnmodifiableTreeNode.of(namedNode.node())));
     }
 
     @Override
@@ -98,8 +99,13 @@ public class UnmodifiableTreeNode implements TreeNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return treeNode.equals(obj);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof UnmodifiableTreeNode) {
+            return treeNode.equals(((UnmodifiableTreeNode) o).treeNode);
+        } else {
+            return o instanceof TreeNode && treeNode.equals(o);
+        }
     }
 
     @Override
