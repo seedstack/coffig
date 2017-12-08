@@ -113,6 +113,7 @@ public class CoffigTest {
         AtomicInteger listener1CallCount = new AtomicInteger();
         AtomicInteger listener2CallCount = new AtomicInteger();
         Coffig coffig = Coffig.builder().withProviders(usersConfigProvider).build();
+        coffig.refresh();
         coffig.registerListener("", c -> listener0CallCount.incrementAndGet());
         coffig.registerListener("elements", c -> listener1CallCount.incrementAndGet());
         ConfigChangeListener configChangeListener = c -> listener2CallCount.incrementAndGet();
