@@ -45,7 +45,7 @@ public class PropertiesProvider extends BaseWatchingProvider implements Configur
     public PropertiesProvider fork() {
         PropertiesProvider fork = new PropertiesProvider();
         for (URL source : sources) {
-            watchSource(source);
+            fork.addSource(source);
         }
         return fork;
     }
@@ -60,7 +60,8 @@ public class PropertiesProvider extends BaseWatchingProvider implements Configur
             throw new NullPointerException("Source URL cannot be null");
         }
 
-        this.sources.add(url);
+        sources.add(url);
+        watchSource(url);
         dirty.set(true);
         return this;
     }
