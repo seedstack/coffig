@@ -44,7 +44,9 @@ public class PropertiesProvider extends BaseWatchingProvider implements Configur
     @Override
     public PropertiesProvider fork() {
         PropertiesProvider fork = new PropertiesProvider();
-        fork.sources.addAll(sources);
+        for (URL source : sources) {
+            watchSource(source);
+        }
         return fork;
     }
 

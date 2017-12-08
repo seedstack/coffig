@@ -48,38 +48,35 @@ public class Coffig {
         LOGGER.debug("Creating new configuration");
 
         this.mapper = mapper;
-        if (mapper != null) {
-            mapper.initialize(this);
-        }
-
         this.provider = provider;
-        if (provider != null) {
-            provider.initialize(this);
-        }
-
         this.processor = processor;
-        if (processor != null) {
-            processor.initialize(this);
-        }
 
-        refresh();
+        if (this.mapper != null) {
+            this.mapper.initialize(this);
+        }
+        if (this.provider != null) {
+            this.provider.initialize(this);
+        }
+        if (this.processor != null) {
+            this.processor.initialize(this);
+        }
     }
 
     public void startWatching() {
-        startWatching(2000);
+        startWatching(2);
     }
 
-    public void startWatching(int period) {
-        timer = new Timer("coffig-watch");
+    public void startWatching(int periodInSeconds) {
+        timer = new Timer("config-watch");
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                LOGGER.debug("Watching for changes...");
+                LOGGER.debug("Watching for configuration changes...");
                 if (provider.watch()) {
                     refresh();
                 }
             }
-        }, 0, period);
+        }, 0, periodInSeconds * 1000);
     }
 
     public void stopWatching() {

@@ -56,7 +56,9 @@ public class JacksonProvider extends BaseWatchingProvider implements Configurati
     @Override
     public JacksonProvider fork() {
         JacksonProvider fork = new JacksonProvider();
-        fork.sources.addAll(sources);
+        for (URL source : sources) {
+            fork.addSource(source);
+        }
         return fork;
     }
 

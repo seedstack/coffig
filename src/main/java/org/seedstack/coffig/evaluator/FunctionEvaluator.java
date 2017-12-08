@@ -5,17 +5,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.evaluator;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigFunction;
-import org.seedstack.coffig.spi.ConfigFunctionHolder;
-import org.seedstack.coffig.spi.ConfigurationComponent;
-import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import static java.util.stream.Collectors.toList;
+import static org.seedstack.shed.reflect.ReflectUtils.makeAccessible;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -27,9 +24,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.util.stream.Collectors.toList;
-import static org.seedstack.shed.reflect.ReflectUtils.makeAccessible;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigFunction;
+import org.seedstack.coffig.spi.ConfigFunctionHolder;
+import org.seedstack.coffig.spi.ConfigurationComponent;
+import org.seedstack.coffig.spi.ConfigurationEvaluator;
 
 public class FunctionEvaluator implements ConfigurationEvaluator {
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\\\?\\$([_a-zA-Z]\\w*)\\(|\\)");
@@ -65,7 +66,8 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     @Override
     public FunctionEvaluator fork() {
         FunctionEvaluator fork = new FunctionEvaluator();
-        fork.configFunctionHolders.addAll(configFunctionHolders.stream().map(ConfigurationComponent::fork).map(ConfigFunctionHolder.class::cast).collect(toList()));
+        fork.configFunctionHolders.addAll(configFunctionHolders.stream().map(ConfigurationComponent::fork)
+                .map(ConfigFunctionHolder.class::cast).collect(toList()));
         fork.functions.putAll(functions);
         fork.scanned.getAndSet(scanned.get());
         return fork;
@@ -84,7 +86,8 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         for (Method method : configFunctionHolder.getClass().getDeclaredMethods()) {
             ConfigFunction annotation = method.getAnnotation(ConfigFunction.class);
             if (annotation != null) {
-                registerFunction(annotation.value().isEmpty() ? method.getName() : annotation.value(), method, configFunctionHolder);
+                registerFunction(annotation.value().isEmpty() ? method.getName() : annotation.value(), method,
+                        configFunctionHolder);
             }
         }
     }
@@ -111,7 +114,8 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
             } else {
                 result.append(invokeFunction(
                         callSiteInfo.name,
-                        Arrays.stream(callSiteInfo.arguments).map(arg -> processArgument(rootNode, arg)).toArray(TreeNode[]::new)
+                        Arrays.stream(callSiteInfo.arguments).map(arg -> processArgument(rootNode, arg))
+                                .toArray(TreeNode[]::new)
                 ));
             }
 
@@ -164,6 +168,12 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
                 return "";
             }
         } catch (Exception e) {
+            if (e instanceof InvocationTargetException) {
+                Throwable targetException = ((InvocationTargetException) e).getTargetException();
+                if (targetException != null) {
+                    return "<ERROR: " + targetException.getMessage() + ">";
+                }
+            }
             return "<ERROR: " + e.getMessage() + ">";
         }
     }
@@ -194,7 +204,8 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
                     if (allArgs.isEmpty()) {
                         callSiteInfo.arguments = new String[0];
                     } else {
-                        callSiteInfo.arguments = Arrays.stream(allArgs.split(",")).map(String::trim).toArray(String[]::new);
+                        callSiteInfo.arguments = Arrays.stream(allArgs.split(",")).map(String::trim)
+                                .toArray(String[]::new);
                     }
                     callSiteInfo.endPos = matcher.end();
                     return callSiteInfo;

@@ -8,11 +8,11 @@
 
 package org.seedstack.coffig.spi;
 
-import static com.sun.jmx.mbeanserver.Util.cast;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
+import static org.seedstack.shed.reflect.Classes.cast;
 
 import com.sun.nio.file.SensitivityWatchEventModifier;
 import java.io.IOException;
@@ -34,16 +34,23 @@ import org.slf4j.LoggerFactory;
 
 public abstract class BaseWatchingProvider implements ConfigurationProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseWatchingProvider.class);
+    private static final WatchService watcher;
+    private static final WatchEvent.Modifier modifier;
     private final Set<Path> paths = new HashSet<>();
-    private final WatchService watcher;
-    private final WatchEvent.Modifier modifier;
-    private final Map<WatchKey, Path> keys;
+    private final Map<WatchKey, Path> keys = new HashMap<>();
 
-    protected BaseWatchingProvider() {
+    static {
+        SensitivityWatchEventModifier detectedModifier;
         try {
-            this.watcher = FileSystems.getDefault().newWatchService();
-            this.modifier = determineModifier();
-            this.keys = new HashMap<>();
+            Class.forName("com.sun.nio.file.SensitivityWatchEventModifier");
+            detectedModifier = SensitivityWatchEventModifier.HIGH;
+        } catch (ClassNotFoundException e) {
+            detectedModifier = null;
+        }
+        modifier = detectedModifier;
+
+        try {
+            watcher = FileSystems.getDefault().newWatchService();
         } catch (IOException e) {
             throw ConfigurationException.wrap(e, ConfigurationErrorCode.UNEXPECTED_EXCEPTION);
         }
@@ -59,7 +66,7 @@ public abstract class BaseWatchingProvider implements ConfigurationProvider {
                         modifier),
                         parent);
             }
-            this.paths.add(path);
+            paths.add(path);
         } catch (Exception e) {
             LOGGER.warn("Unable to watch URL for changes: " + url.toExternalForm(), e);
         }
@@ -100,13 +107,4 @@ public abstract class BaseWatchingProvider implements ConfigurationProvider {
     }
 
     protected abstract void fileChanged(Path path);
-
-    private WatchEvent.Modifier determineModifier() {
-        try {
-            Class.forName("com.sun.nio.file.SensitivityWatchEventModifier");
-            return SensitivityWatchEventModifier.HIGH;
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
-    }
 }
