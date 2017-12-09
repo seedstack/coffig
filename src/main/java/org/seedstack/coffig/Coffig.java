@@ -16,13 +16,13 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Set;
 import java.util.TreeMap;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
@@ -31,6 +31,7 @@ import org.seedstack.coffig.node.UnmodifiableTreeNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.spi.ConfigurationWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +41,8 @@ public class Coffig {
     private final ConfigurationProvider provider;
     private final ConfigurationProcessor processor;
     private final Map<String, List<ConfigChangeListener>> listeners = new TreeMap<>(Comparator.reverseOrder());
+    private final Set<ConfigurationWatcher> configurationWatchers = new HashSet<>();
     private volatile boolean dirty = true;
-    private volatile Timer timer;
     private volatile TreeNode configurationTree = new MapNode();
 
     Coffig(ConfigurationMapper mapper, ConfigurationProvider provider, ConfigurationProcessor processor) {
@@ -53,44 +54,24 @@ public class Coffig {
 
         if (this.mapper != null) {
             this.mapper.initialize(this);
+            configurationWatchers.addAll(this.mapper.watchers());
         }
         if (this.provider != null) {
             this.provider.initialize(this);
+            configurationWatchers.addAll(this.provider.watchers());
         }
         if (this.processor != null) {
             this.processor.initialize(this);
+            configurationWatchers.addAll(this.processor.watchers());
         }
     }
 
-    public void startWatching() {
-        startWatching(2);
+    public synchronized void startWatching() {
+        configurationWatchers.forEach(ConfigurationWatcher::startWatching);
     }
 
-    public void startWatching(int periodInSeconds) {
-        timer = new Timer("config-watch");
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                LOGGER.debug("Watching for configuration changes...");
-                if (provider.watch()) {
-                    refresh();
-                }
-            }
-        }, 0, periodInSeconds * 1000);
-    }
-
-    public void stopWatching() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
-    public boolean isDirty() {
-        return dirty
-                || mapper != null && mapper.isDirty()
-                || provider != null && provider.isDirty()
-                || processor != null && processor.isDirty();
+    public synchronized void stopWatching() {
+        configurationWatchers.forEach(ConfigurationWatcher::stopWatching);
     }
 
     public synchronized void registerListener(String path, ConfigChangeListener configChangeListener) {
@@ -151,6 +132,13 @@ public class Coffig {
                 provider == null ? null : (ConfigurationProvider) provider.fork(),
                 processor == null ? null : (ConfigurationProcessor) processor.fork()
         );
+    }
+
+    public boolean isDirty() {
+        return dirty
+                || mapper != null && mapper.isDirty()
+                || provider != null && provider.isDirty()
+                || processor != null && processor.isDirty();
     }
 
     @SuppressWarnings("unchecked")

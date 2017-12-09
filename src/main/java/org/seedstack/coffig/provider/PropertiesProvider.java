@@ -12,23 +12,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.BaseWatchingProvider;
 import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.spi.ConfigurationWatcher;
+import org.seedstack.coffig.watcher.FileConfigurationWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PropertiesProvider extends BaseWatchingProvider implements ConfigurationProvider {
+public class PropertiesProvider implements ConfigurationProvider, Consumer<Path> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesProvider.class);
     private final List<URL> sources = new ArrayList<>();
     private final AtomicBoolean dirty = new AtomicBoolean(true);
+    private final FileConfigurationWatcher fileWatcher = FileConfigurationWatcher.getInstance();
 
     @Override
     public synchronized MapNode provide() {
@@ -42,7 +48,7 @@ public class PropertiesProvider extends BaseWatchingProvider implements Configur
     }
 
     @Override
-    public PropertiesProvider fork() {
+    public synchronized PropertiesProvider fork() {
         PropertiesProvider fork = new PropertiesProvider();
         for (URL source : sources) {
             fork.addSource(source);
@@ -55,20 +61,30 @@ public class PropertiesProvider extends BaseWatchingProvider implements Configur
         return dirty.get();
     }
 
+    @Override
+    public Set<ConfigurationWatcher> watchers() {
+        HashSet<ConfigurationWatcher> configurationWatchers = new HashSet<>();
+        configurationWatchers.add(fileWatcher);
+        return configurationWatchers;
+    }
+
     public synchronized PropertiesProvider addSource(URL url) {
         if (url == null) {
             throw new NullPointerException("Source URL cannot be null");
         }
 
         sources.add(url);
-        watchSource(url);
+        try {
+            fileWatcher.watchFile(Paths.get(url.toURI()), this);
+        } catch (Exception e) {
+            LOGGER.warn("Unable to watch source: {}", url.toExternalForm(), e);
+        }
         dirty.set(true);
         return this;
     }
 
     @Override
-    protected void fileChanged(Path path) {
-        LOGGER.info("Configuration file changed: " + path.toString());
+    public void accept(Path path) {
         dirty.set(true);
     }
 

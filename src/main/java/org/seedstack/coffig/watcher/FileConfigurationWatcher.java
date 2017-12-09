@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.seedstack.coffig.spi;
+package org.seedstack.coffig.watcher;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -16,10 +16,8 @@ import static org.seedstack.shed.reflect.Classes.cast;
 
 import com.sun.nio.file.SensitivityWatchEventModifier;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -27,17 +25,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.spi.ConfigurationWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BaseWatchingProvider implements ConfigurationProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseWatchingProvider.class);
-    private static final WatchService watcher;
-    private static final WatchEvent.Modifier modifier;
-    private final Set<Path> paths = new HashSet<>();
+public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigurationWatcher.class);
+    private static final WatchEvent.Modifier MODIFIER;
+    private final WatchService watcher;
     private final Map<WatchKey, Path> keys = new HashMap<>();
+    private final Map<Path, Set<Consumer<Path>>> listeners = new HashMap<>();
+    private Thread watchThread;
+    private boolean stop;
 
     static {
         SensitivityWatchEventModifier detectedModifier;
@@ -47,8 +49,14 @@ public abstract class BaseWatchingProvider implements ConfigurationProvider {
         } catch (ClassNotFoundException e) {
             detectedModifier = null;
         }
-        modifier = detectedModifier;
+        MODIFIER = detectedModifier;
+    }
 
+    public static FileConfigurationWatcher getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private FileConfigurationWatcher() {
         try {
             watcher = FileSystems.getDefault().newWatchService();
         } catch (IOException e) {
@@ -56,27 +64,58 @@ public abstract class BaseWatchingProvider implements ConfigurationProvider {
         }
     }
 
-    protected void watchSource(URL url) {
-        try {
-            Path path = Paths.get(url.toURI());
-            Path parent = path.getParent();
-            if (!keys.containsValue(parent)) {
-                keys.put(parent.register(watcher,
-                        new WatchEvent.Kind[]{ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY},
-                        modifier),
-                        parent);
-            }
-            paths.add(path);
-        } catch (Exception e) {
-            LOGGER.warn("Unable to watch URL for changes: " + url.toExternalForm(), e);
+    @Override
+    public void startWatching() {
+        if (watchThread == null) {
+            watchThread = new Thread(this, "configFileWatcher");
+            stop = false;
+            watchThread.start();
         }
     }
 
     @Override
-    public boolean watch() {
-        WatchKey key;
-        boolean hasChanges = false;
-        while ((key = watcher.poll()) != null) {
+    public void stopWatching() {
+        if (watchThread != null) {
+            stop = true;
+            watchThread.interrupt();
+            try {
+                watchThread.join(1000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+    }
+
+    public synchronized void watchFile(Path path, Consumer<Path> listener) {
+        if (!path.toFile().isFile()) {
+            throw new IllegalArgumentException("Path " + path.toString() + " doesn't reference a file");
+        }
+
+        try {
+            Path parent = path.getParent();
+            if (!keys.containsValue(parent)) {
+                keys.put(parent.register(watcher,
+                        new WatchEvent.Kind[]{ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY},
+                        MODIFIER),
+                        parent);
+            }
+            listeners.computeIfAbsent(path, key -> new HashSet<>()).add(listener);
+            LOGGER.debug("Will watch configuration file " + path);
+        } catch (Exception e) {
+            LOGGER.warn("Unable setup watch for path: {}", path, e);
+        }
+    }
+
+    @Override
+    public void run() {
+        while (!stop) {
+            WatchKey key;
+            try {
+                key = watcher.take();
+            } catch (InterruptedException e) {
+                break;
+            }
+
             Path dir = keys.get(key);
             if (dir == null) {
                 continue;
@@ -88,9 +127,10 @@ public abstract class BaseWatchingProvider implements ConfigurationProvider {
                     WatchEvent<Path> ev = cast(event);
                     Path name = ev.context();
                     Path path = dir.resolve(name);
-                    if (paths.contains(path)) {
-                        hasChanges = true;
-                        fileChanged(path);
+                    Set<Consumer<Path>> listeners = this.listeners.get(path);
+                    LOGGER.info("Configuration file changed: " + path.toString());
+                    if (listeners != null) {
+                        listeners.forEach(listener -> listener.accept(path));
                     }
                 }
             }
@@ -103,8 +143,9 @@ public abstract class BaseWatchingProvider implements ConfigurationProvider {
                 }
             }
         }
-        return hasChanges;
     }
 
-    protected abstract void fileChanged(Path path);
+    private static class Holder {
+        private static final FileConfigurationWatcher INSTANCE = new FileConfigurationWatcher();
+    }
 }

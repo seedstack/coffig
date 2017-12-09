@@ -8,6 +8,8 @@
 
 package org.seedstack.coffig.spi;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.seedstack.coffig.Coffig;
 
 public interface ConfigurationComponent {
@@ -29,13 +31,12 @@ public interface ConfigurationComponent {
         return false;
     }
 
-    default boolean watch() {
-        // no changes by default
-        return false;
-    }
-
     default ConfigurationComponent fork() {
         // consider this as stateless (shareable) component by default
         return this;
+    }
+
+    default Set<ConfigurationWatcher> watchers() {
+        return new HashSet<>();
     }
 }

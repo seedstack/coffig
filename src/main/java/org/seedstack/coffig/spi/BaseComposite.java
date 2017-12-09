@@ -10,6 +10,8 @@ package org.seedstack.coffig.spi;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
@@ -41,8 +43,10 @@ public abstract class BaseComposite<T extends ConfigurationComponent> implements
     }
 
     @Override
-    public boolean watch() {
-        return Arrays.stream(items).anyMatch(ConfigurationComponent::watch);
+    public Set<ConfigurationWatcher> watchers() {
+        Set<ConfigurationWatcher> configurationWatchers = new HashSet<>();
+        Arrays.stream(items).forEach(item -> configurationWatchers.addAll(item.watchers()));
+        return configurationWatchers;
     }
 
     @Override
