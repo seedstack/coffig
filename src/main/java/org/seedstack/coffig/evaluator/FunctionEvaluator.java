@@ -31,8 +31,12 @@ import org.seedstack.coffig.spi.ConfigFunction;
 import org.seedstack.coffig.spi.ConfigFunctionHolder;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.shed.exception.Throwing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FunctionEvaluator implements ConfigurationEvaluator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FunctionEvaluator.class);
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\\\?\\$([_a-zA-Z]\\w*)\\(|\\)");
     private final AtomicBoolean scanned = new AtomicBoolean();
     private final List<ConfigFunctionHolder> configFunctionHolders = new ArrayList<>();
@@ -60,7 +64,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
 
     @Override
     public boolean isDirty() {
-        return configFunctionHolders.stream().filter(ConfigurationComponent::isDirty).count() > 0;
+        return configFunctionHolders.stream().anyMatch(ConfigurationComponent::isDirty);
     }
 
     @Override
@@ -76,7 +80,12 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     @Override
     public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
         if (valueNode.type() == TreeNode.Type.VALUE_NODE && !valueNode.isEmpty()) {
-            return new ValueNode(processValue(rootNode, valueNode.value()));
+            try {
+                return new ValueNode(processValue(rootNode, valueNode.value()));
+            } catch (Exception e) {
+                LOGGER.error("Error when evaluating configuration function: {}", valueNode.value(), e);
+                return new ValueNode();
+            }
         } else {
             return valueNode;
         }
@@ -100,7 +109,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         }
     }
 
-    private String processValue(TreeNode rootNode, String value) {
+    private String processValue(TreeNode rootNode, String value) throws Exception {
         int currentPos = 0;
         StringBuilder result = new StringBuilder();
         CallSiteInfo callSiteInfo;
@@ -114,7 +123,9 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
             } else {
                 result.append(invokeFunction(
                         callSiteInfo.name,
-                        Arrays.stream(callSiteInfo.arguments).map(arg -> processArgument(rootNode, arg))
+                        Arrays.stream(callSiteInfo.arguments)
+                                .map((Throwing.Function<String, TreeNode, Exception>) arg ->
+                                        processArgument(rootNode, arg))
                                 .toArray(TreeNode[]::new)
                 ));
             }
@@ -126,7 +137,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         return result.toString();
     }
 
-    private TreeNode processArgument(TreeNode tree, String value) {
+    private TreeNode processArgument(TreeNode tree, String value) throws Exception {
         if (value.startsWith("'") && value.endsWith("'")) {
             return new ValueNode(value.substring(1, value.length() - 1));
         }
@@ -147,10 +158,10 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    private String invokeFunction(String functionName, TreeNode[] arguments) {
+    private String invokeFunction(String functionName, TreeNode[] arguments) throws Exception {
         FunctionRegistration functionRegistration = functions.get(functionName);
         if (functionRegistration == null) {
-            return "<ERROR: unknown function " + functionName + ">";
+            throw new IllegalArgumentException("Unknown function" + functionName);
         }
 
         try {
@@ -170,11 +181,11 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         } catch (Exception e) {
             if (e instanceof InvocationTargetException) {
                 Throwable targetException = ((InvocationTargetException) e).getTargetException();
-                if (targetException != null) {
-                    return "<ERROR: " + targetException.getMessage() + ">";
+                if (targetException != null && targetException instanceof Exception) {
+                    throw ((Exception) targetException);
                 }
             }
-            return "<ERROR: " + e.getMessage() + ">";
+            throw e;
         }
     }
 

@@ -5,19 +5,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.evaluator;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationEvaluator;
-
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MacroEvaluator implements ConfigurationEvaluator {
-    private static final Pattern MACRO_PATTERN = Pattern.compile("\\\\?\\$\\{|\\}");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MacroEvaluator.class);
+    private static final Pattern MACRO_PATTERN = Pattern.compile("\\\\?\\$\\{|}");
     public static final String VALUE_QUOTE = "'";
     public static final String VALUE_SEPARATOR = ":";
 
@@ -29,7 +32,12 @@ public class MacroEvaluator implements ConfigurationEvaluator {
     @Override
     public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
         if (valueNode.type() == TreeNode.Type.VALUE_NODE && !valueNode.isEmpty()) {
-            return new ValueNode(processValue(rootNode, valueNode.value()));
+            try {
+                return new ValueNode(processValue(rootNode, valueNode.value()));
+            } catch (Exception e) {
+                LOGGER.error("Error when evaluating configuration macro: {}", valueNode.value(), e);
+                return new ValueNode();
+            }
         } else {
             return valueNode;
         }
@@ -55,7 +63,8 @@ public class MacroEvaluator implements ConfigurationEvaluator {
             } else {
                 // Process the macro
                 boolean insideQuotes = false;
-                for (String part : value.substring(matchingResult.startPos + 2, matchingResult.endPos).split(VALUE_SEPARATOR)) {
+                for (String part : value.substring(matchingResult.startPos + 2, matchingResult.endPos)
+                        .split(VALUE_SEPARATOR)) {
                     if (part.startsWith(VALUE_QUOTE) && part.endsWith(VALUE_QUOTE)) {
                         result.append(part.substring(1, part.length() - 1));
                         break;

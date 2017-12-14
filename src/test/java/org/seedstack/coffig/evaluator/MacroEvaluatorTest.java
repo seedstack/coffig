@@ -5,15 +5,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.evaluator;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.seedstack.coffig.node.NamedNode;
 
 public class MacroEvaluatorTest {
     private MacroEvaluator macroEvaluator = new MacroEvaluator();
@@ -39,6 +40,12 @@ public class MacroEvaluatorTest {
 
                         new NamedNode("subIndex", "3")
                 )),
+
+                new NamedNode("unfinishedMacro", "${toto"),
+
+                new NamedNode("badQuotes", "${sys.tomcat\\.http\\.port:’9090’}"),
+
+                new NamedNode("badQuotesRef", "${message[14]}${names[0]}"),
 
                 new NamedNode("test", new ArrayNode(
                         new MapNode(
@@ -117,6 +124,17 @@ public class MacroEvaluatorTest {
     public void testColonInQuotes() throws Exception {
         assertThat(evaluate("test[12].message")).isEqualTo("Hello Toto:Titi:Tata!");
         assertThat(evaluate("test[13].message")).isEqualTo("1:2:3");
+    }
+
+    @Test
+    public void testBadQuotes() throws Exception {
+        assertThat(evaluate("badQuotes")).isEmpty();
+        assertThat(evaluate("badQuotesRef")).isEqualTo("Adrien");
+    }
+
+    @Test
+    public void testSyntaxErrors() throws Exception {
+        assertThat(evaluate("unfinishedMacro")).isEqualTo("${toto");
     }
 
     private String evaluate(String path) {
