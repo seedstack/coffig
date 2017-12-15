@@ -2,6 +2,7 @@
 
 * [new] Ability to register change listeners that will be called on refresh if the nodes they are interested in change.
 * [new] Ability to automatically refresh the configuration on YAML/JSON/Properties file change.
+* [fix] Fix resolution of nested macros.
 
 # Version 3.0.1 (2017-08-03)
 

@@ -47,6 +47,8 @@ public class MacroEvaluatorTest {
 
                 new NamedNode("badQuotesRef", "${message[14]}${names[0]}"),
 
+                new NamedNode("refOfRef", "${nullMacro}"),
+
                 new NamedNode("test", new ArrayNode(
                         new MapNode(
                                 new NamedNode("message", "Hello ${key1}!")
@@ -135,6 +137,11 @@ public class MacroEvaluatorTest {
     @Test
     public void testSyntaxErrors() throws Exception {
         assertThat(evaluate("unfinishedMacro")).isEqualTo("${toto");
+    }
+
+    @Test
+    public void testNestedRef() throws Exception {
+        assertThat(evaluate("refOfRef")).isEqualTo("null");
     }
 
     private String evaluate(String path) {

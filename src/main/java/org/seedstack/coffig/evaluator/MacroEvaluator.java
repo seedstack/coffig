@@ -79,7 +79,7 @@ public class MacroEvaluator implements ConfigurationEvaluator {
                     } else {
                         Optional<TreeNode> node = rootNode.get(processValue(rootNode, part));
                         if (node.isPresent()) {
-                            result.append(node.get().value());
+                            result.append(processValue(rootNode, node.get().value()));
                             break;
                         }
                     }
