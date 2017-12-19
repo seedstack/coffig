@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013-2016, The SeedStack authors <http://seedstack.org>
+/*
+ * Copyright © 2013-2018, The SeedStack authors <http://seedstack.org>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,7 +14,6 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static org.seedstack.shed.reflect.Classes.cast;
 
-import com.sun.nio.file.SensitivityWatchEventModifier;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -42,11 +41,11 @@ public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable 
     private boolean stop;
 
     static {
-        SensitivityWatchEventModifier detectedModifier;
+        WatchEvent.Modifier detectedModifier;
         try {
-            Class.forName("com.sun.nio.file.SensitivityWatchEventModifier");
-            detectedModifier = SensitivityWatchEventModifier.HIGH;
-        } catch (ClassNotFoundException e) {
+            Class<?> aClass = Class.forName("com.sun.nio.file.SensitivityWatchEventModifier");
+            detectedModifier = (WatchEvent.Modifier) aClass.getField("HIGH").get(null);
+        } catch (ClassNotFoundException | IllegalAccessException | NoSuchFieldException e) {
             detectedModifier = null;
         }
         MODIFIER = detectedModifier;
