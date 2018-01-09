@@ -8,21 +8,20 @@
 
 package org.seedstack.coffig.mapper;
 
+import static java.util.stream.Collectors.toMap;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.Optional;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationMapper;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Map;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toMap;
-import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 
 public class MapMapper implements ConfigurationMapper {
     private Coffig coffig;
@@ -58,7 +57,8 @@ public class MapMapper implements ConfigurationMapper {
             return treeNode.namedNodes()
                     .collect(toMap(
                             namedNode -> coffig.getMapper().map(new ValueNode(namedNode.name()), keyType),
-                            namedNode -> Optional.ofNullable(coffig.getMapper().map(namedNode.node(), valueType)).orElseGet(() -> instantiateDefault((Class<?>) valueType))
+                            namedNode -> Optional.ofNullable(coffig.getMapper().map(namedNode.node(), valueType))
+                                    .orElseGet(() -> instantiateDefault((Class<?>) valueType))
                     ));
         } else {
             return treeNode.nodes()

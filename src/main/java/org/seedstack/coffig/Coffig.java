@@ -66,6 +66,39 @@ public class Coffig {
         }
     }
 
+    public static CoffigBuilder builder() {
+        return new CoffigBuilder();
+    }
+
+    public static Coffig basic() {
+        return new CoffigBuilder().build();
+    }
+
+    public static String pathOf(AnnotatedElement annotatedElement) {
+        Config annotation;
+        StringBuilder path = new StringBuilder();
+        if (annotatedElement instanceof Class) {
+            Class<?> currentClass = (Class) annotatedElement;
+            while (currentClass != null && (annotation = currentClass.getAnnotation(Config.class)) != null) {
+                if (!annotation.value().isEmpty()) {
+                    if (path.length() > 0) {
+                        path.insert(0, ".");
+                    }
+                    path.insert(0, annotation.value());
+                }
+                currentClass = currentClass.getDeclaringClass();
+            }
+            return path.toString();
+        } else {
+            annotation = annotatedElement.getAnnotation(Config.class);
+            if (annotation != null) {
+                return annotation.value();
+            } else {
+                return null;
+            }
+        }
+    }
+
     public synchronized void startWatching() {
         configurationWatchers.forEach(ConfigurationWatcher::startWatching);
     }
@@ -211,38 +244,5 @@ public class Coffig {
 
     public ConfigurationProcessor getProcessor() {
         return processor;
-    }
-
-    public static CoffigBuilder builder() {
-        return new CoffigBuilder();
-    }
-
-    public static Coffig basic() {
-        return new CoffigBuilder().build();
-    }
-
-    public static String pathOf(AnnotatedElement annotatedElement) {
-        Config annotation;
-        StringBuilder path = new StringBuilder();
-        if (annotatedElement instanceof Class) {
-            Class<?> currentClass = (Class) annotatedElement;
-            while (currentClass != null && (annotation = currentClass.getAnnotation(Config.class)) != null) {
-                if (!annotation.value().isEmpty()) {
-                    if (path.length() > 0) {
-                        path.insert(0, ".");
-                    }
-                    path.insert(0, annotation.value());
-                }
-                currentClass = currentClass.getDeclaringClass();
-            }
-            return path.toString();
-        } else {
-            annotation = annotatedElement.getAnnotation(Config.class);
-            if (annotation != null) {
-                return annotation.value();
-            } else {
-                return null;
-            }
-        }
     }
 }

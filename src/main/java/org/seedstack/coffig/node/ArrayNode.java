@@ -79,15 +79,15 @@ public class ArrayNode extends AbstractTreeNode {
             return Optional.of(this);
         }
 
-        Path _path = new Path(path);
+        Path path2 = new Path(path);
         Optional<TreeNode> treeNode = Optional.empty();
-        if (_path.isArray()) {
-            int index = _path.getIndex();
+        if (path2.isArray()) {
+            int index = path2.getIndex();
             if (index >= 0 && index < children.size()) {
                 treeNode = Optional.ofNullable(children.get(index));
             }
-            if (treeNode.isPresent() && _path.hasTail()) {
-                return treeNode.get().get(_path.getTail());
+            if (treeNode.isPresent() && path2.hasTail()) {
+                return treeNode.get().get(path2.getTail());
             }
         }
         return treeNode;
@@ -156,9 +156,12 @@ public class ArrayNode extends AbstractTreeNode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass()))
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
+        }
         ArrayNode arrayNode = (ArrayNode) o;
         return children.equals(arrayNode.children);
     }

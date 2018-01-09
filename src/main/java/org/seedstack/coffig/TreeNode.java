@@ -8,10 +8,9 @@
 
 package org.seedstack.coffig;
 
-import org.seedstack.coffig.node.NamedNode;
-
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.seedstack.coffig.node.NamedNode;
 
 public interface TreeNode {
 

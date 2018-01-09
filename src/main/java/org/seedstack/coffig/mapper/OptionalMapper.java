@@ -9,13 +9,12 @@
 package org.seedstack.coffig.mapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class OptionalMapper implements ConfigurationMapper {
     private Coffig coffig;

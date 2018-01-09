@@ -8,16 +8,15 @@
 
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
-
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class ValueMapper implements ConfigurationMapper {
     private final Map<Type, Function<String, ?>> converters = new HashMap<>();

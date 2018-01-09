@@ -107,9 +107,12 @@ public class ValueNode extends AbstractTreeNode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass()))
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
+        }
         ValueNode valueNode = (ValueNode) o;
         return Objects.equals(value, valueNode.value);
     }

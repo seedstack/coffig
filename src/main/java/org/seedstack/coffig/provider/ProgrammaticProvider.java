@@ -8,6 +8,11 @@
 
 package org.seedstack.coffig.provider;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.Config;
 import org.seedstack.coffig.TreeNode;
@@ -16,12 +21,6 @@ import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationProvider;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 public class ProgrammaticProvider implements ConfigurationProvider, ConfigurationComponent {
     private final Map<Supplier<Object>, String> suppliers = new HashMap<>();

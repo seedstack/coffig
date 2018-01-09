@@ -8,17 +8,16 @@
 
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.internal.ConfigurationValidationException;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.spi.ConfigurationComponent;
-import org.seedstack.coffig.spi.ConfigurationMapper;
-
+import java.lang.reflect.Type;
+import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.lang.reflect.Type;
-import java.util.Set;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationValidationException;
+import org.seedstack.coffig.spi.ConfigurationComponent;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class ValidatingMapper implements ConfigurationMapper {
     private final ConfigurationMapper mapper;

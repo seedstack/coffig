@@ -8,12 +8,11 @@
 
 package org.seedstack.coffig.mapper;
 
+import java.lang.reflect.Type;
 import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
 import org.seedstack.coffig.spi.ConfigurationMapper;
-
-import java.lang.reflect.Type;
 
 public class EvaluatingMapper implements ConfigurationMapper {
     private final ConfigurationMapper mapper;

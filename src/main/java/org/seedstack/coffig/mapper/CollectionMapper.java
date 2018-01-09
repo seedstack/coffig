@@ -8,22 +8,21 @@
 
 package org.seedstack.coffig.mapper;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ArrayNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.ArrayNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class CollectionMapper implements ConfigurationMapper {
     private Coffig coffig;
@@ -65,6 +64,8 @@ public class CollectionMapper implements ConfigurationMapper {
     @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST", justification = "Cast is verified in canHandle() method")
     public TreeNode unmap(Object object, Type type) {
         Type itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
-        return new ArrayNode(((Collection<?>) object).stream().map(item -> coffig.getMapper().unmap(item, itemType)).collect(toList()));
+        return new ArrayNode(((Collection<?>) object).stream()
+                .map(item -> coffig.getMapper().unmap(item, itemType))
+                .collect(toList()));
     }
 }

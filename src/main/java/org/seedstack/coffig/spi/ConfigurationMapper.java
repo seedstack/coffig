@@ -8,9 +8,8 @@
 
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.TreeNode;
-
 import java.lang.reflect.Type;
+import org.seedstack.coffig.TreeNode;
 
 public interface ConfigurationMapper extends ConfigurationComponent {
 

@@ -8,15 +8,8 @@
 
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.Config;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.SingleValue;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.spi.ConfigurationComponent;
-import org.seedstack.shed.reflect.Classes;
+import static java.util.stream.Collectors.toList;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,27 +20,33 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import static java.util.stream.Collectors.toList;
-import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.Config;
+import org.seedstack.coffig.SingleValue;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.spi.ConfigurationComponent;
+import org.seedstack.shed.reflect.Classes;
 
 class ObjectMapper<T> implements ConfigurationComponent {
-    private final Class<T> aClass;
+    private final Class<T> someClass;
     private final List<FieldInfo> fieldInfo;
     private final FieldInfo valueFieldInfo;
     private final T holder;
     private Coffig coffig;
 
-    ObjectMapper(Class<T> aClass) {
-        this.aClass = aClass;
+    ObjectMapper(Class<T> someClass) {
+        this.someClass = someClass;
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
-        this.holder = instantiateDefault(aClass);
+        this.holder = instantiateDefault(someClass);
     }
 
     @SuppressWarnings("unchecked")
     ObjectMapper(T object) {
-        this.aClass = (Class<T>) object.getClass();
+        this.someClass = (Class<T>) object.getClass();
         this.fieldInfo = getFieldInfo();
         this.valueFieldInfo = getValueFieldInfo();
         this.holder = object;
@@ -72,8 +71,10 @@ class ObjectMapper<T> implements ConfigurationComponent {
 
     TreeNode unmap() {
         MapNode rootNode = new MapNode();
-        fieldInfo.forEach(fieldInfo -> Optional.ofNullable(coffig.getMapper().unmap(fieldInfo.supplier.get(), fieldInfo.type))
-                .ifPresent(treeNode -> rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name, treeNode)));
+        fieldInfo.forEach(fieldInfo -> Optional.ofNullable(coffig.getMapper()
+                .unmap(fieldInfo.supplier.get(), fieldInfo.type))
+                .ifPresent(treeNode -> rootNode.set(fieldInfo.alias != null ? fieldInfo.alias : fieldInfo.name,
+                        treeNode)));
         return rootNode;
     }
 
@@ -89,7 +90,7 @@ class ObjectMapper<T> implements ConfigurationComponent {
     }
 
     private List<FieldInfo> getFieldInfo() {
-        return Classes.from(aClass)
+        return Classes.from(someClass)
                 .traversingSuperclasses()
                 .fields()
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
@@ -139,7 +140,7 @@ class ObjectMapper<T> implements ConfigurationComponent {
         private Optional<Method> getSetter(Field field) {
             String setterName = fieldToSetterName(field);
             try {
-                Method setter = aClass.getDeclaredMethod(setterName, field.getType());
+                Method setter = someClass.getDeclaredMethod(setterName, field.getType());
                 return Optional.of(setter);
             } catch (NoSuchMethodException e) {
                 return Optional.empty();
@@ -149,7 +150,7 @@ class ObjectMapper<T> implements ConfigurationComponent {
         private Optional<Method> getGetter(Field field) {
             String getterName = fieldToGetterName(field);
             try {
-                Method getter = aClass.getDeclaredMethod(getterName);
+                Method getter = someClass.getDeclaredMethod(getterName);
                 return Optional.of(getter);
             } catch (NoSuchMethodException e) {
                 return Optional.empty();

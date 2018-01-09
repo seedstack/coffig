@@ -8,15 +8,14 @@
 
 package org.seedstack.coffig.provider;
 
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.spi.ConfigurationProvider;
-import org.seedstack.coffig.spi.BaseComposite;
-
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.spi.BaseComposite;
+import org.seedstack.coffig.spi.ConfigurationProvider;
 
 public class CompositeProvider extends BaseComposite<ConfigurationProvider> implements ConfigurationProvider {
     public CompositeProvider(ConfigurationProvider... items) {

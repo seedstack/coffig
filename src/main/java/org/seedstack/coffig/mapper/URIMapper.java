@@ -8,15 +8,14 @@
 
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
-
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class URIMapper implements ConfigurationMapper {
     @Override

@@ -8,10 +8,9 @@
 
 package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.TreeNode;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import org.seedstack.coffig.TreeNode;
 
 abstract class AbstractTreeNode implements TreeNode {
     static String HIDDEN_PLACEHOLDER = "***";
@@ -31,6 +30,6 @@ abstract class AbstractTreeNode implements TreeNode {
     }
 
     String quote(String s) {
-        return s == null ? null : s.replace("\"", "\\\"");
+        return s == null ? null : s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

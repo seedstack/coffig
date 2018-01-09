@@ -8,9 +8,8 @@
 
 package org.seedstack.coffig.spi;
 
-import org.seedstack.coffig.node.MapNode;
-
 import java.util.concurrent.Callable;
+import org.seedstack.coffig.node.MapNode;
 
 @FunctionalInterface
 public interface ConfigurationProvider extends Callable<MapNode>, ConfigurationComponent {

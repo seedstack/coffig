@@ -60,10 +60,11 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public TreeNode node(String key) {
-        if (children.containsKey(key))
+        if (children.containsKey(key)) {
             return children.get(key);
-        else
+        } else {
             throw new PropertyNotFoundException(key);
+        }
     }
 
     @Override
@@ -72,12 +73,12 @@ public class MapNode extends AbstractTreeNode {
             return Optional.of(this);
         }
 
-        Path _path = new Path(path);
-        if (_path.hasHead()) {
-            TreeNode child = children.get(_path.getHead());
+        Path path2 = new Path(path);
+        if (path2.hasHead()) {
+            TreeNode child = children.get(path2.getHead());
             if (child != null) {
-                if (_path.hasTail()) {
-                    return child.get(_path.getTail());
+                if (path2.hasTail()) {
+                    return child.get(path2.getTail());
                 } else {
                     return Optional.of(child);
                 }
@@ -149,9 +150,12 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass()))
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
+        }
         MapNode mapNode = (MapNode) o;
         return Objects.equals(children, mapNode.children);
     }

@@ -8,10 +8,9 @@
 
 package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.TreeNode;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.seedstack.coffig.TreeNode;
 
 /**
  * A path is a configuration tree path. It splits the path in two part.
@@ -44,8 +43,7 @@ import java.util.regex.Pattern;
  * </pre>
  *
  * <h2>Path represents an array</h2>
- *
- * if the head correspond to an integer the index will be initialize.
+ * <p>If the head correspond to an integer the index will be initialize.</p>
  * <pre>
  *     0.custom.key
  * </pre>

@@ -8,9 +8,9 @@
 
 package org.seedstack.coffig.internal;
 
+import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.util.Set;
 
 /**
  * This exception class formats a fully detailed message from a set of constraint violations or from an existing

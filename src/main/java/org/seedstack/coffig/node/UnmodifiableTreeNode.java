@@ -22,6 +22,22 @@ public class UnmodifiableTreeNode implements TreeNode {
         this.treeNode = treeNode;
     }
 
+    public static TreeNode of(TreeNode treeNode) {
+        if (treeNode instanceof UnmodifiableTreeNode) {
+            return treeNode;
+        } else {
+            return new UnmodifiableTreeNode(treeNode);
+        }
+    }
+
+    public static NamedNode of(NamedNode namedNode) {
+        if (namedNode.node() instanceof UnmodifiableTreeNode) {
+            return namedNode;
+        } else {
+            return new NamedNode(namedNode.name(), new UnmodifiableTreeNode(namedNode.node()));
+        }
+    }
+
     @Override
     public boolean isHidden() {
         return treeNode.isHidden();
@@ -100,7 +116,9 @@ public class UnmodifiableTreeNode implements TreeNode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
         if (o instanceof UnmodifiableTreeNode) {
             return treeNode.equals(((UnmodifiableTreeNode) o).treeNode);
         } else {
@@ -111,21 +129,5 @@ public class UnmodifiableTreeNode implements TreeNode {
     @Override
     public String toString() {
         return treeNode.toString();
-    }
-
-    public static TreeNode of(TreeNode treeNode) {
-        if (treeNode instanceof UnmodifiableTreeNode) {
-            return treeNode;
-        } else {
-            return new UnmodifiableTreeNode(treeNode);
-        }
-    }
-
-    public static NamedNode of(NamedNode namedNode) {
-        if (namedNode.node() instanceof UnmodifiableTreeNode) {
-            return namedNode;
-        } else {
-            return new NamedNode(namedNode.name(), new UnmodifiableTreeNode(namedNode.node()));
-        }
     }
 }

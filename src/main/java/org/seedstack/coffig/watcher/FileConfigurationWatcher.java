@@ -34,26 +34,23 @@ import org.slf4j.LoggerFactory;
 public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigurationWatcher.class);
     private static final WatchEvent.Modifier MODIFIER;
-    private final WatchService watcher;
-    private final Map<WatchKey, Path> keys = new HashMap<>();
-    private final Map<Path, Set<Consumer<Path>>> listeners = new HashMap<>();
-    private Thread watchThread;
-    private boolean stop;
 
     static {
         WatchEvent.Modifier detectedModifier;
         try {
-            Class<?> aClass = Class.forName("com.sun.nio.file.SensitivityWatchEventModifier");
-            detectedModifier = (WatchEvent.Modifier) aClass.getField("HIGH").get(null);
+            Class<?> someClass = Class.forName("com.sun.nio.file.SensitivityWatchEventModifier");
+            detectedModifier = (WatchEvent.Modifier) someClass.getField("HIGH").get(null);
         } catch (ClassNotFoundException | IllegalAccessException | NoSuchFieldException e) {
             detectedModifier = null;
         }
         MODIFIER = detectedModifier;
     }
 
-    public static FileConfigurationWatcher getInstance() {
-        return Holder.INSTANCE;
-    }
+    private final WatchService watcher;
+    private final Map<WatchKey, Path> keys = new HashMap<>();
+    private final Map<Path, Set<Consumer<Path>>> listeners = new HashMap<>();
+    private Thread watchThread;
+    private boolean stop;
 
     private FileConfigurationWatcher() {
         try {
@@ -61,6 +58,10 @@ public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable 
         } catch (IOException e) {
             throw ConfigurationException.wrap(e, ConfigurationErrorCode.UNEXPECTED_EXCEPTION);
         }
+    }
+
+    public static FileConfigurationWatcher getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

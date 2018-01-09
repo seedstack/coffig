@@ -190,7 +190,8 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     }
 
     private CallSiteInfo findFunctionCall(String value, int startIndex) {
-        int level = 0, argumentPos = 0;
+        int level = 0;
+        int argumentPos = 0;
         Matcher matcher = CALL_SITE_PATTERN.matcher(value);
         CallSiteInfo callSiteInfo = new CallSiteInfo();
         while (matcher.find()) {

@@ -8,9 +8,8 @@
 
 package org.seedstack.coffig.node;
 
-import org.seedstack.coffig.TreeNode;
-
 import java.util.Objects;
+import org.seedstack.coffig.TreeNode;
 
 public class NamedNode {
     private final String name;
@@ -39,11 +38,15 @@ public class NamedNode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         NamedNode namedNode = (NamedNode) o;
-        return Objects.equals(name, namedNode.name) &&
-                Objects.equals(value, namedNode.value);
+        return Objects.equals(name, namedNode.name)
+                && Objects.equals(value, namedNode.value);
     }
 
     @Override

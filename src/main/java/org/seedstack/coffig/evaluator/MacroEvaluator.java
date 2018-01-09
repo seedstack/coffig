@@ -19,10 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MacroEvaluator implements ConfigurationEvaluator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MacroEvaluator.class);
-    private static final Pattern MACRO_PATTERN = Pattern.compile("\\\\?\\$\\{|}");
     public static final String VALUE_QUOTE = "'";
     public static final String VALUE_SEPARATOR = ":";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MacroEvaluator.class);
+    private static final Pattern MACRO_PATTERN = Pattern.compile("\\\\?\\$\\{|}");
 
     @Override
     public MacroEvaluator fork() {
@@ -98,7 +98,8 @@ public class MacroEvaluator implements ConfigurationEvaluator {
 
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     private MatchingResult findMatchingCurlyBraces(String value, int startIndex) {
-        int level = 0, startPos = -1;
+        int level = 0;
+        int startPos = -1;
         boolean escaped = false;
         Matcher matcher = MACRO_PATTERN.matcher(value);
         while (matcher.find()) {
@@ -110,6 +111,7 @@ public class MacroEvaluator implements ConfigurationEvaluator {
                     if (level == 0) {
                         escaped = true;
                     }
+                    // falls through
                 case "${":
                     if (level == 0) {
                         startPos = matcher.start();

@@ -8,6 +8,13 @@
 
 package org.seedstack.coffig;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
 import org.seedstack.coffig.evaluator.CompositeEvaluator;
 import org.seedstack.coffig.mapper.CompositeMapper;
 import org.seedstack.coffig.mapper.EvaluatingMapper;
@@ -18,14 +25,6 @@ import org.seedstack.coffig.spi.ConfigurationEvaluator;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.Set;
 
 public class CoffigBuilder {
     private final List<ConfigurationMapper> mappers = new ArrayList<>();

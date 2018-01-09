@@ -8,13 +8,12 @@
 
 package org.seedstack.coffig.mapper;
 
+import java.lang.reflect.Type;
+import java.util.Properties;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
-
-import java.lang.reflect.Type;
-import java.util.Properties;
 
 public class PropertiesMapper implements ConfigurationMapper {
     @Override
@@ -26,7 +25,8 @@ public class PropertiesMapper implements ConfigurationMapper {
     public Object map(TreeNode treeNode, Type type) {
         Properties properties = new Properties();
         if (treeNode.type() == TreeNode.Type.MAP_NODE) {
-            treeNode.namedNodes().forEach(namedNode -> properties.setProperty(namedNode.name(), namedNode.node().value()));
+            treeNode.namedNodes()
+                    .forEach(namedNode -> properties.setProperty(namedNode.name(), namedNode.node().value()));
         } else {
             treeNode.nodes().forEach(item -> properties.setProperty(item.value(), null));
         }

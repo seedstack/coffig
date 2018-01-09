@@ -8,12 +8,11 @@
 
 package org.seedstack.coffig.mapper;
 
+import java.io.File;
+import java.lang.reflect.Type;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
-
-import java.io.File;
-import java.lang.reflect.Type;
 
 public class FileMapper implements ConfigurationMapper {
     @Override

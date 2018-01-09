@@ -9,8 +9,8 @@
 package org.seedstack.coffig.evaluator;
 
 import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.spi.ConfigurationEvaluator;
 import org.seedstack.coffig.spi.BaseComposite;
+import org.seedstack.coffig.spi.ConfigurationEvaluator;
 
 public class CompositeEvaluator extends BaseComposite<ConfigurationEvaluator> implements ConfigurationEvaluator {
     public CompositeEvaluator(ConfigurationEvaluator... items) {

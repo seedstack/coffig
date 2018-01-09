@@ -8,12 +8,8 @@
 
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.BuilderSupplier;
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -21,9 +17,12 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.seedstack.shed.reflect.Classes.instantiateDefault;
-import static org.seedstack.shed.reflect.Types.rawClassOf;
+import org.seedstack.coffig.BuilderSupplier;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class BuilderMapper implements ConfigurationMapper {
     private Coffig coffig;
@@ -48,7 +47,8 @@ public class BuilderMapper implements ConfigurationMapper {
             Method method = builderMethods.get(namedNode.name());
             if (method != null) {
                 try {
-                    method.invoke(builder, coffig.getMapper().map(namedNode.node(), method.getGenericParameterTypes()[0]));
+                    method.invoke(builder,
+                            coffig.getMapper().map(namedNode.node(), method.getGenericParameterTypes()[0]));
                 } catch (Exception e) {
                     throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_METHOD_INVOCATION)
                             .put("method", method.toString());
@@ -70,7 +70,9 @@ public class BuilderMapper implements ConfigurationMapper {
         Class<?> rawClass = rawClassOf(type);
         if (rawClass.equals(BuilderSupplier.class)) {
             // If the type equals to the supplier interface, instantiate a default supplier
-            return BuilderSupplier.of(instantiateDefault(rawClassOf(((ParameterizedType) type).getActualTypeArguments()[0])));
+            return BuilderSupplier.of(
+                    instantiateDefault(rawClassOf(((ParameterizedType) type).getActualTypeArguments()[0]))
+            );
         } else {
             // Otherwise try to instantiate the supplier
             return (BuilderSupplier<?>) instantiateDefault(rawClass);
@@ -82,6 +84,5 @@ public class BuilderMapper implements ConfigurationMapper {
         Arrays.stream(builder.getClass().getMethods()).forEach(method -> methods.put(method.getName(), method));
         return methods;
     }
-
 
 }

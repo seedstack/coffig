@@ -8,15 +8,14 @@
 
 package org.seedstack.coffig.mapper;
 
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
-import org.seedstack.coffig.spi.BaseComposite;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
-
-import static org.seedstack.shed.reflect.Types.rawClassOf;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.spi.BaseComposite;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class CompositeMapper extends BaseComposite<ConfigurationMapper> implements ConfigurationMapper {
     private Coffig coffig;
