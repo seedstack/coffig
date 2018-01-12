@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.MapNode;
@@ -30,7 +29,7 @@ import org.seedstack.coffig.watcher.FileConfigurationWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PropertiesProvider implements ConfigurationProvider, Consumer<Path> {
+public class PropertiesProvider implements ConfigurationProvider, FileConfigurationWatcher.Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesProvider.class);
     private final List<URL> sources = new ArrayList<>();
     private final AtomicBoolean dirty = new AtomicBoolean(true);
@@ -84,7 +83,7 @@ public class PropertiesProvider implements ConfigurationProvider, Consumer<Path>
     }
 
     @Override
-    public void accept(Path path) {
+    public void fileChanged(Path path) {
         dirty.set(true);
     }
 

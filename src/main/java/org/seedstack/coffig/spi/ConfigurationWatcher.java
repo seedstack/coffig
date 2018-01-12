@@ -8,7 +8,7 @@
 
 package org.seedstack.coffig.spi;
 
-public interface ConfigurationWatcher {
+public interface ConfigurationWatcher extends ConfigurationComponent {
     void startWatching();
 
     void stopWatching();

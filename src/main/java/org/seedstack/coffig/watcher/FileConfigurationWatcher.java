@@ -48,7 +48,7 @@ public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable 
 
     private final WatchService watcher;
     private final Map<WatchKey, Path> keys = new HashMap<>();
-    private final Map<Path, Set<Consumer<Path>>> listeners = new HashMap<>();
+    private final Map<Path, Set<Listener>> listeners = new HashMap<>();
     private Thread watchThread;
     private boolean stop;
 
@@ -67,9 +67,10 @@ public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable 
     @Override
     public void startWatching() {
         if (watchThread == null) {
-            watchThread = new Thread(this, "configFileWatcher");
+            watchThread = new Thread(this, "cfgFileWatcher");
             stop = false;
             watchThread.start();
+            LOGGER.debug("File watching started");
         }
     }
 
@@ -80,13 +81,14 @@ public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable 
             watchThread.interrupt();
             try {
                 watchThread.join(1000);
+                LOGGER.debug("File watching stopped");
             } catch (InterruptedException e) {
-                // ignore
+                LOGGER.warn("Failed to stop file watching");
             }
         }
     }
 
-    public synchronized void watchFile(Path path, Consumer<Path> listener) {
+    public synchronized void watchFile(Path path, Listener listener) {
         if (!path.toFile().isFile()) {
             throw new IllegalArgumentException("Path " + path.toString() + " doesn't reference a file");
         }
@@ -127,10 +129,10 @@ public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable 
                     WatchEvent<Path> ev = cast(event);
                     Path name = ev.context();
                     Path path = dir.resolve(name);
-                    Set<Consumer<Path>> listeners = this.listeners.get(path);
-                    LOGGER.info("Configuration file changed: " + path.toString());
+                    Set<Listener> listeners = this.listeners.get(path);
+                    LOGGER.debug("Configuration file changed: " + path.toString());
                     if (listeners != null) {
-                        listeners.forEach(listener -> listener.accept(path));
+                        listeners.forEach(listener -> listener.fileChanged(path));
                     }
                 }
             }
@@ -142,6 +144,15 @@ public class FileConfigurationWatcher implements ConfigurationWatcher, Runnable 
                     break;
                 }
             }
+        }
+    }
+
+    public interface Listener extends Consumer<Path> {
+        void fileChanged(Path path);
+
+        @Override
+        default void accept(Path path) {
+            fileChanged(path);
         }
     }
 
