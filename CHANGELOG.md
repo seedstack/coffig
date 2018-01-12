@@ -1,4 +1,4 @@
-# Version 3.1.0 (2017-12-06)
+# Version 3.1.0 (2017-01-12)
 
 * [new] Ability to register change listeners that will be called on refresh if the nodes they are interested in change.
 * [new] Ability to automatically refresh the configuration on YAML/JSON/Properties file change.
