@@ -79,10 +79,12 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
             throw new NullPointerException("Source URL cannot be null");
         }
         sources.add(url);
-        try {
-            fileWatcher.watchFile(Paths.get(url.toURI()), this);
-        } catch (Exception e) {
-            LOGGER.warn("Unable to watch source: {}", url.toExternalForm(), e);
+        if ("file".equalsIgnoreCase(url.getProtocol())) {
+            try {
+                fileWatcher.watchFile(Paths.get(url.toURI()), this);
+            } catch (Exception e) {
+                LOGGER.warn("Unable to watch source: {}", url.toExternalForm(), e);
+            }
         }
         dirty.set(true);
         return this;
