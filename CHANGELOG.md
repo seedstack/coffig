@@ -1,5 +1,6 @@
-# Version 3.1.0 (2017-01-12)
+# Version 3.1.0 (2018-01-30)
 
+* [new] Java 9 compatibility.
 * [new] Ability to register change listeners that will be called on refresh if the nodes they are interested in change.
 * [new] Ability to automatically refresh the configuration on YAML/JSON/Properties file change.
 * [fix] Fix resolution of nested macros.
