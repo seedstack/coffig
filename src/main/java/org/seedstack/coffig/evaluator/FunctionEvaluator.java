@@ -161,7 +161,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     private String invokeFunction(String functionName, TreeNode[] arguments) throws Exception {
         FunctionRegistration functionRegistration = functions.get(functionName);
         if (functionRegistration == null) {
-            throw new IllegalArgumentException("Unknown function" + functionName);
+            throw new IllegalArgumentException("Unknown function " + functionName);
         }
 
         try {
