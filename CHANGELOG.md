@@ -1,4 +1,4 @@
-# Version 3.1.0 (2018-01-30)
+# Version 3.1.0 (2018-02-14)
 
 * [new] Java 9 compatibility.
 * [new] Ability to register change listeners that will be called on refresh if the nodes they are interested in change.
