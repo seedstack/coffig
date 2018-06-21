@@ -31,11 +31,14 @@ import org.seedstack.coffig.spi.ConfigFunction;
 import org.seedstack.coffig.spi.ConfigFunctionHolder;
 import org.seedstack.coffig.spi.ConfigurationComponent;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.shed.ClassLoaders;
 import org.seedstack.shed.exception.Throwing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FunctionEvaluator implements ConfigurationEvaluator {
+    private static final ClassLoader MOST_COMPLETE_CLASS_LOADER = ClassLoaders.findMostCompleteClassLoader
+            (FunctionEvaluator.class);
     private static final Logger LOGGER = LoggerFactory.getLogger(FunctionEvaluator.class);
     private static final Pattern CALL_SITE_PATTERN = Pattern.compile("\\\\?\\$([_a-zA-Z]\\w*)\\(|\\)");
     private final AtomicBoolean scanned = new AtomicBoolean();
@@ -47,7 +50,8 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     public void initialize(Coffig coffig) {
         this.coffig = coffig;
         if (!scanned.getAndSet(true)) {
-            for (ConfigFunctionHolder configFunctionHolder : ServiceLoader.load(ConfigFunctionHolder.class)) {
+            for (ConfigFunctionHolder configFunctionHolder : ServiceLoader.load(ConfigFunctionHolder.class,
+                    MOST_COMPLETE_CLASS_LOADER)) {
                 configFunctionHolders.add(configFunctionHolder);
                 detectFunctionsOfHolder(configFunctionHolder);
             }

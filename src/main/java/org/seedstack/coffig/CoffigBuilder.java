@@ -25,8 +25,11 @@ import org.seedstack.coffig.spi.ConfigurationEvaluator;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.shed.ClassLoaders;
 
 public class CoffigBuilder {
+    private static final ClassLoader MOST_COMPLETE_CLASS_LOADER = ClassLoaders.findMostCompleteClassLoader
+            (CoffigBuilder.class);
     private final List<ConfigurationMapper> mappers = new ArrayList<>();
     private final List<ConfigurationProvider> providers = new ArrayList<>();
     private final List<ConfigurationProcessor> processors = new ArrayList<>();
@@ -127,25 +130,33 @@ public class CoffigBuilder {
 
     private Collection<? extends ConfigurationMapper> loadMappers() {
         Set<ConfigurationMapper> loadedMappers = new HashSet<>();
-        ServiceLoader.load(ConfigurationMapper.class).iterator().forEachRemaining(loadedMappers::add);
+        ServiceLoader.load(ConfigurationMapper.class, MOST_COMPLETE_CLASS_LOADER)
+                .iterator()
+                .forEachRemaining(loadedMappers::add);
         return loadedMappers;
     }
 
     private Collection<? extends ConfigurationProcessor> loadProcessors() {
         Set<ConfigurationProcessor> loadedProcessors = new HashSet<>();
-        ServiceLoader.load(ConfigurationProcessor.class).iterator().forEachRemaining(loadedProcessors::add);
+        ServiceLoader.load(ConfigurationProcessor.class, MOST_COMPLETE_CLASS_LOADER)
+                .iterator()
+                .forEachRemaining(loadedProcessors::add);
         return loadedProcessors;
     }
 
     private Collection<? extends ConfigurationEvaluator> loadEvaluators() {
         Set<ConfigurationEvaluator> loadedEvaluators = new HashSet<>();
-        ServiceLoader.load(ConfigurationEvaluator.class).iterator().forEachRemaining(loadedEvaluators::add);
+        ServiceLoader.load(ConfigurationEvaluator.class, MOST_COMPLETE_CLASS_LOADER)
+                .iterator()
+                .forEachRemaining(loadedEvaluators::add);
         return loadedEvaluators;
     }
 
     private Collection<? extends ConfigurationProvider> loadProviders() {
         Set<ConfigurationProvider> loadedProviders = new HashSet<>();
-        ServiceLoader.load(ConfigurationProvider.class).iterator().forEachRemaining(loadedProviders::add);
+        ServiceLoader.load(ConfigurationProvider.class, MOST_COMPLETE_CLASS_LOADER)
+                .iterator()
+                .forEachRemaining(loadedProviders::add);
         return loadedProviders;
     }
 }

@@ -1,3 +1,7 @@
+# Version 3.1.1 (2018-07-31)
+
+* [fix] Always make ServiceLoader use the most complete classloader it can find.
+
 # Version 3.1.0 (2018-02-14)
 
 * [new] Java 9 compatibility.
