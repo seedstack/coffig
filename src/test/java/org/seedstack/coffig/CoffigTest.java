@@ -9,7 +9,9 @@
 package org.seedstack.coffig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.seedstack.coffig.fixture.EnumFixture;
@@ -36,6 +38,9 @@ public class CoffigTest {
             new NamedNode("elements",
                     new MapNode(new NamedNode("key1", mutableValue2), new NamedNode("key2", mutableValue3))),
             new NamedNode("items", "one"));
+
+    private final ConfigurationProvider classConfigProvider = () -> new MapNode(
+            new NamedNode("someListClass", "java.lang.Object"));
 
     @Test
     public void testConfigurationNotNull() {
@@ -108,6 +113,19 @@ public class CoffigTest {
     }
 
     @Test
+    public void testErrorMessages() throws Exception {
+        Coffig coffig = Coffig.builder().withProviders(classConfigProvider).build();
+        try {
+            coffig.get(ClassConfig.class);
+            fail("should have thrown a ConfigurationException");
+        } catch (ConfigurationException e) {
+            assertThat(e.getMessage()).isEqualTo("[CONFIGURATION] Non assignable class");
+            assertThat(e.getDescription())
+                    .isEqualTo("Class 'java.lang.Object' is not assignable to '? extends java.util.List'.");
+        }
+    }
+
+    @Test
     public void testListeners() {
         AtomicInteger listener0CallCount = new AtomicInteger();
         AtomicInteger listener1CallCount = new AtomicInteger();
@@ -155,5 +173,9 @@ public class CoffigTest {
         String[] users;
         String[] items;
         String[] elements;
+    }
+
+    private static class ClassConfig {
+        private Class<? extends List> someListClass;
     }
 }

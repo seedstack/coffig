@@ -1,3 +1,7 @@
+# Version 3.1.2 (2018-08-29)
+
+* [fix] Fixed missing detailed error messages for configuration exceptions.
+
 # Version 3.1.1 (2018-07-31)
 
 * [fix] Always make ServiceLoader use the most complete classloader it can find.
