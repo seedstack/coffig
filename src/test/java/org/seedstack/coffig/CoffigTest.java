@@ -121,7 +121,7 @@ public class CoffigTest {
         } catch (ConfigurationException e) {
             assertThat(e.getMessage()).isEqualTo("[CONFIGURATION] Non assignable class");
             assertThat(e.getDescription())
-                    .isEqualTo("Class 'java.lang.Object' is not assignable to '? extends java.util.List'.");
+                    .isEqualTo("Class 'java.lang.Object' is not compatible with type '? extends java.util.List'.");
         }
     }
 

@@ -16,6 +16,7 @@ abstract class AbstractTreeNode implements TreeNode {
     static String HIDDEN_PLACEHOLDER = "***";
     private boolean hidden = false;
 
+    @Override
     public boolean isHidden() {
         return this.hidden;
     }

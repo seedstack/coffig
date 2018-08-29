@@ -22,10 +22,6 @@ public class ValueNode extends AbstractTreeNode {
         this.value = null;
     }
 
-    public ValueNode(ValueNode other) {
-        this.value = other.value;
-    }
-
     public ValueNode(String value) {
         this.value = value;
     }

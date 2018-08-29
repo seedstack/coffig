@@ -9,7 +9,6 @@
 package org.seedstack.coffig.node;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,20 +27,21 @@ public class ArrayNode extends AbstractTreeNode {
         children = new ArrayList<>();
     }
 
-    public ArrayNode(ArrayNode other) {
-        this.children = new ArrayList<>(other.children);
-    }
-
     public ArrayNode(TreeNode... children) {
-        this.children = Arrays.stream(children).collect(toList());
+        this();
+        this.children.addAll(Arrays.asList(children));
     }
 
     public ArrayNode(List<TreeNode> children) {
-        this.children = new ArrayList<>(children);
+        this();
+        this.children.addAll(children);
     }
 
     public ArrayNode(String... children) {
-        this.children = Arrays.stream(children).map(ValueNode::new).collect(toList());
+        this();
+        for (String child : children) {
+            this.children.add(new ValueNode(child));
+        }
     }
 
     @Override

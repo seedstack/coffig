@@ -13,8 +13,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
 
 public abstract class BaseComposite<T extends ConfigurationComponent> implements ConfigurationComponent {
     protected final T[] items;
@@ -64,8 +62,7 @@ public abstract class BaseComposite<T extends ConfigurationComponent> implements
                 return (U) item;
             }
         }
-        throw ConfigurationException.createNew(ConfigurationErrorCode.SPECIFIED_ITEM_CLASS_NOT_FOUND)
-                .put("itemClass", itemClass.getCanonicalName());
+        throw new IllegalArgumentException("No " + itemClass.getName() + " item found in composite " + name());
     }
 
     @SuppressWarnings("unchecked")

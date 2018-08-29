@@ -1,6 +1,7 @@
 # Version 3.1.2 (2018-08-29)
 
 * [fix] Fixed missing detailed error messages for configuration exceptions.
+* [brk] Removed copy constructors from nodes (their shallow copy was risky and useless).
 
 # Version 3.1.1 (2018-07-31)
 

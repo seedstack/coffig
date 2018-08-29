@@ -8,7 +8,6 @@
 
 package org.seedstack.coffig.node;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,16 +26,16 @@ public class MapNode extends AbstractTreeNode {
         this.children = new HashMap<>();
     }
 
-    public MapNode(MapNode other) {
-        this.children = new HashMap<>(other.children);
-    }
-
     public MapNode(Map<String, TreeNode> children) {
-        this.children = new HashMap<>(children);
+        this();
+        this.children.putAll(children);
     }
 
     public MapNode(NamedNode... children) {
-        this.children = Arrays.stream(children).collect(Collectors.toMap(NamedNode::name, NamedNode::node));
+        this();
+        for (NamedNode child : children) {
+            this.children.put(child.name(), child.node());
+        }
     }
 
     @Override

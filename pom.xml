@@ -151,6 +151,9 @@
                                 <exclude>org.seedstack.coffig.ConfigurationException</exclude>
                                 <exclude>org.seedstack.coffig.ConfigurationValidationException</exclude>
                                 <exclude>org.seedstack.coffig.PropertyNotFoundException</exclude>
+                                <exclude>org.seedstack.coffig.node.ArrayNode</exclude>
+                                <exclude>org.seedstack.coffig.node.MapNode</exclude>
+                                <exclude>org.seedstack.coffig.node.ValueNode</exclude>
                             </excludes>
                         </parameter>
                     </configuration>
