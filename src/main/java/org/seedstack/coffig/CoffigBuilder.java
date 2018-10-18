@@ -112,11 +112,11 @@ public class CoffigBuilder {
 
         return new Coffig(
                 wrap(new EvaluatingMapper(
-                        new CompositeMapper(mappers.toArray(new ConfigurationMapper[mappers.size()])),
-                        new CompositeEvaluator(evaluators.toArray(new ConfigurationEvaluator[evaluators.size()]))
+                        new CompositeMapper(mappers.toArray(new ConfigurationMapper[0])),
+                        new CompositeEvaluator(evaluators.toArray(new ConfigurationEvaluator[0]))
                 )),
-                new CompositeProvider(providers.toArray(new ConfigurationProvider[providers.size()])),
-                new CompositeProcessor(processors.toArray(new ConfigurationProcessor[processors.size()]))
+                new CompositeProvider(providers.toArray(new ConfigurationProvider[0])),
+                new CompositeProcessor(processors.toArray(new ConfigurationProcessor[0]))
         );
     }
 

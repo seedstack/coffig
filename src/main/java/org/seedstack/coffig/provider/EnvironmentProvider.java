@@ -11,10 +11,15 @@ package org.seedstack.coffig.provider;
 import org.seedstack.coffig.node.MapNode;
 import org.seedstack.coffig.node.NamedNode;
 import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EnvironmentProvider implements ConfigurationProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentProvider.class);
+
     @Override
     public MapNode provide() {
+        LOGGER.debug("Reading configuration from environment variables");
         return new MapNode(System.getenv().entrySet().stream()
                 .map(e -> new NamedNode(e.getKey(), e.getValue()))
                 .toArray(NamedNode[]::new));

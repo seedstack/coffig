@@ -1,3 +1,7 @@
+# Version 3.1.2 (2018-10-18)
+
+* [chg] Add debug logging
+
 # Version 3.1.1 (2018-09-03)
 
 * [fix] Always make ServiceLoader use the most complete classloader it can find.

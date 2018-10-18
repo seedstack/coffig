@@ -85,10 +85,12 @@ public class PropertiesProvider implements ConfigurationProvider, FileConfigurat
 
     @Override
     public void fileChanged(Path path) {
+        LOGGER.debug("Configuration file has changed: " + path);
         dirty.set(true);
     }
 
     private MapNode buildTreeFromSource(URL url) {
+        LOGGER.debug("Reading configuration from " + url.toExternalForm());
         try (InputStream inputStream = url.openStream()) {
             MapNode mapNode = new MapNode();
             Properties properties = new Properties();

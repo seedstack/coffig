@@ -91,12 +91,14 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
     }
 
     @Override
-    public void fileChanged(Path changed) {
+    public void fileChanged(Path path) {
+        LOGGER.debug("Configuration file has changed: " + path);
         dirty.set(true);
     }
 
     private MapNode buildTreeFromSource(URL url) {
         try {
+            LOGGER.debug("Reading configuration from " + url.toExternalForm());
             return buildTreeFromFields(jacksonMapper.readTree(url));
         } catch (IOException e) {
             throw ConfigurationException.wrap(e, ConfigurationErrorCode.FAILED_TO_READ_CONFIGURATION)
@@ -111,7 +113,7 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
             TreeNode treeNode = buildTreeFromField(entry.getValue());
             namedNodes.add(new NamedNode(name, treeNode));
         });
-        return new MapNode(namedNodes.toArray(new NamedNode[namedNodes.size()]));
+        return new MapNode(namedNodes.toArray(new NamedNode[0]));
     }
 
     private TreeNode buildTreeFromField(JsonNode jsonNode) {
@@ -145,7 +147,7 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
                 TreeNode treeNode = buildTreeFromField(jsonNode.get(i));
                 treeNodes.add(treeNode);
             }
-            TreeNode[] nodes = treeNodes.toArray(new TreeNode[treeNodes.size()]);
+            TreeNode[] nodes = treeNodes.toArray(new TreeNode[0]);
             return new ArrayNode(nodes);
         }
     }
@@ -161,7 +163,7 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
                 TreeNode treeNode = buildTreeFromField(entry.getValue());
                 namedNodes.add(new NamedNode(fieldName, treeNode));
             }
-            NamedNode[] nodes = namedNodes.toArray(new NamedNode[namedNodes.size()]);
+            NamedNode[] nodes = namedNodes.toArray(new NamedNode[0]);
             return new MapNode(nodes);
         }
     }
