@@ -1,3 +1,7 @@
+# Version 3.1.3 (2018-12-03)
+
+* [chg] Built and tested with OpenJDK 11 (minimum Java version still being 8).
+
 # Version 3.1.2 (2018-10-18)
 
 * [chg] Add debug logging
