@@ -8,17 +8,13 @@
 
 package org.seedstack.coffig.provider;
 
+import java.util.Properties;
 import mockit.Mock;
 import mockit.MockUp;
-import mockit.integration.junit4.JMockit;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.seedstack.coffig.node.MapNode;
 
-import java.util.Properties;
-
-@RunWith(JMockit.class)
 public class SystemPropertiesProviderTest {
 
     private SystemPropertiesProvider underTest = new SystemPropertiesProvider();
