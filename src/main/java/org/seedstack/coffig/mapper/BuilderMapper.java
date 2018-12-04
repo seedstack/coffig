@@ -11,6 +11,7 @@ package org.seedstack.coffig.mapper;
 import static org.seedstack.shed.reflect.Classes.instantiateDefault;
 import static org.seedstack.shed.reflect.Types.rawClassOf;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -49,7 +50,7 @@ public class BuilderMapper implements ConfigurationMapper {
                 try {
                     method.invoke(builder,
                             coffig.getMapper().map(namedNode.node(), method.getGenericParameterTypes()[0]));
-                } catch (Exception e) {
+                } catch (IllegalAccessException | InvocationTargetException e) {
                     throw ConfigurationException.wrap(e, ConfigurationErrorCode.ERROR_DURING_METHOD_INVOCATION)
                             .put("method", method.toString());
                 }

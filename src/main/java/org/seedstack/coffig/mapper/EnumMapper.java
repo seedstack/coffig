@@ -8,6 +8,7 @@
 
 package org.seedstack.coffig.mapper;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.Type;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
@@ -21,6 +22,7 @@ public class EnumMapper implements ConfigurationMapper {
 
     @SuppressWarnings("unchecked")
     @Override
+    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST", justification = "Cast is verified in canHandle() method")
     public Object map(TreeNode treeNode, Type type) {
         return Enum.valueOf((Class<Enum>) type, treeNode.value());
     }

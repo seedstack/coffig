@@ -28,7 +28,7 @@ public class PropertiesMapper implements ConfigurationMapper {
             treeNode.namedNodes()
                     .forEach(namedNode -> properties.setProperty(namedNode.name(), namedNode.node().value()));
         } else {
-            treeNode.nodes().forEach(item -> properties.setProperty(item.value(), null));
+            treeNode.nodes().forEach(item -> properties.setProperty(item.value(), ""));
         }
         return properties;
     }
