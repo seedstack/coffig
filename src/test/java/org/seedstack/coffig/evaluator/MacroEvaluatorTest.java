@@ -91,6 +91,9 @@ public class MacroEvaluatorTest {
                         ),
                         new MapNode(
                                 new NamedNode("message", "${'1:2:3'}")
+                        ),
+                        new MapNode(
+                                new NamedNode("message", "${unknown:other:'fallback'}")
                         )
                 ))
         );
@@ -142,6 +145,11 @@ public class MacroEvaluatorTest {
     @Test
     public void testNestedRef() throws Exception {
         assertThat(evaluate("refOfRef")).isEqualTo("null");
+    }
+
+    @Test
+    public void testMultipleDefaults() throws Exception {
+        assertThat(evaluate("test[14].message")).isEqualTo("fallback");
     }
 
     private String evaluate(String path) {
