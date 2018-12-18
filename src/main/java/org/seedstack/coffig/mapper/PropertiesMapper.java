@@ -10,12 +10,19 @@ package org.seedstack.coffig.mapper;
 
 import java.lang.reflect.Type;
 import java.util.Properties;
+import org.seedstack.coffig.Coffig;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class PropertiesMapper implements ConfigurationMapper {
+    private Coffig coffig;
+
+    @Override
+    public void initialize(Coffig coffig) {
+        this.coffig = coffig;
+    }
+
     @Override
     public boolean canHandle(Type type) {
         return type instanceof Class && type.equals(Properties.class);
@@ -26,7 +33,8 @@ public class PropertiesMapper implements ConfigurationMapper {
         Properties properties = new Properties();
         if (treeNode.type() == TreeNode.Type.MAP_NODE) {
             treeNode.namedNodes()
-                    .forEach(namedNode -> properties.setProperty(namedNode.name(), namedNode.node().value()));
+                    .forEach(namedNode -> properties.setProperty(namedNode.name(),
+                            (String) coffig.getMapper().map(namedNode.node(), String.class)));
         } else {
             treeNode.nodes().forEach(item -> properties.setProperty(item.value(), ""));
         }
@@ -38,7 +46,7 @@ public class PropertiesMapper implements ConfigurationMapper {
         MapNode mapNode = new MapNode();
         ((Properties) object).forEach((key, value) -> {
             if (key != null) {
-                mapNode.set(String.valueOf(key), new ValueNode(String.valueOf(value)));
+                mapNode.set(String.valueOf(key), coffig.getMapper().unmap(value, String.class));
             }
         });
         return mapNode;

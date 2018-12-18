@@ -1,3 +1,7 @@
+# Version 3.1.4 (2018-12-18)
+
+* [fix] Fix macro and function evaluation in properties mapping/unmapping.
+
 # Version 3.1.3 (2018-12-03)
 
 * [chg] Built and tested with OpenJDK 11 (minimum Java version still being 8).
