@@ -1,3 +1,7 @@
+# Version 3.1.5 (2019-09-12)
+
+* [fix] Fix NullPointerException when a YAML or JSON file read by the Jackson provider is empty.
+
 # Version 3.1.4 (2018-12-18)
 
 * [fix] Fix macro and function evaluation in properties mapping/unmapping.

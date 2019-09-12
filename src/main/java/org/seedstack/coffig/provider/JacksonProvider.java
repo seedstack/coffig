@@ -5,6 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
 package org.seedstack.coffig.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -107,11 +108,13 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
 
     private MapNode buildTreeFromFields(JsonNode node) {
         List<NamedNode> namedNodes = new ArrayList<>();
-        node.fields().forEachRemaining(entry -> {
-            String name = entry.getKey();
-            TreeNode treeNode = buildTreeFromField(entry.getValue());
-            namedNodes.add(new NamedNode(name, treeNode));
-        });
+        if (node != null) {
+            node.fields().forEachRemaining(entry -> {
+                String name = entry.getKey();
+                TreeNode treeNode = buildTreeFromField(entry.getValue());
+                namedNodes.add(new NamedNode(name, treeNode));
+            });
+        }
         return new MapNode(namedNodes.toArray(new NamedNode[0]));
     }
 
