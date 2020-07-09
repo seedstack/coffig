@@ -22,15 +22,21 @@ public class PropertiesMapperTest {
     private Properties properties = new Properties() {{
         setProperty("key1", "value1");
         setProperty("key2", "value2");
+        setProperty("key3", "");
     }};
 
     @Test
     public void testMapProperties() {
-        assertThat(mapper.map(new MapNode(new NamedNode("key1", "value1"), new NamedNode("key2", "value2")), Properties.class)).isEqualTo(properties);
+        assertThat(mapper.map(new MapNode(new NamedNode("key1", "value1"), new NamedNode("key2", "value2"), new NamedNode("key3", "")), Properties.class)).isEqualTo(properties);
+    }
+
+    @Test
+    public void testNullValuedProperties() {
+        assertThat(mapper.map(new MapNode(new NamedNode("key1", "value1"), new NamedNode("key2", "value2"), new NamedNode("key3", (String) null)), Properties.class)).isEqualTo(properties);
     }
 
     @Test
     public void testUnmapProperties() {
-        assertThat(mapper.unmap(properties, Properties.class)).isEqualTo(new MapNode(new NamedNode("key1", "value1"), new NamedNode("key2", "value2")));
+        assertThat(mapper.unmap(properties, Properties.class)).isEqualTo(new MapNode(new NamedNode("key1", "value1"), new NamedNode("key2", "value2"), new NamedNode("key3", "")));
     }
 }
