@@ -1,6 +1,6 @@
 # Version 3.1.6 (2020-08-05)
 
-* [fix] Fix NullPointerException when a property is left blank in application.yaml file.
+* [fix] Fix NullPointerException when a blank value is present in properties files.
 
 # Version 3.1.5 (2019-09-12)
 
