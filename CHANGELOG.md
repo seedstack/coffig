@@ -1,3 +1,7 @@
+# Version 3.1.6 (2020-08-05)
+
+* [fix] Fix NullPointerException when a property is left blank in application.yaml file.
+
 # Version 3.1.5 (2019-09-12)
 
 * [fix] Fix NullPointerException when a YAML or JSON file read by the Jackson provider is empty.
