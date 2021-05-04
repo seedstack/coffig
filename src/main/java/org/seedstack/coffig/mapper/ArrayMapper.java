@@ -38,14 +38,14 @@ public class ArrayMapper implements ConfigurationMapper {
     @Override
     @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST", justification = "Cast is verified in canHandle() method")
     public Object map(TreeNode treeNode, Type type) {
-        Class<?> componentType;
+        Type componentType;
         if (type instanceof GenericArrayType) {
-            componentType = rawClassOf(((GenericArrayType) type).getGenericComponentType());
+            componentType = ((GenericArrayType) type).getGenericComponentType();
         } else {
             componentType = ((Class<?>) type).getComponentType();
         }
         Collection<TreeNode> values = treeNode.nodes().collect(Collectors.toList());
-        Object array = Array.newInstance(componentType, values.size());
+        Object array = Array.newInstance(rawClassOf(componentType), values.size());
         AtomicInteger index = new AtomicInteger();
         values.stream()
                 .map(childNode -> coffig.getMapper().map(childNode, componentType))
