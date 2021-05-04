@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020, The SeedStack authors <http://seedstack.org>
+ * Copyright © 2013-2021, The SeedStack authors <http://seedstack.org>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -29,6 +29,7 @@ public class CoffigTest {
     private final ConfigurationProvider appConfigProvider = () -> new MapNode(
             new NamedNode("id", "foo"),
             new NamedNode("name", "The Foo app"),
+            new NamedNode("dotted.key", "someValue"),
             new NamedNode("someEnum", "FOO"));
 
     private final ConfigurationProvider usersConfigProvider = () -> new MapNode(
@@ -122,6 +123,13 @@ public class CoffigTest {
             assertThat(e.getDescription())
                     .isEqualTo("Class 'java.lang.Object' is not compatible with type '? extends java.util.List'.");
         }
+    }
+
+    @Test
+    public void testEscaping() {
+        Coffig coffig = Coffig.builder().withProviders(appConfigProvider).build();
+        assertThat(coffig.getOptional(String.class, "dotted.key").isPresent()).isFalse();
+        assertThat(coffig.getOptional(String.class, "dotted\\.key").get()).isEqualTo("someValue");
     }
 
     @Test

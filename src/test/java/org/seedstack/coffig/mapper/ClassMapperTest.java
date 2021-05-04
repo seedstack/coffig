@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020, The SeedStack authors <http://seedstack.org>
+ * Copyright © 2013-2021, The SeedStack authors <http://seedstack.org>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -27,6 +27,13 @@ public class ClassMapperTest {
     }
 
     @Test
+    public void testMapRawClass() {
+        FixtureRawClass result = (FixtureRawClass) mapper.map(new MapNode(new NamedNode("rawClass", "java.lang.String")), FixtureRawClass.class);
+        assertThat(result).isNotNull();
+        assertThat(result.rawClass).isEqualTo(String.class);
+    }
+
+    @Test
     public void testMapUpperBoundedClass() {
         FixtureUpperBoundedClass result = (FixtureUpperBoundedClass) mapper.map(new MapNode(new NamedNode("mapperClass", "org.seedstack.coffig.mapper.ClassMapper")), FixtureUpperBoundedClass.class);
         assertThat(result).isNotNull();
@@ -50,12 +57,12 @@ public class ClassMapperTest {
         mapper.map(new MapNode(new NamedNode("configurationMapperClass", "java.lang.String")), FixtureLowerBoundedClass.class);
     }
 
-    @Test
-    public void testUnmapOptional() {
-    }
-
     private static class FixtureAnyClass {
         private Class<?> anyClass;
+    }
+
+    private static class FixtureRawClass {
+        private Class rawClass;
     }
 
     private static class FixtureUpperBoundedClass {

@@ -1,3 +1,7 @@
+# Version 3.1.7 (2021-05-05)
+
+* [fix] Generic arrays (like Class<Integer>[]) are no longer ignored in the mapping process.
+
 # Version 3.1.6 (2020-08-05)
 
 * [fix] Fix NullPointerException when a blank value is present in properties files.
