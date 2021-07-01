@@ -44,13 +44,21 @@ public interface TreeNode {
         try {
             return value();
         } catch (Exception e) {
-            return String.format("<!! %s !!>", e.getMessage());
+            return formatNodeError(e);
         }
     }
 
     default TreeNode move(String sourcePath, String destinationPath) {
         this.set(destinationPath, this.remove(sourcePath));
         return this;
+    }
+
+    static String formatNodeError(String err) {
+        return String.format("<!! %s !!>", err);
+    }
+
+    static String formatNodeError(Exception exc) {
+        return String.format("<!! %s !!>", exc.getMessage());
     }
 
     enum Type {
