@@ -1,3 +1,9 @@
+# Version 3.1.8 (2021-06-29)
+
+* [new] Support returning tree nodes from functions, allowing to pass subtrees between functions.
+* [new] A new `safeValue()` function allows to obtain the value of a node without any exception being raised. If an
+  error occurs it is returned as the value.
+
 # Version 3.1.7 (2021-05-05)
 
 * [fix] Generic arrays (like Class<Integer>[]) are no longer ignored in the mapping process.
@@ -45,7 +51,7 @@
 * [brk] Remove node attributes.
 * [brk] API cleanup.
 * [brk] When converting an array node to a map node, items are used as keys instead of values.
-* [chg] Compatibility with Jackson 2.8.0+. 
+* [chg] Compatibility with Jackson 2.8.0+.
 * [fix] Properly parse and handle null values.
 
 # Version 2.1.1 (2017-06-07)
@@ -73,9 +79,9 @@
 
 # Version 1.1.0 (2017-01-12)
 
-* [new] Allow to ignore macro and function resolution by escaping them with `\`.  
+* [new] Allow to ignore macro and function resolution by escaping them with `\`.
 * [new] Visit superclasses when gathering field info for object mapping.
-* [new] Add a mapper for configuration builders (i.e. objects that provide functions for configuration). 
+* [new] Add a mapper for configuration builders (i.e. objects that provide functions for configuration).
 
 # Version 1.0.0 (2016-12-12)
 

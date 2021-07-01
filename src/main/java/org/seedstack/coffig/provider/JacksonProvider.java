@@ -10,17 +10,6 @@ package org.seedstack.coffig.provider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
@@ -34,6 +23,18 @@ import org.seedstack.coffig.watcher.FileConfigurationWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class JacksonProvider implements ConfigurationProvider, FileConfigurationWatcher.Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonProvider.class);
     private final List<URL> sources = new ArrayList<>();
@@ -45,7 +46,8 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
     public synchronized MapNode provide() {
         MapNode mapNode = sources
                 .stream()
-                .map(this::buildTreeFromSource)
+                .peek(url -> LOGGER.debug("Reading configuration from " + url.toExternalForm()))
+                .map(url -> buildTreeFromUrl(jacksonMapper, url))
                 .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                 .orElse(new MapNode());
         dirty.set(false);
@@ -95,9 +97,8 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
         dirty.set(true);
     }
 
-    private MapNode buildTreeFromSource(URL url) {
+    public static MapNode buildTreeFromUrl(ObjectMapper jacksonMapper, URL url) {
         try {
-            LOGGER.debug("Reading configuration from " + url.toExternalForm());
             return buildTreeFromFields(jacksonMapper.readTree(url));
         } catch (IOException e) {
             throw ConfigurationException.wrap(e, ConfigurationErrorCode.FAILED_TO_READ_CONFIGURATION)
@@ -105,7 +106,16 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
         }
     }
 
-    private MapNode buildTreeFromFields(JsonNode node) {
+    public static MapNode buildTreeFromString(ObjectMapper jacksonMapper, String value) {
+        try {
+            return buildTreeFromFields(jacksonMapper.readTree(value));
+        } catch (IOException e) {
+            throw ConfigurationException.wrap(e, ConfigurationErrorCode.FAILED_TO_READ_CONFIGURATION)
+                    .put("url", "<string>");
+        }
+    }
+
+    private static MapNode buildTreeFromFields(JsonNode node) {
         List<NamedNode> namedNodes = new ArrayList<>();
         if (node != null) {
             node.fields().forEachRemaining(entry -> {
@@ -117,7 +127,7 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
         return new MapNode(namedNodes.toArray(new NamedNode[0]));
     }
 
-    private TreeNode buildTreeFromField(JsonNode jsonNode) {
+    private static TreeNode buildTreeFromField(JsonNode jsonNode) {
         NodeBuilder nodeBuilder;
         if (jsonNode.isValueNode()) {
             nodeBuilder = new ValueNodeBuilder();
@@ -140,7 +150,7 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
         }
     }
 
-    private class ArrayNodeBuilder implements NodeBuilder {
+    private static class ArrayNodeBuilder implements NodeBuilder {
         @Override
         public TreeNode build(JsonNode jsonNode) {
             List<TreeNode> treeNodes = new ArrayList<>();
@@ -153,7 +163,7 @@ public class JacksonProvider implements ConfigurationProvider, FileConfiguration
         }
     }
 
-    private class ObjectNodeBuilder implements NodeBuilder {
+    private static class ObjectNodeBuilder implements NodeBuilder {
         @Override
         public TreeNode build(JsonNode jsonNode) {
             List<NamedNode> namedNodes = new ArrayList<>();

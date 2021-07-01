@@ -10,9 +10,11 @@ package org.seedstack.coffig.evaluator;
 import org.junit.Before;
 import org.junit.Test;
 import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ArrayNode;
 import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.node.ValueNode;
 
 import java.util.List;
 
@@ -35,9 +37,30 @@ public class FunctionEvaluatorTest {
                     new NamedNode("unresolvedRef", "$greet('World', test.unknown)"),
                     new NamedNode("mappedArg1", "$greetSeveralTimes('World', '5', '!')"),
                     new NamedNode("mappedArg2", "$verifyObject(object)"),
-                    new NamedNode("escaped", "test: \\$verifyObject(object)!")
+                    new NamedNode("escaped", "test: \\$verifyObject(object)!"),
+                    new NamedNode("rawNodeArg", "test: $rawNodeArg(object)!"),
+                    new NamedNode("rawArrayNode", "test: $rawArrayNode()!"),
+                    new NamedNode("rawMapNode", "test: $rawMapNode()!"),
+                    new NamedNode("rawValueNode", "test: $rawValueNode()!")
             ))
     );
+
+    private static String rawNodeArg(TreeNode map) {
+        assertThat(map.type()).isEqualTo(TreeNode.Type.MAP_NODE);
+        return "ok";
+    }
+
+    private static ArrayNode rawArrayNode() {
+        return new ArrayNode("val1", "val2");
+    }
+
+    private static MapNode rawMapNode() {
+        return new MapNode(new NamedNode("key1", "val1"));
+    }
+
+    private static ValueNode rawValueNode() {
+        return new ValueNode("val1");
+    }
 
     private static String greet(String name, String suffix) {
         return "Hello " + name + suffix;
@@ -70,6 +93,10 @@ public class FunctionEvaluatorTest {
         functionEvaluator.registerFunction("greetSeveralTimes", FunctionEvaluatorTest.class.getDeclaredMethod("greetSeveralTimes", String.class, int.class, String.class), null);
         functionEvaluator.registerFunction("prefix", FunctionEvaluatorTest.class.getDeclaredMethod("prefix"), null);
         functionEvaluator.registerFunction("verifyObject", FunctionEvaluatorTest.class.getDeclaredMethod("verifyObject", MappedClass.class), null);
+        functionEvaluator.registerFunction("rawNodeArg", FunctionEvaluatorTest.class.getDeclaredMethod("rawNodeArg", TreeNode.class), null);
+        functionEvaluator.registerFunction("rawMapNode", FunctionEvaluatorTest.class.getDeclaredMethod("rawMapNode"), null);
+        functionEvaluator.registerFunction("rawArrayNode", FunctionEvaluatorTest.class.getDeclaredMethod("rawArrayNode"), null);
+        functionEvaluator.registerFunction("rawValueNode", FunctionEvaluatorTest.class.getDeclaredMethod("rawValueNode"), null);
         functionEvaluator.initialize(Coffig.basic());
     }
 
@@ -116,6 +143,27 @@ public class FunctionEvaluatorTest {
     public void testEscaping() throws Exception {
         assertThat(evaluate("test.escaped")).isEqualTo("test: $verifyObject(object)!");
     }
+
+    @Test
+    public void testRawNodeArgument() throws Exception {
+        assertThat(evaluate("test.rawNodeArg")).isEqualTo("test: ok!");
+    }
+
+    @Test
+    public void testRawArrayNode() throws Exception {
+        assertThat(evaluate("test.rawArrayNode")).isEqualTo("test: <!! [CONFIGURATION] Cannot convert array to value !!>!");
+    }
+
+    @Test
+    public void testRawMapNode() throws Exception {
+        assertThat(evaluate("test.rawMapNode")).isEqualTo("test: <!! [CONFIGURATION] Cannot convert map to value !!>!");
+    }
+
+    @Test
+    public void testRawValueNode() throws Exception {
+        assertThat(evaluate("test.rawValueNode")).isEqualTo("test: val1!");
+    }
+
 
     private static class MappedClass {
         private String field1;

@@ -7,9 +7,10 @@
  */
 package org.seedstack.coffig;
 
+import org.seedstack.coffig.node.NamedNode;
+
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.seedstack.coffig.node.NamedNode;
 
 public interface TreeNode {
 
@@ -38,6 +39,14 @@ public interface TreeNode {
     TreeNode set(String path, TreeNode value);
 
     TreeNode remove(String path);
+
+    default String safeValue() {
+        try {
+            return value();
+        } catch (Exception e) {
+            return String.format("<!! %s !!>", e.getMessage());
+        }
+    }
 
     default TreeNode move(String sourcePath, String destinationPath) {
         this.set(destinationPath, this.remove(sourcePath));

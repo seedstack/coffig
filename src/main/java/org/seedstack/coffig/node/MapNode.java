@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
@@ -44,7 +45,7 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public String value() {
-        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_MAP_AS_SINGLE_VALUE);
+        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_CONVERT_MAP_TO_VALUE);
     }
 
     @Override

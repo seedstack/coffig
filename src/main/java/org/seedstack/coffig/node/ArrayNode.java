@@ -50,7 +50,7 @@ public class ArrayNode extends AbstractTreeNode {
 
     @Override
     public String value() {
-        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_ACCESS_ARRAY_AS_SINGLE_VALUE);
+        throw ConfigurationException.createNew(ConfigurationErrorCode.CANNOT_CONVERT_ARRAY_TO_VALUE);
     }
 
     @Override

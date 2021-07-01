@@ -7,6 +7,16 @@
  */
 package org.seedstack.coffig.provider;
 
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.spi.ConfigurationWatcher;
+import org.seedstack.coffig.watcher.FileConfigurationWatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -18,15 +28,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigurationProvider;
-import org.seedstack.coffig.spi.ConfigurationWatcher;
-import org.seedstack.coffig.watcher.FileConfigurationWatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PropertiesProvider implements ConfigurationProvider, FileConfigurationWatcher.Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesProvider.class);
@@ -38,7 +39,8 @@ public class PropertiesProvider implements ConfigurationProvider, FileConfigurat
     public synchronized MapNode provide() {
         MapNode mapNode = sources
                 .stream()
-                .map(this::buildTreeFromSource)
+                .peek(url -> LOGGER.debug("Reading configuration from " + url.toExternalForm()))
+                .map(PropertiesProvider::buildTreeFromUrl)
                 .reduce((conf1, conf2) -> (MapNode) conf1.merge(conf2))
                 .orElse(new MapNode());
         dirty.set(false);
@@ -88,8 +90,7 @@ public class PropertiesProvider implements ConfigurationProvider, FileConfigurat
         dirty.set(true);
     }
 
-    private MapNode buildTreeFromSource(URL url) {
-        LOGGER.debug("Reading configuration from " + url.toExternalForm());
+    public static MapNode buildTreeFromUrl(URL url) {
         try (InputStream inputStream = url.openStream()) {
             MapNode mapNode = new MapNode();
             Properties properties = new Properties();

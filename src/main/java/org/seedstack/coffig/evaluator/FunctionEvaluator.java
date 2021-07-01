@@ -7,10 +7,19 @@
  */
 package org.seedstack.coffig.evaluator;
 
-import static java.util.stream.Collectors.toList;
-import static org.seedstack.shed.reflect.ReflectUtils.makeAccessible;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.seedstack.coffig.Coffig;
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.node.ValueNode;
+import org.seedstack.coffig.spi.ConfigFunction;
+import org.seedstack.coffig.spi.ConfigFunctionHolder;
+import org.seedstack.coffig.spi.ConfigurationComponent;
+import org.seedstack.coffig.spi.ConfigurationEvaluator;
+import org.seedstack.shed.ClassLoaders;
+import org.seedstack.shed.exception.Throwing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -23,17 +32,10 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.seedstack.coffig.Coffig;
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.node.ValueNode;
-import org.seedstack.coffig.spi.ConfigFunction;
-import org.seedstack.coffig.spi.ConfigFunctionHolder;
-import org.seedstack.coffig.spi.ConfigurationComponent;
-import org.seedstack.coffig.spi.ConfigurationEvaluator;
-import org.seedstack.shed.ClassLoaders;
-import org.seedstack.shed.exception.Throwing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.seedstack.shed.reflect.ReflectUtils.makeAccessible;
 
 public class FunctionEvaluator implements ConfigurationEvaluator {
     private static final ClassLoader MOST_COMPLETE_CLASS_LOADER = ClassLoaders.findMostCompleteClassLoader
@@ -84,7 +86,7 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
     public TreeNode evaluate(TreeNode rootNode, TreeNode valueNode) {
         if (valueNode.type() == TreeNode.Type.VALUE_NODE && !valueNode.isEmpty()) {
             try {
-                return new ValueNode(processValue(rootNode, valueNode.value()));
+                return processValue(rootNode, valueNode.value());
             } catch (Exception e) {
                 LOGGER.error("Error when evaluating configuration function: {}", valueNode.value(), e);
                 return new ValueNode();
@@ -112,19 +114,19 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
         }
     }
 
-    private String processValue(TreeNode rootNode, String value) throws Exception {
+    private TreeNode processValue(TreeNode rootNode, String value) throws Exception {
         int currentPos = 0;
-        StringBuilder result = new StringBuilder();
+        List<TreeNode> results = new ArrayList<>();
         CallSiteInfo callSiteInfo;
 
         // Iterate through all call sites in the value
         while ((callSiteInfo = findFunctionCall(value, currentPos)) != null) {
-            result.append(value.substring(currentPos, callSiteInfo.startPos));
+            addIfNotBlankValue(results, new ValueNode(value.substring(currentPos, callSiteInfo.startPos)));
 
             if (callSiteInfo.escaped) {
-                result.append(value.substring(callSiteInfo.startPos + 1, callSiteInfo.endPos));
+                addIfNotBlankValue(results, new ValueNode(value.substring(callSiteInfo.startPos + 1, callSiteInfo.endPos)));
             } else {
-                result.append(invokeFunction(
+                addIfNotBlankValue(results, invokeFunction(
                         callSiteInfo.name,
                         Arrays.stream(callSiteInfo.arguments)
                                 .map((Throwing.Function<String, TreeNode, Exception>) arg ->
@@ -135,9 +137,28 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
 
             currentPos = callSiteInfo.endPos;
         }
-        result.append(value.substring(currentPos));
 
-        return result.toString();
+        // Append the remainder
+        addIfNotBlankValue(results, new ValueNode(value.substring(currentPos)));
+
+        if (results.size() == 1) {
+            // If only one tree node return it untouched
+            return results.get(0);
+        } else {
+            // Otherwise serialize everything as string (may trigger an exception if arrays and maps are in the list)
+            return new ValueNode(results.stream().map(TreeNode::safeValue).collect(Collectors.joining("")));
+        }
+    }
+
+    private void addIfNotBlankValue(List<TreeNode> list, TreeNode node) {
+        if (node.type() == TreeNode.Type.VALUE_NODE) {
+            String value = node.value();
+            if (value != null && !value.isEmpty()) {
+                list.add(node);
+            }
+        } else {
+            list.add(node);
+        }
     }
 
     private TreeNode processArgument(TreeNode tree, String value) throws Exception {
@@ -150,18 +171,18 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
             TreeNode refNode = tree.get(value).orElse(new ValueNode(""));
             if (refNode.type() == TreeNode.Type.VALUE_NODE) {
                 // References value nodes can be processed...
-                return new ValueNode(processValue(tree, refNode.value()));
+                return processValue(tree, refNode.value());
             } else {
                 // ... whereas other node types are passed directly
                 return refNode;
             }
         } else {
-            return new ValueNode(processValue(tree, value));
+            return processValue(tree, value);
         }
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    private String invokeFunction(String functionName, TreeNode[] arguments) throws Exception {
+    private TreeNode invokeFunction(String functionName, TreeNode[] arguments) throws Exception {
         FunctionRegistration functionRegistration = functions.get(functionName);
         if (functionRegistration == null) {
             throw new IllegalArgumentException("Unknown function " + functionName);
@@ -171,20 +192,28 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
             // Map arguments according to the function parameter types
             Object[] mappedArguments = new Object[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                mappedArguments[i] = coffig.getMapper().map(arguments[i], functionRegistration.argTypes[i]);
+                if (TreeNode.class.equals(functionRegistration.argTypes[i])) {
+                    mappedArguments[i] = arguments[i];
+                } else {
+                    mappedArguments[i] = coffig.getMapper().map(arguments[i], functionRegistration.argTypes[i]);
+                }
             }
 
             // Invoke the function
             Object result = functionRegistration.method.invoke(functionRegistration.instance, mappedArguments);
             if (result != null) {
-                return result.toString();
+                if (result instanceof TreeNode) {
+                    return (TreeNode) result;
+                } else {
+                    return new ValueNode(result.toString());
+                }
             } else {
-                return "";
+                return new ValueNode("");
             }
         } catch (Exception e) {
             if (e instanceof InvocationTargetException) {
                 Throwable targetException = ((InvocationTargetException) e).getTargetException();
-                if (targetException != null && targetException instanceof Exception) {
+                if (targetException instanceof Exception) {
                     throw ((Exception) targetException);
                 }
             }
