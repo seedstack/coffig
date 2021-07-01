@@ -34,7 +34,7 @@ public class PropertiesMapper implements ConfigurationMapper {
         if (treeNode.type() == TreeNode.Type.MAP_NODE) {
             treeNode.namedNodes()
                     .forEach(namedNode -> properties.setProperty(namedNode.name(),
-                            Objects.toString((String) coffig.getMapper().map(namedNode.node(), String.class), "")));
+                            Objects.toString(coffig.getMapper().map(namedNode.node(), String.class), "")));
         } else {
             treeNode.nodes().forEach(item -> properties.setProperty(item.value(), ""));
         }

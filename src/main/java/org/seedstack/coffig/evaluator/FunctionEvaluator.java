@@ -88,8 +88,8 @@ public class FunctionEvaluator implements ConfigurationEvaluator {
             try {
                 return processValue(rootNode, valueNode.value());
             } catch (Exception e) {
-                LOGGER.error("Error when evaluating configuration function: {}", valueNode.value(), e);
-                return new ValueNode();
+                LOGGER.debug("Error when evaluating configuration function: {}", valueNode.value(), e);
+                return new ValueNode(TreeNode.formatNodeError(e));
             }
         } else {
             return valueNode;

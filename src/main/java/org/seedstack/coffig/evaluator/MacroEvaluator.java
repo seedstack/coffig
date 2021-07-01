@@ -8,14 +8,15 @@
 package org.seedstack.coffig.evaluator;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MacroEvaluator implements ConfigurationEvaluator {
     public static final String VALUE_QUOTE = "'";
@@ -34,8 +35,8 @@ public class MacroEvaluator implements ConfigurationEvaluator {
             try {
                 return new ValueNode(processValue(rootNode, valueNode.value()));
             } catch (Exception e) {
-                LOGGER.error("Error when evaluating configuration macro: {}", valueNode.value(), e);
-                return new ValueNode();
+                LOGGER.debug("Error when evaluating configuration macro: {}", valueNode.value(), e);
+                return new ValueNode(TreeNode.formatNodeError(e));
             }
         } else {
             return valueNode;
@@ -54,24 +55,24 @@ public class MacroEvaluator implements ConfigurationEvaluator {
         // Process all macros
         while ((matchingResult = findMatchingCurlyBraces(value, currentPos)) != null) {
             // Add the beginning of the string (before the macro)
-            result.append(value.substring(currentPos, matchingResult.startPos));
+            result.append(value, currentPos, matchingResult.startPos);
 
             if (matchingResult.escaped) {
                 // Add the macro as-is (without resolving it)
-                result.append(value.substring(matchingResult.startPos + 1, matchingResult.endPos + 1));
+                result.append(value, matchingResult.startPos + 1, matchingResult.endPos + 1);
             } else {
                 // Process the macro
                 boolean insideQuotes = false;
                 for (String part : value.substring(matchingResult.startPos + 2, matchingResult.endPos)
                         .split(VALUE_SEPARATOR)) {
                     if (part.startsWith(VALUE_QUOTE) && part.endsWith(VALUE_QUOTE)) {
-                        result.append(part.substring(1, part.length() - 1));
+                        result.append(part, 1, part.length() - 1);
                         break;
                     } else if (!insideQuotes && part.startsWith(VALUE_QUOTE)) {
                         result.append(part.substring(1));
                         insideQuotes = true;
                     } else if (insideQuotes && part.endsWith(VALUE_QUOTE)) {
-                        result.append(VALUE_SEPARATOR).append(part.substring(0, part.length() - 1));
+                        result.append(VALUE_SEPARATOR).append(part, 0, part.length() - 1);
                         insideQuotes = false;
                     } else if (insideQuotes) {
                         result.append(VALUE_SEPARATOR).append(part);
