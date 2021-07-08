@@ -190,7 +190,7 @@ public class ArrayNode extends AbstractTreeNode {
                 }
             }).collect(joining("\n"));
         } else {
-            return children.stream().map(item -> "-\n" + indent(item.toString())).collect(joining("\n"));
+            return children.stream().map(item -> "-\n" + indent(item.toMappedString(mapper))).collect(joining("\n"));
         }
     }
 

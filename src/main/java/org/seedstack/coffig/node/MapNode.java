@@ -183,7 +183,7 @@ public class MapNode extends AbstractTreeNode {
                         return entry.getKey() + ": " + entry.getValue().toString();
                     }
                 } else {
-                    return entry.getKey() + ":\n" + indent(entry.getValue().toString());
+                    return entry.getKey() + ":\n" + indent(entry.getValue().toMappedString(mapper));
                 }
             }).collect(Collectors.joining("\n"));
         }
