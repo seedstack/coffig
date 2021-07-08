@@ -7,15 +7,16 @@
  */
 package org.seedstack.coffig.mapper;
 
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.node.ValueNode;
 import org.seedstack.coffig.spi.ConfigurationMapper;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class ValueMapper implements ConfigurationMapper {
     private final Map<Type, Function<String, ?>> converters = new HashMap<>();
@@ -47,7 +48,18 @@ public class ValueMapper implements ConfigurationMapper {
 
     @Override
     public Object map(TreeNode value, Type type) {
-        return converters.get(type).apply(value.value());
+        String innerValue = value.value();
+        if (type instanceof Class && ((Class<?>) type).isPrimitive()) {
+            // Don't return a null value for primitive types (would cause NPE)
+            return converters.get(type).apply(innerValue);
+        } else {
+            // For other types it's ok to return null
+            if (innerValue == null) {
+                return null;
+            } else {
+                return converters.get(type).apply(innerValue);
+            }
+        }
     }
 
     @Override

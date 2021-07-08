@@ -7,18 +7,18 @@
  */
 package org.seedstack.coffig.node;
 
+import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.internal.PropertyNotFoundException;
+import org.seedstack.coffig.spi.ConfigurationMapper;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.seedstack.coffig.TreeNode;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.internal.PropertyNotFoundException;
-import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class MapNode extends AbstractTreeNode {
     private final Map<String, TreeNode> children;
@@ -177,11 +177,7 @@ public class MapNode extends AbstractTreeNode {
         } else {
             return children.entrySet().stream().map(entry -> {
                 if (entry.getValue().type() == Type.VALUE_NODE) {
-                    if (mapper != null) {
-                        return entry.getKey() + ": " + mapper.map(entry.getValue(), String.class);
-                    } else {
-                        return entry.getKey() + ": " + entry.getValue().toString();
-                    }
+                    return entry.getKey() + ": " + entry.getValue().toMappedString(mapper);
                 } else {
                     return entry.getKey() + ":\n" + indent(entry.getValue().toMappedString(mapper));
                 }

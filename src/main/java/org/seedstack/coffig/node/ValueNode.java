@@ -121,22 +121,25 @@ public class ValueNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
-        return value == null ? "~" : "\"" + (isHidden() ? HIDDEN_PLACEHOLDER : quote(value)) + "\"";
+        return toMappedString(null);
     }
 
     @Override
     public String toMappedString(ConfigurationMapper mapper) {
-        if (value == null) {
-            return "~";
+        if (isHidden()) {
+            return "\"" + HIDDEN_PLACEHOLDER + "\"";
         } else {
-            if (isHidden()) {
-                return "\"" + HIDDEN_PLACEHOLDER + "\"";
+            String s;
+            if (mapper != null) {
+                s = (String) mapper.map(this, String.class);
             } else {
-                if (mapper != null) {
-                    return "\"" + quote(String.valueOf(mapper.map(this, String.class))) + "\"";
-                } else {
-                    return "\"" + quote(value) + "\"";
-                }
+                s = value;
+            }
+
+            if (s == null) {
+                return "~";
+            } else {
+                return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
             }
         }
     }

@@ -182,13 +182,7 @@ public class ArrayNode extends AbstractTreeNode {
         if (isHidden()) {
             return "\"" + HIDDEN_PLACEHOLDER + "\"";
         } else if (children.size() > 0 && children.get(0).type() == Type.VALUE_NODE) {
-            return children.stream().map(item -> {
-                if (mapper != null) {
-                    return "- " + mapper.map(item, String.class);
-                } else {
-                    return "- " + item.toString();
-                }
-            }).collect(joining("\n"));
+            return children.stream().map(item -> "- " + item.toMappedString(mapper)).collect(joining("\n"));
         } else {
             return children.stream().map(item -> "-\n" + indent(item.toMappedString(mapper))).collect(joining("\n"));
         }
