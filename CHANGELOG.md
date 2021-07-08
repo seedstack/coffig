@@ -3,6 +3,7 @@
 * [new] Support returning tree nodes from functions, allowing to pass subtrees between functions.
 * [new] A new `safeValue()` function allows to obtain the value of a node without any exception being raised. If an
   error occurs it is returned as the value.
+* [new] The `toString()` method on the `Coffig` class will now return a fully evaluated YAML by default.
 
 # Version 3.1.7 (2021-05-05)
 

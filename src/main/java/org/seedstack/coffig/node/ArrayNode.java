@@ -14,10 +14,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.internal.PropertyNotFoundException;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class ArrayNode extends AbstractTreeNode {
     private final List<TreeNode> children;
@@ -172,10 +174,21 @@ public class ArrayNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
+        return toMappedString(null);
+    }
+
+    @Override
+    public String toMappedString(ConfigurationMapper mapper) {
         if (isHidden()) {
             return "\"" + HIDDEN_PLACEHOLDER + "\"";
         } else if (children.size() > 0 && children.get(0).type() == Type.VALUE_NODE) {
-            return children.stream().map(item -> "- " + item.toString()).collect(joining("\n"));
+            return children.stream().map(item -> {
+                if (mapper != null) {
+                    return "- " + mapper.map(item, String.class);
+                } else {
+                    return "- " + item.toString();
+                }
+            }).collect(joining("\n"));
         } else {
             return children.stream().map(item -> "-\n" + indent(item.toString())).collect(joining("\n"));
         }

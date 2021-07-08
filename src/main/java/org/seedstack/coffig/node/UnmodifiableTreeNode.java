@@ -10,6 +10,7 @@ package org.seedstack.coffig.node;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.seedstack.coffig.TreeNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class UnmodifiableTreeNode implements TreeNode {
     private final TreeNode treeNode;
@@ -128,5 +129,10 @@ public class UnmodifiableTreeNode implements TreeNode {
     @Override
     public String toString() {
         return treeNode.toString();
+    }
+
+    @Override
+    public String toMappedString(ConfigurationMapper mapper) {
+        return treeNode.toMappedString(mapper);
     }
 }

@@ -18,6 +18,7 @@ import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
 import org.seedstack.coffig.internal.PropertyNotFoundException;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 public class MapNode extends AbstractTreeNode {
     private final Map<String, TreeNode> children;
@@ -166,12 +167,21 @@ public class MapNode extends AbstractTreeNode {
 
     @Override
     public String toString() {
+        return toMappedString(null);
+    }
+
+    @Override
+    public String toMappedString(ConfigurationMapper mapper) {
         if (isHidden()) {
             return "\"" + HIDDEN_PLACEHOLDER + "\"";
         } else {
             return children.entrySet().stream().map(entry -> {
                 if (entry.getValue().type() == Type.VALUE_NODE) {
-                    return entry.getKey() + ": " + entry.getValue().toString();
+                    if (mapper != null) {
+                        return entry.getKey() + ": " + mapper.map(entry.getValue(), String.class);
+                    } else {
+                        return entry.getKey() + ": " + entry.getValue().toString();
+                    }
                 } else {
                     return entry.getKey() + ":\n" + indent(entry.getValue().toString());
                 }

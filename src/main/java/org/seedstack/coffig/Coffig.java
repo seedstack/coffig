@@ -7,8 +7,16 @@
  */
 package org.seedstack.coffig;
 
-import static org.seedstack.shed.reflect.Classes.instantiateDefault;
-import static org.seedstack.shed.reflect.Types.rawClassOf;
+import org.seedstack.coffig.internal.ConfigurationErrorCode;
+import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.node.MapNode;
+import org.seedstack.coffig.node.UnmodifiableTreeNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
+import org.seedstack.coffig.spi.ConfigurationProcessor;
+import org.seedstack.coffig.spi.ConfigurationProvider;
+import org.seedstack.coffig.spi.ConfigurationWatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
@@ -23,16 +31,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import org.seedstack.coffig.internal.ConfigurationErrorCode;
-import org.seedstack.coffig.internal.ConfigurationException;
-import org.seedstack.coffig.node.MapNode;
-import org.seedstack.coffig.node.UnmodifiableTreeNode;
-import org.seedstack.coffig.spi.ConfigurationMapper;
-import org.seedstack.coffig.spi.ConfigurationProcessor;
-import org.seedstack.coffig.spi.ConfigurationProvider;
-import org.seedstack.coffig.spi.ConfigurationWatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.seedstack.shed.reflect.Classes.instantiateDefault;
+import static org.seedstack.shed.reflect.Types.rawClassOf;
 
 public class Coffig {
     private static final Logger LOGGER = LoggerFactory.getLogger(Coffig.class);
@@ -41,6 +42,7 @@ public class Coffig {
     private final ConfigurationProcessor processor;
     private final Map<String, List<ConfigChangeListener>> listeners = new TreeMap<>(Comparator.reverseOrder());
     private final Set<ConfigurationWatcher> configurationWatchers = new HashSet<>();
+    private boolean toStringMapping = true;
     private volatile boolean dirty = true;
     private volatile TreeNode configurationTree = new MapNode();
 
@@ -63,6 +65,14 @@ public class Coffig {
             this.processor.initialize(this);
             configurationWatchers.addAll(this.processor.watchers());
         }
+    }
+
+    public boolean isToStringMapping() {
+        return toStringMapping;
+    }
+
+    public void setToStringMapping(boolean toStringMapping) {
+        this.toStringMapping = toStringMapping;
     }
 
     public static CoffigBuilder builder() {
@@ -230,7 +240,15 @@ public class Coffig {
 
     @Override
     public String toString() {
-        return "---\n" + configurationTree.toString();
+        if (toStringMapping) {
+            return toMappedString();
+        } else {
+            return "---\n" + configurationTree.toString();
+        }
+    }
+
+    public String toMappedString() {
+        return "---\n" + configurationTree.toMappedString(mapper);
     }
 
     public ConfigurationMapper getMapper() {

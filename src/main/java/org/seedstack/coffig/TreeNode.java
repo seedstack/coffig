@@ -8,6 +8,7 @@
 package org.seedstack.coffig;
 
 import org.seedstack.coffig.node.NamedNode;
+import org.seedstack.coffig.spi.ConfigurationMapper;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -39,6 +40,8 @@ public interface TreeNode {
     TreeNode set(String path, TreeNode value);
 
     TreeNode remove(String path);
+
+    String toMappedString(ConfigurationMapper mapper);
 
     default String safeValue() {
         try {

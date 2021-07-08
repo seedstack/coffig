@@ -7,13 +7,6 @@
  */
 package org.seedstack.coffig;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.Set;
 import org.seedstack.coffig.evaluator.CompositeEvaluator;
 import org.seedstack.coffig.mapper.CompositeMapper;
 import org.seedstack.coffig.mapper.EvaluatingMapper;
@@ -25,6 +18,14 @@ import org.seedstack.coffig.spi.ConfigurationMapper;
 import org.seedstack.coffig.spi.ConfigurationProcessor;
 import org.seedstack.coffig.spi.ConfigurationProvider;
 import org.seedstack.shed.ClassLoaders;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
 
 public class CoffigBuilder {
     private static final ClassLoader MOST_COMPLETE_CLASS_LOADER = ClassLoaders.findMostCompleteClassLoader
@@ -38,6 +39,7 @@ public class CoffigBuilder {
     private boolean processorDetection = true;
     private boolean evaluatorDetection = true;
     private boolean providerDetection = true;
+    private boolean toStringMapping = true;
     private Object validatorFactory;
 
     CoffigBuilder() {
@@ -65,6 +67,11 @@ public class CoffigBuilder {
 
     public CoffigBuilder disableProviderDetection() {
         providerDetection = false;
+        return this;
+    }
+
+    public CoffigBuilder disableToStringMapping() {
+        toStringMapping = false;
         return this;
     }
 

@@ -7,12 +7,14 @@
  */
 package org.seedstack.coffig.node;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 import org.seedstack.coffig.TreeNode;
 import org.seedstack.coffig.internal.ConfigurationErrorCode;
 import org.seedstack.coffig.internal.ConfigurationException;
+import org.seedstack.coffig.spi.ConfigurationMapper;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ValueNode extends AbstractTreeNode {
     private final String value;
@@ -120,5 +122,22 @@ public class ValueNode extends AbstractTreeNode {
     @Override
     public String toString() {
         return value == null ? "~" : "\"" + (isHidden() ? HIDDEN_PLACEHOLDER : quote(value)) + "\"";
+    }
+
+    @Override
+    public String toMappedString(ConfigurationMapper mapper) {
+        if (value == null) {
+            return "~";
+        } else {
+            if (isHidden()) {
+                return "\"" + HIDDEN_PLACEHOLDER + "\"";
+            } else {
+                if (mapper != null) {
+                    return "\"" + quote(String.valueOf(mapper.map(this, String.class))) + "\"";
+                } else {
+                    return "\"" + quote(value) + "\"";
+                }
+            }
+        }
     }
 }
